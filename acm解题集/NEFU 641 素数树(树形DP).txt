@@ -1,0 +1,142 @@
+素数树
+
+Time Limit 1000ms
+
+Memory Limit 65536K
+
+description
+
+Suppose there is a tree named A. All nodes of A have a weight v(0 < v < 4000000).Now, we will give the definition of "Prime Node".A node is a Prime Node if the following conditions are satisfied.The subtree of A whose root node is b will be marked as B. If all nodes in B have prime weights and b's weight is greater than other nodes', then b is a Prime Node.Now you are to calculate how many Prime Nodes are in A.
+							
+input
+
+  For each test case:The fist line will contains an integer n(1 <= n <= 10000) indicating the number of nodes in A,the root of A will always be node 1.The second line has n integers giving the weights of each node numbered from 1 to n.The following n-1 lines, each contains a pair of integers x and y indicating there is an edge between x and y, give the n-1 edges of A.
+    Process to the end of file.
+							
+output
+
+For each test case,  print the number of Prime Nodes on a single line.Print a blank line after each test case, even after the last one.
+							
+sample_input
+
+5
+12 11 5 7 3
+1 2
+2 3
+2 5
+3 4
+							
+sample_output
+
+3
+							
+hint
+
+
+								
+							
+source
+
+
+思路：记忆化搜索，一个状态中有四个元素，一个标记每个点是不是素数节点，一个标记该点有没被访问，一个点标明以该点为根的子树最大值，一个点标明点值。
+就是用个CLASS就好了。
+class node
+{
+  public:bool vis,pri;
+  int no,ma;
+}f[nn];
+然后从，主根节点1开始记忆化搜索其连边，如果改点以访问就返回，不是素数那将根也改为非素数，因为以这棵树为子树的树都不合条件。
+
+#include<iostream>
+#include<cstring>
+#include<string>
+#include<cstdio>
+#include<algorithm>
+#include<set>
+#include<vector>
+using namespace std;
+const int mm=4e6+9;
+const int nn=5e4+9;
+class node
+{
+  public:bool vis,pri;
+  int no,ma;
+}f[nn];
+int head[nn],ver[nn],next[nn],edge;
+bool p[mm],vis[nn];
+int n,ans,ma[nn];
+void ppp()
+{ memset(p,0,sizeof(p));
+  p[0]=1;p[1]=1;
+  for(int i=2;i*i<mm;++i)
+  { if(!p[i])
+    for(int j=i+i;j<mm;j+=i)
+      p[j]=1;
+  }
+}
+void data()
+{ memset(head,-1,sizeof(head));
+  memset(vis,0,sizeof(vis));
+  edge=0;
+}
+void add(int u,int v)
+{
+  ver[edge]=v;next[edge]=head[u];head[u]=edge++;
+  ver[edge]=u;next[edge]=head[v];head[v]=edge++;
+}
+inline void Max(int&x,const int y)
+{
+  if(x<y)x=y;
+}
+void dfs(int u)
+{ int v;
+  bool yes=f[u].pri;
+  f[u].vis=1;
+  for(int i=head[u];i>=0;i=next[i])
+  {
+    v=ver[i];
+    if(!f[v].vis)///未访问
+    {
+      f[v].vis=1;
+      dfs(v);///搜其子树
+      if(!f[v].pri)///子树不是素数树，就更改根为非素数树
+        {f[u].pri=0;yes=0;}
+      else
+      {if(f[v].ma>=f[u].no)yes=0;///是素数树，判断是否根值最大
+       Max(f[u].ma,f[v].ma);///更新
+      }
+    }
+  }
+  if(yes)///是素数树
+  { ++ans;
+  }
+}
+int main()
+{ ppp();
+  int u,v;
+  while(scanf("%d",&n)!=EOF)
+  { data();
+    for(int i=1;i<=n;++i)
+      {scanf("%d",&f[i].no);
+       if(!p[f[i].no])
+       {
+         f[i].pri=1;
+       }
+       else f[i].pri=0;
+       f[i].vis=0;
+       f[i].ma=f[i].no;
+      }
+     for(int i=1;i<n;++i)
+     {
+       scanf("%d%d",&u,&v);
+       add(u,v);
+     }
+     ans=0;
+     memset(vis,0,sizeof(vis));
+     dfs(1);
+     printf("%d\n\n",ans);
+  }
+}
+
+
+

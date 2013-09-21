@@ -1,0 +1,155 @@
+Longest Non-decreasing Substring
+
+Time Limit 1000ms
+
+Memory Limit 65536K
+
+description
+
+You are given a string S no longer than 100,000 consisting of characters 0-9 only. And two kinds of operations will be performed on S:
+Flip i j: for each i <= k <= j, Sk is replaced substituted with 9 - Sk.
+Query: you are to calculate the length of the longest non-decreasing substring of S.
+							
+input
+
+The first line of the input contains a single integer t, the number of test cases.
+For each test case, the first line contains two integers, n and m(1 <= m <= 5000), indicating the length of S and the number of operations to perform.
+Then m lines follow. Each line gives a single operation that is either “flip i j”(1 <= i <= j <= n) or “query”.
+There is a blank line after each test case.
+							
+output
+
+For each query operation, print the length of the longest non-decreasing substring of S on a single line.
+Print a blank line after each test case.
+							
+sample_input
+
+1
+10 6
+0123456789
+query
+flip 1 10
+query
+flip 1 10
+flip 3 4
+query
+							
+sample_output
+
+10
+1
+6
+							
+hint
+
+
+								
+							
+source
+
+
+思路：线段树一个节点记录9个值，de(区间的最长递减序)inc(区间的最长递增)lz(区间最左值)rz(区间最右值)ld(从最左开始区间连续递减数)rd(从区间最右开始区间连续递减数)
+          lg(区间最左开始连续递增数)rg(区间最右开始连续递增数)lazy（懒惰标记）
+        翻转更新：把该区间的的最左值，最右值9- ，递增与递减交换。
+        更新值时，应注意中间段连续需要连接。
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+#define lson t<<1
+#define rson t<<1|1
+#define midl (l+r)/2
+#define midr (l+r)/2+1
+using namespace std;
+const int mm=1e5+9;
+class node
+{
+  public:int l,r,de,inc,lz,rz,ld,rd,lg,rg,lazy;
+}rt[mm*4];
+char s[mm];
+
+void chage(int t)///翻转
+{
+  ++rt[t].lazy;
+  swap(rt[t].de,rt[t].inc);
+  swap(rt[t].ld,rt[t].lg);
+  swap(rt[t].rd,rt[t].rg);
+  rt[t].lz=9-rt[t].lz;rt[t].rz=9-rt[t].rz;
+}
+void upush(int t)///更新值
+{
+  rt[t].lz=rt[lson].lz;rt[t].rz=rt[rson].rz;
+  rt[t].lg=rt[lson].lg;rt[t].rg=rt[rson].rg;
+  rt[t].ld=rt[lson].ld;rt[t].rd=rt[rson].rd;
+  rt[t].inc=max(rt[lson].inc,rt[rson].inc);
+  rt[t].de=max(rt[lson].de,rt[rson].de);
+  if(rt[lson].rz<=rt[rson].lz)///中间可递增
+    {rt[t].inc=max(rt[t].inc,rt[lson].rg+rt[rson].lg);
+     if(rt[t].lg==rt[lson].r-rt[lson].l+1)rt[t].lg+=rt[rson].lg;
+     if(rt[t].rg==rt[rson].r-rt[rson].l+1)rt[t].rg+=rt[lson].rg;
+    }
+  if(rt[lson].rz>=rt[rson].lz)///中间可递减
+    {rt[t].de=max(rt[t].de,rt[lson].rd+rt[rson].ld);
+     if(rt[t].ld==rt[lson].r-rt[lson].l+1)rt[t].ld+=rt[rson].ld;
+     if(rt[t].rd==rt[rson].r-rt[rson].l+1)rt[t].rd+=rt[lson].rd;
+    }
+}
+void build(int t,int l,int r)
+{
+  rt[t].l=l;rt[t].r=r;rt[t].lazy=0;
+  if(l==r)
+    {
+      rt[t].lz=rt[t].rz=s[r-1]-'0';
+      rt[t].de=rt[t].inc=rt[t].ld=rt[t].rd=rt[t].lg=rt[t].rg=1;
+      return;
+    }
+  build(lson,l,midl);build(rson,midr,r);
+  upush(t);
+}
+void update(int t,int l,int r)
+{
+  if(rt[t].l>=l&&rt[t].r<=r)
+  { /**swap(rt[t].de,rt[t].inc);
+    swap(rt[t].ld,rt[t].lg);
+    swap(rt[t].rd,rt[t].rg);
+    ++rt[t].lazy;*/
+    chage(t);
+    return;
+    ///rt[t].de^=rt[t].inc;rt[t].inc^=rt[t].de;rt[t].de^=rt[t].inc;
+  }
+  if(rt[t].lazy&1)
+  {
+    chage(lson);chage(rson);rt[t].lazy=0;
+  }
+  if(l<=rt[lson].r)update(lson,l,r);
+  if(r>=rt[rson].l)update(rson,l,r);
+ /// else update(lson,l,r),update(rson,l,r);
+  upush(t);
+}
+int main()
+{
+  int cas,n,m,a,b;
+  while(~scanf("%d",&cas))
+  {
+    while(cas--)
+    {
+      scanf("%d%d",&n,&m);
+      scanf("%s",s);
+      n=strlen(s);
+      build(1,1,n);
+      for(int i=0;i<m;++i)
+      {
+        scanf("%s",s);
+        if(s[0]=='q')printf("%d\n",rt[1].inc);
+        else
+        { scanf("%d%d",&a,&b);
+          update(1,a,b);
+        }
+      }
+      printf("\n");
+    }
+  }
+}
+
+
+

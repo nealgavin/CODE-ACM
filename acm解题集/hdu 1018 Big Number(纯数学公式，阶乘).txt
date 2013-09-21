@@ -1,0 +1,88 @@
+Big Number
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 17227    Accepted Submission(s): 7705
+
+
+
+Problem Description
+
+In many applications very large integers numbers are required. Some of these applications are using keys for secure transmission of data, encryption, etc. In this problem you are given a number, you have to determine the number of digits in the factorial of the number.
+
+
+ 
+
+
+Input
+
+Input consists of several lines of integer numbers. The first line contains an integer n, which is the number of cases to be tested, followed by n lines, one integer 1 ≤ n ≤ 107 on each line.
+
+
+ 
+
+
+Output
+
+The output contains the number of digits in the factorial of the integers appearing in the input.
+
+
+ 
+
+
+Sample Input
+
+2
+10
+20
+ 
+
+
+Sample Output
+
+7
+19
+ 
+
+
+Source
+
+Asia 2002, Dhaka (Bengal) 
+
+
+
+
+Recommend
+
+JGShining
+
+
+思路：///N!的位数=log(N!)/log(10);log(N!)=N*log(N)-N+0.5*log(2*m*pi);
+
+
+失误点：注意函数重载，别CE了
+
+
+///N!的位数=log(N!)/log(10);log(N!)=N*log(N)-N+0.5*log(2*m*pi);
+#include<iostream>
+#include<cmath>
+using namespace std;
+const double pi=3.1415926;
+double sum;
+int lowbit(int m)
+{
+  double s=m*log((double)m)-m+0.5*log((double)2*m*pi);
+  s=s/log((float)10);
+  return (int)s+1;///如果是7.5位，则说明实际上是8位
+}
+int main()
+{
+  int cas;
+  while(cin>>cas)
+  {
+    while(cas--)
+    { int m;
+      cin>>m;
+      cout<<lowbit(m)<<"\n";
+    }
+  }
+}
+

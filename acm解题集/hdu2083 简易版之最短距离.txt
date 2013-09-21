@@ -1,0 +1,19 @@
+#include<stdio.h>
+int main()
+{
+  int m,n,i,j,sum,k,dian[501];
+  scanf("%d",&m);
+  while(m--)
+  {sum=0;
+    scanf("%d",&n);
+    for(i=0;i<n;i++)
+    scanf("%d",&dian[i]);
+    for(i=0;i<n;i++)
+    for(j=i+1;j<n;j++)
+    if(dian[i]>dian[j]){k=dian[i];dian[i]=dian[j];dian[j]=k;}
+    for(i=0;i<n;i++)
+    if(i<=n/2)sum+=dian[n/2]-dian[i];
+    else sum+=dian[i]-dian[n/2];
+    printf("%d\n",sum);
+  }
+}

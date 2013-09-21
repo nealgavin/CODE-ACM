@@ -1,0 +1,52 @@
+Divisor counting (Easy)
+
+Let σ(n)  denote the number of divisors of n .
+Compute σ(1)+σ(2)+?+σ(n) .
+Input
+
+An integer n .
+(1≤n≤10 8 ) 
+Output
+
+The sum.
+Sample input
+
+5
+Sample output
+
+10
+
+思路：
+计算 [1, X]区间内所有数字的因子个数之和这个等价于X / 1 + X / 2 + ... + X / X,
+
+         这里注意是整除，直接暴力（O（X）超时），所以就要分段求；
+
+         例如：X/[i………j]==X[k](i<=k)<=j，没必要i……..j都求一次，（详情看代码1）
+
+
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+int sum;
+int n;
+int main()
+{ int x;
+  while(cin>>n)
+  { sum=0;
+    for(int i=1;i*i<=n;i++)
+    { ///能被i整除的数有多少个
+      x=n/i;
+      sum+=x;
+      if(x^i)
+      {///能被x+k[0,z]整除为i的数有多少个
+        sum+=i*(x-n/(i+1));
+      }
+    }
+    cout<<sum<<"\n";
+  }
+}
+
+
+
+

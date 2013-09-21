@@ -1,0 +1,86 @@
+Heavy Cargo
+Time Limit: 1000MS	
+Memory Limit: 65536K
+Total Submissions: 2614	
+Accepted: 1445
+Description
+Big Johnsson Trucks Inc. is a company specialized in manufacturing big trucks. Their latest model, the Godzilla V12, is so big that the amount of cargo you can transport with it is never limited by the truck itself. It is only limited by the weight restrictions that apply for the roads along the path you want to drive. 
+
+Given start and destination city, your job is to determine the maximum load of the Godzilla V12 so that there still exists a path between the two specified cities. 
+Input
+The input will contain one or more test cases. The first line of each test case will contain two integers: the number of cities n (2<=n<=200) and the number of road segments r (1<=r<=19900) making up the street network. 
+Then r lines will follow, each one describing one road segment by naming the two cities connected by the segment and giving the weight limit for trucks that use this segment. Names are not longer than 30 characters and do not contain white-space characters. Weight limits are integers in the range 0 - 10000. Roads can always be travelled in both directions. 
+The last line of the test case contains two city names: start and destination. 
+Input will be terminated by two values of 0 for n and r.
+Output
+For each test case, print three lines: 
+a line saying "Scenario #x" where x is the number of the test case 
+a line saying "y tons" where y is the maximum possible load 
+a blank line
+Sample Input
+4 3
+Karlsruhe Stuttgart 100
+Stuttgart Ulm 80
+Ulm Muenchen 120
+Karlsruhe Muenchen
+5 5
+Karlsruhe Stuttgart 100
+Stuttgart Ulm 80
+Ulm Muenchen 120
+Karlsruhe Hamburg 220
+Hamburg Muenchen 170
+Muenchen Karlsruhe
+0 0
+Sample Output
+Scenario #1
+80 tons
+ 
+Scenario #2
+170 tons
+Source
+Ulm Local 1998
+
+思路：最短路变形，FLoyd
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=220;
+int g[mm][mm];
+char s[mm][mm],a[mm],b[mm];
+int n,m,pos;
+int main()
+{ int cas=0;
+  while(cin>>n>>m)
+  { if(n==0&&m==0)break;
+    int c;pos=0;++cas;
+    memset(g,0,sizeof(g));
+    for(int i=0;i<m;i++)
+    {
+      cin>>a>>b>>c;
+      int aa=0,bb=0;
+      while(aa<pos&&strcmp(a,s[aa])!=0)++aa;
+      if(aa==pos)strcpy(s[pos++],a);
+      while(bb<pos&&strcmp(b,s[bb])!=0)++bb;
+      if(bb==pos)strcpy(s[pos++],b);
+      g[aa][bb]=g[bb][aa]=c;
+    }
+    for(int k=0;k<pos;k++)
+      for(int i=0;i<pos;i++)
+      for(int j=0;j<pos;j++)
+      {
+        int z=g[i][k]<g[k][j]?g[i][k]:g[k][j];
+        if(i^k&&j^k&&g[i][j]<z)
+        g[i][j]=z;
+      }
+
+    cin>>a>>b;
+      int aa=-1,bb=-1;
+      while(strcmp(a,s[++aa])!=0);
+      while(strcmp(b,s[++bb])!=0);
+      cout<<"Scenario #"<<cas<<"\n";
+      cout<<g[aa][bb]<<" tons\n\n";
+  }
+}
+
+

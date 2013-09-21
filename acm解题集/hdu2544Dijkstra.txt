@@ -1,0 +1,42 @@
+#include<stdio.h>
+#define MAX 0x7fffffff
+#define N 101
+int map[N][N],dist[N],s[N],i,j;
+bool Dijkstra(int n)
+{
+  int k,mindist;
+  for(i=2;i<=n;i++)
+  {
+    s[i]=0;dist[i]=map[1][i];
+  }s[1]=1;
+  for(i=2;i<=n;i++)//切记从2开始
+  {
+    mindist=MAX;k=0;
+    for(j=2;j<=n;j++)
+    {
+      if(!s[j]&&dist[j]<mindist)
+      {mindist=dist[j];k=j;}
+    }if(!k)return false;
+    s[k]=1;
+    for(j=2;j<=n;j++)
+    {
+      if(!s[j]&&dist[k]+map[k][j]<dist[j]&&map[k][j]<MAX)
+      dist[j]=dist[k]+map[k][j];
+    }
+  }return true;
+}
+int main()
+{
+  int a,b,c,n,m;
+  while(scanf("%d%d",&n,&m)&&(n||m))
+  {
+    for(i=1;i<=n;i++)
+    for(j=1;j<=n;j++)
+    map[i][j]=map[j][i]=MAX;
+    for(i=1;i<=m;i++)
+    {scanf("%d%d%d",&a,&b,&c);map[a][b]=map[b][a]=c;}
+    if(Dijkstra(n))
+    printf("%d\n",dist[n]);
+    else printf("??\n");
+  }return 0;
+}

@@ -1,0 +1,147 @@
+Quoit Design
+Time Limit: 10000/5000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 17773    Accepted Submission(s): 4563
+
+
+
+Problem Description
+
+Have you ever played quoit in a playground? Quoit is a game in which flat rings are pitched at some toys, with all the toys encircled awarded.
+In the field of Cyberground, the position of each toy is fixed, and the ring is carefully designed so it can only encircle one toy at a time. On the other hand, to make the game look more attractive, the ring is designed to have the largest radius. Given a configuration of the field, you are supposed to find the radius of such a ring.
+
+Assume that all the toys are points on a plane. A point is encircled by the ring if the distance between the point and the center of the ring is strictly less than the radius of the ring. If two toys are placed at the same point, the radius of the ring is considered to be 0.
+
+
+ 
+
+
+Input
+
+The input consists of several test cases. For each case, the first line contains an integer N (2 <= N <= 100,000), the total number of toys in the field. Then N lines follow, each contains a pair of (x, y) which are the coordinates of a toy. The input is terminated by N = 0.
+
+
+ 
+
+
+Output
+
+For each test case, print in one line the radius of the ring required by the Cyberground manager, accurate up to 2 decimal places. 
+
+
+
+
+
+Sample Input
+
+2
+0 0
+1 1
+2
+1 1
+1 1
+3
+-1.5 0
+0 0
+0 1.5
+0
+ 
+
+
+Sample Output
+
+0.71
+0.00
+0.75
+ 
+
+
+Author
+
+CHEN, Yue
+
+ 
+
+
+Source
+
+ZJCPC2004 
+
+
+
+
+Recommend
+
+JGShining
+
+
+思路：先给所有点按照x排序y排序。然后使用二分，合并的时候只要算出中间左右距离为d的点暴力加优化算下最小点即可。其实也可以在矩形里再使用二分算，效率会更高一点
+
+失误点：编程的时候点用错了，WA了几次，各种粗心啊。
+
+
+代码：
+
+
+#include<iostream>
+#include<iomanip>
+#include<cmath>
+#include<algorithm>
+using namespace std;
+const int mm=100008;
+const double oo=1e100;
+class Point
+{
+  public:double x,y;
+}poin[mm];
+int tmp[mm];
+int m;
+bool cmpxy(Point a,Point b)///对xy排序
+{ if(a.x==b.x)
+  return a.y<b.y;
+  else
+  return a.x<b.x;
+}
+bool cmpy(int a,int b)//对y排序
+{
+  return poin[a].y<poin[b].y;
+}
+double dist(Point a,Point b)//点距离
+{
+  double dis=(a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y);
+  return sqrt(dis);
+}
+double min_dist(int left,int right)
+{ double d=oo;
+  if(left==right)return d;
+  else if(left+1==right)return dist(poin[left],poin[right]);
+  int mid=(left+right)/2;
+  d=min(min_dist(left,mid),min_dist(mid+1,right));
+  int pos=0;
+  for(int i=left;i<=right;i++)///切取中间矩形点
+  {
+    if(fabs(poin[i].x-poin[mid].x)<=d)
+    tmp[pos++]=i;
+  }
+  sort(tmp,tmp+pos,cmpy);
+  for(int i=0;i<pos;i++)
+  for(int j=i+1;j<pos&&poin[tmp[j]].y-poin[tmp[i]].y<=d;j++)
+  {
+    double dd=dist(poin[tmp[i]],poin[tmp[j]]);
+    d=min(d,dd);
+  }
+  return d;
+}
+int main()
+{
+  while(cin>>m&&m)
+  {
+    for(int i=0;i<m;i++)
+    cin>>poin[i].x>>poin[i].y;
+    sort(poin,poin+m,cmpxy);
+    cout.setf(ios::fixed);
+    //cout<<oo<<endl;
+    double ans=min_dist(0,m-1)/2.0;
+    cout<<setprecision(2)<<ans<<endl;
+  }
+}
+

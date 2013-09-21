@@ -1,0 +1,126 @@
+Greatest Common Increasing Subsequence
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 2081    Accepted Submission(s): 626
+
+
+Problem Description
+This is a problem from ZOJ 2432.To make it easyer,you just need output the length of the subsequence.
+ 
+
+Input
+Each sequence is described with M - its length (1 <= M <= 500) and M integer numbers Ai (-2^31 <= Ai < 2^31) - the sequence itself.
+ 
+
+Output
+output print L - the length of the greatest common increasing subsequence of both sequences.
+ 
+
+Sample Input
+1
+
+5
+1 4 2 5 -12
+4
+-12 1 2 4
+ 
+
+Sample Output
+2
+ 
+
+Source
+ACM暑期集训队练习赛（二）
+ 
+
+Recommend
+lcy
+
+思路：
+能想到的最简单的方法就是对a的每一项和b的每一项进行匹配，当找到一个匹配的
+时候，就往回找比它小的一个最长公共子列，如a[i]==b[j]，就搜a[0,i-1]*b[0,j
+-1]这个矩形里面比a[i]小的最长公共递增子列。简化的代码如下：
+for(i=1;i<=l1;i++)
+for(j=1;j<=l2;j++)
+if (a[i-1]==b[j-1])
+{
+    max=0;
+    for(i1=1;i1<i;i1++)
+    for(j1=1;j1<j;j1++)
+    if (a[i1-1]==b[j1-1] && a[i1-1]<a[i-1] && f[i1][j1]>max) max=f[i1][j1];
+    f[i][j]=max+1;
+}
+0(n^4)
+一次优化
+for(i=1;i<=l1;i++)
+for(j=1;j<=l2;j++)
+{
+    f[i][j]=a[i-1][j];
+    if (a[i-1]==b[j-1])
+    {
+        max=0;
+        for(k=1;k<j;k++)
+        if (b[k-1]<b[j-1] && f[i][max]<f[i][k]) max=k;
+/*  这里如果f[i][k]>0，因为b[k]<b[j]，所以不可能是a[i-1]和b[k]匹配，所以只
+可能是a[0,i-2]和其匹配，故符合公共递增子列的要求    */
+        if (f[i][max]+1>f[i][j]) f[i][j]=f[i][max]+1; 
+   }
+}
+0(n^3)
+二次优化
+  for(int i=1;i<=la;i++)
+      { int k=0;
+        for(int j=1;j<=lb;j++)
+        {
+          if(a[i]>b[j]&&f[i-1][j]>f[i-1][k])
+          {k=j;
+          }
+          f[i][j]=max(f[i-1][j],f[i][j-1]);
+            if(a[i]==b[j]&&f[i][j]<f[i-1][k]+1)
+            {f[i][j]=f[i-1][k]+1;
+            }
+        }
+      }
+0（n^2）
+
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int mm=555;
+int f[mm][mm];
+///前i个a与前j个b匹配的最优值
+int a[mm],b[mm],la,lb;
+int main()
+{
+  int cas;
+  while(cin>>cas)
+  {
+    while(cas--)
+    {
+      cin>>la;
+      for(int i=1;i<=la;i++)cin>>a[i];
+      cin>>lb;
+      for(int i=1;i<=lb;i++)cin>>b[i];
+      memset(f,0,sizeof(f));
+      int ans=0;
+      for(int i=1;i<=la;i++)
+      { int k=0;
+        for(int j=1;j<=lb;j++)
+        {
+          if(a[i]>b[j]&&f[i-1][j]>f[i-1][k])///扫描i行符合条件的最长子序列，用k记录
+          {k=j;
+          }
+          f[i][j]=max(f[i-1][j],f[i][j-1]);///更新f[i][j]值
+            if(a[i]==b[j]&&f[i][j]<f[i-1][k]+1)
+            {f[i][j]=f[i-1][k]+1;
+            }
+        }
+      }
+      cout<<f[la][lb]<<"\n";
+      if(cas)cout<<"\n";
+    }
+  }
+}
+
+

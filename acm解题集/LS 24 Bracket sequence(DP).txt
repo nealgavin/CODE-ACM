@@ -1,0 +1,59 @@
+Bracket sequence
+Given string s made up with (, ), ?, count the way to substitude ? with ( or ) to form regular bracket sequence.
+
+Input
+A string s.
+
+(1≤|s|≤1000)
+
+Ouptut
+An integer denotes the number of ways modulo (109+7).
+
+Sample input
+????
+Sample output
+2
+
+思路：dp[x][y]字符串长为x时，左括号还有y个未匹配。
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=1009;
+const int mod=1e9+7;
+char s[mm];
+int dp[2][mm];
+int main()
+{
+  while(cin>>s)
+  {
+    int len=strlen(s);
+    memset(dp,0,sizeof(dp));
+    dp[0][0]=1;int z=0;
+    for(int i=1;i<=len;i++)
+    {
+      if(s[i-1]=='(')
+      {
+        for(int j=1;j<=i;j++)
+          dp[z^1][j]=dp[z][j-1];
+          dp[z^1][0]=0;
+      }
+      else if(s[i-1]==')')
+      {
+        for(int j=0;j<i;j++)
+          dp[z^1][j]=dp[z][j+1];
+      }
+      else
+      {
+          for(int j=1;j<=i;j++)
+          dp[z^1][j]=dp[z][j-1];
+          dp[z^1][0]=0;
+          for(int j=0;j<i;j++)
+          dp[z^1][j]=(dp[z][j+1]+dp[z^1][j])%mod;
+      }z^=1;
+    }
+    cout<<dp[z][0]<<"\n";
+  }
+}
+
+

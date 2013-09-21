@@ -1,0 +1,79 @@
+吉哥系列故事——完美队形I
+
+Time Limit: 3000/1000 MS (Java/Others)    Memory Limit: 65535/32768 K (Java/Others)
+Total Submission(s): 587    Accepted Submission(s): 130
+
+
+Problem Description
+　　吉哥这几天对队形比较感兴趣。
+　　有一天，有n个人按顺序站在他的面前，他们的身高分别是h[1], h[2] ... h[n]，吉哥希望从中挑出一些人，让这些人形成一个新的队形，新的队形若满足以下三点要求，则称之为完美队形：
+　　
+　　1、挑出的人保持他们在原队形的相对顺序不变；
+　　2、左右对称，假设有m个人形成新的队形，则第1个人和第m个人身高相同，第2个人和第m-1个人身高相同，依此类推，当然，如果m是奇数，中间那个人可以任意；
+　　3、从左到中间那个人，身高需保证递增，如果用H表示新队形的高度，则H[1] < H[2] < H[3] .... < H[mid]。
+
+　　现在吉哥想知道：最多能选出多少人组成完美队形？
+ 
+
+Input
+　　第一行输入T，表示总共有T组数据(T <= 20)；
+　　每组数据先输入原先队形的人数n(1<=n <= 200)，接下来一行输入n个整数，表示按顺序从左到右原先队形位置站的人的身高（50 <= h <= 250，不排除特别矮小和高大的）。
+ 
+
+Output
+　　请输出能组成完美队形的最多人数，每组数据输出占一行。
+ 
+
+Sample Input
+2
+3
+51 52 51
+4
+51 52 52 51
+ 
+
+Sample Output
+3
+4
+
+
+思路：本题就是最长公共上升序列，整个正的序列和反序列，求最长公共上升序。
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=220;
+int n;
+int dp[mm],f[mm];
+int main()
+{
+  int cas,n;
+  while(scanf("%d",&cas)!=EOF)
+  {
+    while(cas--)
+    {
+      scanf("%d",&n);
+      for(int i=0;i<n;i++)
+        scanf("%d",&f[i]);
+      memset(dp,0,sizeof(dp));
+      int ans=0;
+      for(int i=n-1;i>=0;--i)
+      { int mx=0;
+        for(int j=0;j<=i;++j)
+        {
+          if(f[j]<f[i])///前面比后面小的更新，比其大的放入将破坏整体性质
+          mx=mx>dp[j]?mx:dp[j];
+          else if(f[j]==f[i])
+            dp[j]=mx+1;
+          if(j<i&&ans<dp[j]+dp[j])ans=dp[j]+dp[j];
+          else ans=ans>dp[j]*2-1?ans:dp[j]*2-1;
+        }
+      }
+      printf("%d\n",ans);
+    }
+  }
+}
+
+
+

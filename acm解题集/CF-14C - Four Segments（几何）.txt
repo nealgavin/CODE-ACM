@@ -1,0 +1,131 @@
+
+CF-14C - Four Segments（几何） 
+.
+ 分类： 基础杂题2013-01-15 13:500人阅读评论(0)收藏编辑删除 
+
+
+C - Four Segments
+ 
+Crawling in process...Crawling failedTime Limit:2000MS    Memory Limit:65536KB    64bit IO Format:%I64d & %I64u
+ 
+SubmitStatusPracticeCodeForces 14C
+ 
+
+
+Description
+ 
+
+Several months later Alex finally got his brother Bob's creation by post. And now, in his turn, Alex wants to boast about something to his brother. He thought for a while, and came to the conclusion that he has no ready creations, and decided to write a program for rectangles detection. According to his plan, the program detects if the four given segments form a rectangle of a positive area and with sides parallel to coordinate axes. As Alex does badly at school and can't write this program by himself, he asks you to help him.
+ 
+
+Input
+ 
+
+The input data contain four lines. Each of these lines contains four integers x1, y1, x2, y2 (?-?109?≤?x1,?y1,?x2,?y2?≤?109) — coordinates of segment's beginning and end positions. The given segments can degenerate into points.
+ 
+
+Output
+ 
+
+Output the word ?YES?, if the given four segments form the required rectangle, otherwise output ?NO?.
+ 
+
+Sample Input
+ 
+
+
+Input
+ 1 1 6 1
+1 0 6 0
+6 0 6 1
+1 1 1 0
+ 
+
+Output
+ YES
+ 
+
+Input
+ 0 0 0 3
+2 0 0 0
+2 2 2 0
+0 2 2 2
+ 
+
+Output
+ NO 
+ 
+ 
+思路：简单几何，先判断是个四边形，判断有条边与X轴平行，再判断每个角是90度，就是矩形了。
+ 
+       判断有点小技巧，具体看代码。
+ 
+失误点：比赛的时候粗心，看落了个条件，要求要有边和x轴平行。结果╮(╯▽╰)╭
+ 
+ 
+ 
+
+
+[cpp] view plaincopy
+01.#include<iostream>  
+02.#include<algorithm>  
+03.#include<cstring>  
+04.#include<cmath>  
+05.#include<map>  
+06.using namespace std;  
+07.const double pi=3.1415926;  
+08.class node  
+09.{  
+10.public:  
+11.  int x,y,xx,yy;  
+12.  int z;  
+13.}s[77];  
+14.int num[44];  
+15.map<int,int>mp;  
+16.int main()  
+17.{  
+18.  int a,b,c,d;  
+19.  while(cin>>a>>b>>c>>d)  
+20.  {   memset(num,0,sizeof(num));  
+21.     bool ans=0;  
+22.     for(int i=0;i<4;i++)  
+23.     {  if(a==c&&b==d)ans=1;  
+24.       s[i].x=a;s[i].y=b;s[i].xx=c;s[i].yy=d;///交换点生成一遍好判断  
+25.       s[i+4].x=c;s[i+4].y=d;s[i+4].xx=a;s[i+4].yy=b;  
+26.       if(i!=3)cin>>a>>b>>c>>d;  
+27.     }  
+28.     bool flag=1;  
+29.     for(int i=0;i<4;i++)  
+30.     for(int j=0;j<8;j++)  
+31.     { if(i==j)continue;  
+32.  
+33.       if(s[i].x==s[j].x&&s[i].y==s[j].y)  
+34.        num[i]++;///判断是个四边形，那有且仅有两个点一样  
+35.        if(s[i].y==s[i].yy)flag=0;///判断有条边是x轴平行就行了  
+36.     }  
+37.     if(flag)ans=1;  
+38.     for(int i=0;i<4;i++)  
+39.      if(num[i]!=1)ans=1;  
+40.     for(int i=0;i<4;i++)  
+41.     for(int j=0;j<8;j++)  
+42.     { if(i==j)continue;  
+43.        double x,y,xx,yy,z,zz;  
+44.       if(s[i].x==s[j].x&&s[i].y==s[j].y)///判断角都是90度  
+45.        {///向量知识，(x,y)*(xx,yy)=(长度乘积)cos degree;  
+46.          x=s[i].x-s[i].xx;  
+47.          y=s[i].y-s[i].yy;  
+48.          xx=s[i].x-s[j].xx;  
+49.          yy=s[i].y-s[j].yy;  
+50.          z=x*xx+y*yy;  
+51.          zz=sqrt(x*x+y*y)*sqrt(xx*xx+yy*yy);  
+52.          z=z/zz;  
+53.          z=acos(z)/pi*180;  
+54.         /// cout<<z<<endl;  
+55.  
+56.          if(abs(z-90.0)>0.0001)ans=1;  
+57.        }  
+58.     }  
+59.     if(ans)cout<<"NO\n";  
+60.     else cout<<"YES\n";  
+61.  }  
+62.}  

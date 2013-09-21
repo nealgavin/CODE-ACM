@@ -1,0 +1,117 @@
+Period
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 1543    Accepted Submission(s): 746
+
+
+
+
+Problem Description
+
+For each prefix of a given string S with N characters (each character has an ASCII code between 97 and 126, inclusive), we want to know whether the prefix is a periodic string. That is, for each i (2 <= i <= N) we want to know the largest K > 1 (if there is one) such that the prefix of S with length i can be written as AK , that is A concatenated K times, for some string A. Of course, we also want to know the period K.
+
+
+ 
+
+
+
+
+Input
+
+The input file consists of several test cases. Each test case consists of two lines. The first one contains N (2 <= N <= 1 000 000) – the size of the string S. The second line contains the string S. The input file ends with a line, having the number zero on it.
+
+
+ 
+
+
+
+
+Output
+
+For each test case, output “Test case #” and the consecutive test case number on a single line; then, for each prefix with length i that has a period K > 1, output the prefix size i and the period K separated by a single space; the prefix sizes must be in increasing order. Print a blank line after each test case.
+
+
+ 
+
+
+
+
+Sample Input
+
+3
+aaa
+12
+aabaabaabaab
+0
+ 
+
+
+
+
+Sample Output
+
+Test case #1
+2 2
+3 3
+
+Test case #2
+2 2
+6 2
+9 3
+12 4
+ 
+
+
+
+
+Recommend
+
+
+
+思路：本题有用到KMP里面求next函数的一个结论，那就是当前的标号减去next的记录值就等于最小循环节的长度。
+
+所以这题解就用next函数就可以处理了。
+#include <iostream>
+#include <cstring>
+#include <map>
+using namespace std;
+const int mm=1e6+10;
+char s[mm];
+int next[mm],len;
+void get()
+{ memset(next,0,sizeof(next));
+  next[0]=-1;int k=-1;
+  for(int i=0;i<len;)
+  {
+    if(k==-1||s[i]==s[k])
+    {
+      ++k;++i;
+      next[i]=k;
+    }else k=next[k];
+  }
+}
+int main()
+{ int cas=0;
+  while(cin>>len&&len)
+  {
+    cin>>s;
+    get();
+    ///for(int i=0;i<=len;i++)
+      ///cout<<next[i]<<" ";
+    int temp;
+    cout<<"Test case #"<<++cas<<"\n";
+    for(int i=2;i<=len;i++)
+      {
+        temp=i-next[i];///串循环长度
+        int ans=i/temp;///循环次数
+        if(i%temp==0&&ans>1)
+          cout<<i<<" "<<ans<<"\n";
+      }
+      cout<<"\n";
+  }
+}
+
+
+
+
+

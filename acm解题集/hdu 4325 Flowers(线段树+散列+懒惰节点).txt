@@ -1,0 +1,166 @@
+Flowers
+Time Limit: 4000/2000 MS (Java/Others)    Memory Limit: 65536/65536 K (Java/Others)
+Total Submission(s): 1076    Accepted Submission(s): 535
+
+
+Problem Description
+As is known to all, the blooming time and duration varies between different kinds of flowers. Now there is a garden planted full of flowers. The gardener wants to know how many flowers will bloom in the garden in a specific time. But there are too many flowers in the garden, so he wants you to help him.
+ 
+
+Input
+The first line contains a single integer t (1 <= t <= 10), the number of test cases.
+For each case, the first line contains two integer N and M, where N (1 <= N <= 10^5) is the number of flowers, and M (1 <= M <= 10^5) is the query times. 
+In the next N lines, each line contains two integer Si and Ti (1 <= Si <= Ti <= 10^9), means i-th flower will be blooming at time [Si, Ti].
+In the next M lines, each line contains an integer Ti, means the time of i-th query.
+
+ 
+
+Output
+For each case, output the case number as shown and then print M lines. Each line contains an integer, meaning the number of blooming flowers.
+Sample outputs are available for more details.
+
+ 
+
+Sample Input
+2
+1 1
+5 10
+4
+2 3
+1 4
+4 8
+1
+4
+6
+ 
+
+Sample Output
+Case #1:
+0
+Case #2:
+1
+2
+1
+ 
+
+Author
+Cloud
+ 
+
+Source
+2012 Multi-University Training Contest 3 
+ 
+
+Recommend
+zhoujiaqi2010
+
+线段树使用hash，这次编程犯了个极其低级的错误，
+f[j]写成了f[i]
+导致调了一下午，还有build()里面的初始化。
+
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#define N 100300
+using namespace std;
+class node
+{
+  public:
+  int l,r,lazy,val;
+}root[N<<3];
+class A
+{
+  public:
+  int l,r;
+}q[N];
+int hash[N<<3],len;
+int f[N];
+int ss(int pos)
+{
+  int l=0,r=len,mid=len/2;
+  while(l<=r)
+  {
+    if(hash[mid]==pos)return mid;
+    else if(hash[mid]>pos)
+    {
+      r=mid-1;mid=(l+r)/2;
+    }
+    else {l=mid+1;mid=(l+r)/2;}
+  }
+}
+void build(int t,int l,int r)
+{
+  root[t].l=l;root[t].r=r;
+  root[t].lazy=0;root[t].val=0;//就是这原先没加上WA
+  if(root[t].l==root[t].r){root[t].lazy=0;root[t].val=0;return;}
+  build(t<<1,l,(l+r)/2);build(t<<1|1,(l+r)/2+1,r);
+}
+void update(int t,int l,int r)
+{
+  if(root[t].l==l&&root[t].r==r){root[t].lazy++;root[t].val++;}
+  else
+  {
+    if(root[t].lazy)
+    {
+      root[t<<1].lazy+=root[t].lazy;
+      root[t<<1].val+=root[t].lazy;
+      root[t<<1|1].lazy+=root[t].lazy;
+      root[t<<1|1].val+=root[t].lazy;
+     // root[t<<1].val=root[t].val;root[t<<1|1].val=root[t].val;
+      root[t].lazy=0;//root[t].val=0;
+    }
+    if(root[t<<1].r>=r)update(t<<1,l,r);
+    else if(root[t<<1|1].l<=l)
+    {
+      update(t<<1|1,l,r);
+    }
+    else
+    {update(t<<1,l,root[t<<1].r);
+     update(t<<1|1,root[t<<1|1].l,r);
+    }
+  }
+}
+int query(int t,int pos)
+{
+  if(root[t].l==root[t].r&&root[t].l==pos)
+  return root[t].val;
+  if(root[t].lazy)
+  {
+    root[t<<1].val+=root[t].lazy;root[t<<1|1].val+=root[t].lazy;
+    root[t<<1].lazy+=root[t].lazy;root[t<<1|1].lazy+=root[t].lazy;
+    root[t].lazy=0;
+  }
+  if(root[t<<1].r>=pos)
+  query(t<<1,pos);
+  else query(t<<1|1,pos);
+}
+int main()
+{
+  int cas;
+  int m,n;
+  scanf("%d",&cas);
+  for(int i=1;i<=cas;i++)
+  {  len=0;
+      scanf("%d%d",&n,&m);
+      for(int j=0;j<n;j++)
+      {scanf("%d%d",&q[j].l,&q[j].r);hash[len++]=q[j].l;hash[len++]=q[j].r;}
+      for(int j=0;j<m;j++)
+      {
+        scanf("%d",&f[j]);hash[len++]=f[j];
+      }
+      sort(hash,hash+len);
+      int k=0;
+      for(int j=1;j<len;j++)
+      if(hash[k]!=hash[j])
+      hash[++k]=hash[j];
+      len=k;
+      build(1,0,len);
+      for(int j=0;j<n;j++)
+      update(1,ss(q[j].l),ss(q[j].r));
+      printf("Case #%d:\n",i);
+      for(int j=0;j<m;j++)
+      printf("%d\n",query(1,ss(f[j])));
+  }
+}
+

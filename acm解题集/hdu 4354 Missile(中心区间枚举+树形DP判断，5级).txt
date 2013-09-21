@@ -1,0 +1,177 @@
+E - Missile
+Time Limit:2000MS     Memory Limit:32768KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+HDU 4354
+Description
+Long long ago,there is a strange area where all the C cities are located in a straight line.To make things easy,lets regard the line as X axis.
+Even more strangely,cities belonging to the same country are not necessarily adjacent to each other.
+But people of these countries are still living happily with their friends.
+However,their enemies are preparing for a disastrous attack.Recently they have invented a new weapon called missile,which can destroy any city if they have enough power.If they want to destroy a set of cities,the power required is max{xi}-min{xj},where i and j are all from the city set they want to destroy.Now the enenies are wondering the minimum power needed to destroy some cities which are from at least K different countries.This is an easy task.The problem is that some countries are strangely protected.That means ,if country A and country B has a special relationship,you can destroy at most one country's cities.A good news is that the relationships will not form circles.But the enemies regard it as helpless,so they order you to write a programme to calculate the specific power.In this task,you can assume that once the missile is launched with certain power,it will destroy the cities from as more countries as possible.
+ 
+Input
+There is an integer T (1<=T<=60) indicating the cases you have to solve.Then the following T cases,each one begins with four integers C,N,K,M.C is the number of cities.N is the number of different countries.K is the number of distinct countries the enemies want to destroy.M is the number of the strange relationships. Then comes the next C lines,each line has two integers.The first one is the city's position x(-109<=x<=109),and the second one is the country Y it belongs to(1<=Y<=N).
+No two cities are located in the same position.In last M lines, each line contains two integers A and B (1 <= A, B <= N) which means country A and country B has a special relationship.(1<=C<=5000,1<=N<=2000,1<=K<=N,0<=M<=1000)
+ 
+Output
+First you should output "Case #X:" ,without quote.X means the case number you are dealing with.After that ,you should output a blank and the answer.If it's impossible,then the answer should be -1.See sample for more details.
+ 
+Sample Input
+2
+3 3 2 1
+0 1
+2 2
+5 3
+1 2
+
+3 3 3 1
+0 1
+2 2
+5 3
+1 2
+ 
+Sample Output
+Case #1: 3
+Case #2: -1
+Hint
+Not all the cases are big ones.
+ 
+ 
+
+思路：
+
+首先要枚举区间，假设[l, r]是枚举的区间，最初l = r = 0。
+当区间不满足炸毁条件时，增加r，直到满足条件。
+当区间满足炸毁条件时，增加l，直到不满足条件。
+同时记录国家的数量，可以减少验证的次数。
+正确性很容易证明，因为排过序，所以遍历最近的符合条件肯定包含最优解
+验证一段区间[l, r]是否满足可以炸毁K个以上城市：
+利用树状DP，图就是国家间的特殊关系，因为可能是森林所以要把所有的根节点的值加起来。
+dp[i][j]：能炸毁的最多的国家数目，i代表第几个节点，范围一定在[l, r]之内，j=0时不炸毁当前城市，j=1时炸毁当前城市。
+叶子节点：dp[u][0] = 0, dp[u][1] = 1;
+一般节点：
+dp[u][0] = sum(max(dp[v][0], dp[v][1])); 因为不做选择所以完全不用考虑冲突。
+dp[u][1] = sum(dp[v][0]) + 1; 选择u点就一定不能选择v点。
+
+[html] view plaincopy
+#include<iostream>  
+#include<cstring>  
+#include<cstdio>  
+#include<algorithm>  
+using namespace std;  
+const int mm=5e3+9;  
+int c_to[mm],dp[mm][2];  
+class City  
+{  
+  public:int x,who;  
+  bool operator<(const City&z)const  
+  {  
+    return x<z.x;  
+  }  
+}city[mm];  
+int head[mm];  
+bool vis[mm];  
+class Edge  
+{  
+  public:int v,next;  
+}e[mm];  
+int cas,C,N,K,M,edge;  
+void data()  
+{  
+  memset(head,-1,sizeof(head));  
+  edge=0;  
+}  
+void add(int u,int v)  
+{  
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;  
+}  
+void dfs(int u)  
+{ int v;  
+  vis[u]=1;  
+  dp[u][0]=0;//没选  
+  dp[u][1]=1;///选择了，那肯定有一个国家就是本身  
+  for(int i=head[u];~i;i=e[i].next)  
+  {  
+    v=e[i].v;  
+    if(!vis[v]&&c_to[v])  
+    {  
+       dfs(v);  
+       dp[u][0]+=max(dp[v][0],dp[v][1]);///没选当前点，怎样都行  
+       dp[u][1]+=dp[v][0];///选当前，则子节点不可选  
+    }  
+  }  
+}  
+bool judge()  
+{ memset(vis,0,sizeof(vis));  
+  int country_num=0;  
+  for(int i=1;i<=N;++i)  
+    if(!vis[i]&&c_to[i])  
+    {  dfs(i);  
+      country_num+=max(dp[i][0],dp[i][1]);  
+    }  
+    return country_num>=K;  
+}  
+int getans()  
+{  
+  int l,r,num,ans=-1;  
+  l=r=0;  
+  sort(city,city+C);///城市坐标排序  
+  memset(c_to,0,sizeof(c_to));  
+  c_to[city[0].who]=1;  
+  num=1;  
+  while(l<C&&r<C)  
+  {  
+    bool flag=0;  
+    if(num>=K)  
+    {  
+      if(judge())  
+      {  
+        flag=1;  
+        if(ans==-1)  
+          ans=city[r].x-city[l].x;  
+        else ans=min(ans,city[r].x-city[l].x);  
+      }  
+    }  
+    if(flag)  
+    {  
+      if(--c_to[city[l++].who]==0)  
+        --num;  
+        //printf("cc=%d  %d\n",city[l].x,num);  
+      //  puts("yes");  
+    }  
+    else  
+    {  
+      if(!c_to[city[++r].who])  
+        ++num;  
+      ++c_to[city[r].who];  
+    }  
+  }  
+  return ans;  
+}  
+int main()  
+{ int u,v;  
+  while(~scanf("%d",&cas))  
+  {  
+    for(int ca=1;ca<=cas;++ca)  
+    {  
+      printf("Case #%d: ",ca);  
+      scanf("%d%d%d%d",&C,&N,&K,&M);  
+      for(int i=0;i<C;++i)  
+      {  
+        scanf("%d%d",&city[i].x,&city[i].who);  
+      }  
+      data();  
+      for(int i=0;i<M;++i)  
+      {  
+        scanf("%d%d",&u,&v);  
+        add(u,v);add(v,u);  
+      }  
+      printf("%d\n",getans());  
+    }  
+  }  
+  return 0;  
+}  

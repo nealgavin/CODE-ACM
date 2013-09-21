@@ -1,0 +1,141 @@
+小明系列故事——买年货
+
+Time Limit: 5000/2000 MS (Java/Others)    Memory Limit: 65535/32768 K (Java/Others)
+Total Submission(s): 831    Accepted Submission(s): 335
+
+
+
+
+Problem Description
+
+　　春节将至，小明要去超市购置年货，于是小明去了自己经常去的都尚超市。
+　　刚到超市，小明就发现超市门口聚集一堆人。用白云女士的话说就是：“那家伙，那场面，真是人山人海，锣鼓喧天，鞭炮齐呤，红旗招展。那可真是相当的壮观啊！”。好奇的小明走过去，奋力挤过人群，发现超市门口贴了一张通知，内容如下：
+　　
+　　值此新春佳节来临之际，为了回馈广大顾客的支持和厚爱，特举行春节大酬宾、优惠大放送活动。凡是都尚会员都可用会员积分兑换商品，凡是都尚会员都可免费拿k件商品，凡是购物顾客均有好礼相送。满100元送bla bla bla bla，满200元送bla bla bla bla bla...blablabla....
+　　
+　　还没看完通知，小明就高兴的要死，因为他就是都尚的会员啊。迫不及待的小明在超市逛了一圈发现超市里有n件他想要的商品。小明顺便对这n件商品打了分，表示商品的实际价值。小明发现身上带了v1的人民币，会员卡里面有v2的积分。他想知道他最多能买多大价值的商品。
+　　由于小明想要的商品实在太多了，他算了半天头都疼了也没算出来，所以请你这位聪明的程序员来帮帮他吧。
+
+ 
+
+
+
+
+Input
+
+输入包含多组测试用例。
+每组数据的第一行是四个整数n，v1，v2，k；
+然后是n行，每行三个整数a，b，val，分别表示每个商品的价钱，兑换所需积分，实际价值。
+[Technical Specification]
+1 <= n <= 100
+0 <= v1, v2 <= 100
+0 <= k <= 5
+0 <= a, b, val <= 100
+
+Ps. 只要钱或者积分满足购买一件商品的要求，那么就可以买下这件商品。
+
+
+ 
+
+
+
+
+Output
+
+对于每组数据，输出能买的最大价值。
+详细信息见Sample。 
+
+
+
+
+
+
+Sample Input
+
+5 1 6 1
+4 3 3
+0 3 2
+2 3 3
+3 3 2
+1 0 2
+4 2 5 0
+0 1 0
+4 4 1
+3 3 4
+3 4 4
+ 
+
+
+
+
+Sample Output
+
+12
+4
+ 
+
+
+
+
+Source
+
+2013腾讯编程马拉松初赛第〇场（3月20日） 
+
+
+
+
+
+
+Recommend
+
+liuyiding
+
+
+思路：简单多维背包，dp[v1][v2][k]=MAX(dp[v1-a][v2][k],dp[v1][v2-b][k],dp[v1][v2][k-1])+c;
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=110;
+int dp[mm][mm][11];
+class node
+{
+  public:int a,b,c;
+}f[mm];
+int n,v1,v2,kk;
+void Max(int &x,const int y)
+{
+  if(x<y)x=y;
+}
+int main()
+{
+  while(scanf("%d%d%d%d",&n,&v1,&v2,&kk)!=EOF)
+  {
+    for(int i=0;i<n;++i)
+      scanf("%d%d%d",&f[i].a,&f[i].b,&f[i].c);
+    memset(dp,0,sizeof(dp));
+    int z,ans=0,tmp;
+    for(int i=0;i<n;i++)
+    {
+       for(int j=v1;j>=0;--j)
+        for(int k=v2;k>=0;--k)
+        for(int l=kk;l>=0;--l)
+        { tmp=0;
+          if(j-f[i].a>=0)
+            Max(tmp,dp[j-f[i].a][k][l]+f[i].c);
+          if(k-f[i].b>=0)
+            Max(tmp,dp[j][k-f[i].b][l]+f[i].c);
+          if(l-1>=0)
+            Max(tmp,dp[j][k][l-1]+f[i].c);
+          Max(dp[j][k][l],tmp);
+        }
+    }
+    printf("%d\n",dp[v1][v2][kk]);
+  }
+}
+
+
+
+
+

@@ -1,0 +1,126 @@
+monkey
+
+Time Limit 1000ms
+
+Memory Limit 65536K
+
+description
+
+ Cc is a lovely monkey. It likes to play the game "catching plates".
+    The game is as follows.
+    There are n pegs in a line numbered from 1 to n. Cc stands on the first peg at the beginning. It is rather hard for Cc to jump from peg i to peg i+1(i+1<=n) or peg i-1(i-1>=1), which takes him exactly one second. He can jump at most t times. And he will only jump at the beginning of one second.There is a clown at the other end. He has m plates in hand. He will throw a plate to one peg every second. The clown will throw the plate exactly to the peg. The plates will get broken if they hit the pegs. Cc can catch the plate if only he stands on the peg the plate is thrown to. For simplicity, the process of throwing and catching don't take any time at all. Suppose the clown will throw a plate to the 9th peg at the 9th second, if Cc stands on peg 9 at the 8th second and stands still for a second, or if Cc stand on peg 8 at the 8th second and jumps to peg 9, or if Cc stand on peg 10 at the 8th second and jumps to peg 9, he can catch the plate.
+    There is a positive integer on each plate, indicating the bananas Cc can get if he catch that plate. Cc will know the way the clown throw the plates in advance. Now he wants to get as many bananas as possible.
+
+							
+input
+
+ For each test case,the first line contains three integers n, m and t(1 <= n <= 100,1 <= m <= 100,0 <= t <= 100), indicating the number of the pegs, the number of the plates and the maximum number Cc can jump.The next m lines gives ai and bi each, which means the clown will throw a plate with number bi on it to peg ai at the ith second.
+    Process to the end of file.
+							
+output
+
+For each test case, first print a line saying "Scenario #k", where k is the number of the test case.Then, print the maximum number Cc can get, one per line.Print a blank line after each test case, even after the last one.
+							
+sample_input
+
+4 4 2
+2 10
+3 15
+1 10
+1 8
+4 4 4
+2 10
+3 15
+1 10
+1 8
+2 2 1
+1 1
+2 1
+							
+sample_output
+
+Scenario #1
+28
+
+Scenario #2
+33
+
+Scenario #3
+2
+							
+hint
+
+
+								
+							
+source
+
+
+思路：三维DP ,dp[a][b][c]代表，第a个时间在b个钉子上已经跳了c次得到的最多的香蕉。
+           dp[a][b][c]=max(dp[a-1][b-1][c-1],dp[a-1][b+1][c-1],dp[a-1][b][c])+该时刻该点的香蕉数。
+这题坑人啊，时间卡的忒紧了，如果三维，初始化，比爆无疑。因此使用滚动数组，使其初始化时间减少。
+另外，max()中能提高效率就尽量使用高效率的。否则还是过不了。
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int mm=103;
+const int oo=1e9;
+int dp[3][mm][mm];
+int bana[mm][mm];
+int n,m,t,ans;
+void Max(int&x,const int y)
+{
+  if(x<y)x=y;
+}
+void data()
+{
+  memset(bana,0,sizeof(bana));
+  for(int i=0;i<=1;++i)
+    for(int j=0;j<=n+1;++j)
+    for(int k=0;k<=t;++k)
+    dp[i][j][k]=-oo;
+   dp[0][1][0]=0;
+}
+void DP()
+{ int z=1;
+  for(int i=1;i<=m;++i)///扔盘子的时间
+  {
+    for(int j=1;j<=n;++j)///所在的钉子
+    {
+      if(dp[z^1][j][0]>=0)
+        {
+          dp[z][j][0]=dp[z^1][j][0]+bana[i][j];
+          Max(ans,dp[z][j][0]);
+        }
+        for(int k=1;k<=t;++k)
+        { dp[z][j][k]=max(dp[z^1][j-1][k-1],max(dp[z^1][j+1][k-1],dp[z^1][j][k]))+bana[i][j];
+         /*Max(dp[z][j][k],dp[z^1][j-1][k-1]+bana[i][j]);
+         Max(dp[z][j][k],dp[z^1][j+1][k-1]+bana[i][j]);
+         Max(dp[z][j][k],dp[z^1][j][k]+bana[i][j]);
+         Max(ans,dp[z][j][k]);
+        */
+        ///用上上面的注释也还是超时，实在无语
+        }
+    }
+    z^=1;
+  }
+}
+int main()
+{ int cas=0;
+  while(scanf("%d%d%d",&n,&m,&t)!=EOF)
+  { int b,c;
+    data();
+    for(int i=1;i<=m;++i)
+    {
+      scanf("%d%d",&b,&c);
+      bana[i][b]=c;
+    }
+    ans=0;
+    DP();
+    printf("Scenario #%d\n%d\n\n",++cas,ans);
+  }
+}
+
+

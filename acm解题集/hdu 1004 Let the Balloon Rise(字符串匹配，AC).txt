@@ -1,0 +1,120 @@
+Let the Balloon Rise
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 43447    Accepted Submission(s): 15311
+
+
+Problem Description
+Contest time again! How excited it is to see balloons floating around. But to tell you a secret, the judges' favorite time is guessing the most popular problem. When the contest is over, they will count the balloons of each color and find the result.
+
+This year, they decide to leave this lovely job to you. 
+
+ 
+
+Input
+Input contains multiple test cases. Each test case starts with a number N (0 < N <= 1000) -- the total number of balloons distributed. The next N lines contain one color each. The color of a balloon is a string of up to 15 lower-case letters.
+
+A test case with N = 0 terminates the input and this test case is not to be processed.
+
+ 
+
+Output
+For each case, print the color of balloon for the most popular problem on a single line. It is guaranteed that there is a unique solution for each test case.
+
+ 
+
+Sample Input
+5
+green
+red
+blue
+red
+red
+3
+pink
+orange
+pink
+0
+ 
+
+Sample Output
+red
+pink
+ 
+
+Author
+WU, Jiazhi
+ 
+
+Source
+ZJCPC2004 
+ 
+
+Recommend
+JGShining
+
+
+#include<iostream>
+#include<algorithm>
+using namespace std;
+class node
+{
+  public:
+  node*next[26];
+  int count;
+  int vis;
+  node()
+  {
+    for(int i=0;i<26;i++)
+    next[i]=0;
+    count=0;vis=0;
+  }
+}root;
+void insert(node*p,char*str)
+{
+  int num;
+  int i=0;p=&root;
+  while(str[i]!='\0')
+  {num=str[i]-'a';
+    if(!p->next[num])
+    p->next[num]=new node;
+    p=p->next[num];
+    p->count++;
+    i++;
+  }
+   p->vis=1;
+}
+int find(node*p,char*str)
+{
+ p=&root;int i=0;
+ while(str[i]!='\0'&&p->next[str[i]-'a'])
+ {
+   p=p->next[str[i]-'a'];
+   i++;
+ }
+ if(str[i]=='\0')
+ return p->count;
+ return 0;
+}
+int main()
+{
+  int m;
+  char qs[1200][12];
+  while(cin>>m&&m)
+  {
+    for(int i=0;i<m;i++)
+    {
+      cin>>qs[i];
+      insert(&root,qs[i]);
+    }
+    int max=0,nu;
+    for(int i=0;i<m;i++)
+    {
+      nu=find(&root,qs[i]);
+      if(nu>max)
+      max=nu;
+    }
+    for(int i=0;i<m;i++)
+    if(max==find(&root,qs[i]))
+    {cout<<qs[i]<<endl;break;}
+  }
+}

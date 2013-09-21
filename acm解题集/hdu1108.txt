@@ -1,0 +1,23 @@
+#include<stdio.h>
+__int64 bei(__int64 &x,__int64 &y)
+{
+  __int64 z;
+  while(y)
+  {
+    z=y;
+    y=x%y;
+    x=z;
+  }
+  return x;
+}
+int main()
+{
+  __int64 x,y,z,a,b;
+  while(scanf("%I64d%I64d",&x,&y)!=EOF)
+  { a=x;b=y;
+    if(x>=y)z=bei(x,y);
+    else z=bei(y,x);
+    printf("%I64d\n",(a/z)*b);
+  }
+  return 0;
+}

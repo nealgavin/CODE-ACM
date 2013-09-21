@@ -1,0 +1,54 @@
+#include<iostream>
+#include<cmath>
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#define N 65537
+using namespace std;
+int f[N];
+bool s[N];
+int next=0;
+void oprime()
+{
+  memset(s,0,sizeof(s));
+  s[0]=s[1]=1;
+  int i,j;
+  for(i=2;i<N;i++)
+  {
+    if(!s[i])
+    {
+      f[++next]=i;//¼ÇÂ¼ËØÊý
+      for(j=i+i;j<N;j+=i)
+      s[i]=1;
+    }
+  }
+}
+int main()
+{
+  int m;
+  int ans;
+  oprime();
+  while(scanf("%d",&m)!=EOF)
+  {
+    ans=0;
+    for(int i=0;i<m;i++)
+    {
+      __int64 shu;
+      scanf("%I64d",&shu);
+      bool flag=0;
+      if(shu==1)
+      continue;
+      for(int j=1;j<next&&int(sqrt(shu)+1)>f[j];j++)
+      {
+        if(shu%f[j]==0)
+        {
+          flag=1;
+          break;
+        }
+      }
+      if(!flag)
+       ans++;
+    }
+    printf("%d\n",ans);
+  }
+}

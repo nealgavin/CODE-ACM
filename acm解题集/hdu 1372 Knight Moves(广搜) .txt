@@ -1,0 +1,63 @@
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+
+const int tx[]={1,-1,2,-2,1,-1,2,-2};
+const int ty[]={2,2,1,1,-2,-2,-1,-1};
+class A
+{
+  public:
+  int x,y,step;
+};
+
+A map[100000];
+bool vis[15][15];
+int x_start,y_start,x_end,y_end;
+int ans;
+int bfs()
+{
+  if(x_start==x_end&&y_start==y_end)
+  return 0;
+  ans=0;
+  int front=0,rear=1;
+  int dx,dy;
+    dx=x_start;
+    dy=y_start;
+    map[0].x=x_start;
+    map[0].y=y_start;
+    map[0].step=1;
+    vis[dx][dy]=1;
+  while(front<rear)
+  {
+    for(int i=0;i<8;i++)
+    {
+      dx=map[front].x+tx[i];
+      dy=map[front].y+ty[i];
+      if(dx>8||dx<1||dy>8||dy<1||vis[dx][dy])
+      continue;
+      if(dx==x_end&&dy==y_end)
+      return map[front].step;
+      map[rear].x=dx;map[rear].y=dy;
+      map[rear].step=map[front].step+1;
+      rear++;
+    }
+    front++;
+  }
+  return 0;
+}
+
+int main()
+{
+  //freopen("4.txt","r",stdin);
+  char start,end;
+  while(scanf("%c%d %c%d",&start,&y_start,&end,&y_end)!=EOF)
+  {
+    getchar();
+    x_start=start-'a'+1;
+    x_end=end-'a'+1;
+    memset(vis,0,sizeof(vis));
+    int z=bfs();
+    printf("To get from %c%d to %c%d takes %d knight moves.\n",start,y_start,end,y_end,z);
+  }
+}

@@ -1,0 +1,59 @@
+Square free
+
+Test whether n  is square free. n  is square free if and only if for all p>1 , p 2   is not divisors of n .
+Input
+
+The first line contains an integer t , the number of test cases.
+The following n  lines, each contains an integer n .
+(1≤t≤10 2 ,1≤n≤10 18 ) 
+Output
+
+Print "Yes" if n  is square free, or "No" otherwise.
+Sample input
+
+2
+10
+20
+Sample output 1
+
+Yes
+No
+
+思路： 只检查i^3<=n的数，那么最多检查10^6
+            如果这个数是a*b*b 如果a>n那么b<n所以可以检查
+           如果a<n 那么就把a剔除检查是否剔除完的数是平方数
+           这样所有的情况就都包括在内了。
+#include<iostream>
+#include<cstring>
+#include<cmath>
+using namespace std;
+const int mm=1000210;
+int n;
+bool p[mm];
+int f[mm],pos;
+int main()
+{
+  while(cin>>n)
+  {
+    while(n--)
+    {
+      long long m;
+      cin>>m;
+      bool yes=1;
+      long long i;
+      for(i=1;i*i*i<=m&&yes;i++)
+        if(m%i==0)
+      {
+        long long z=m/i;
+        long long y=(long long)sqrt(double(z)+0.01);
+        if(y*y==z)yes=0;
+        m/=i;
+        if(i>1&&m%i==0)yes=0;
+      }
+      if(yes)cout<<"Yes\n";
+      else cout<<"No\n";
+    }
+  }
+}
+
+

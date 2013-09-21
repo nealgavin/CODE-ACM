@@ -1,0 +1,63 @@
+#include<stdio.h>
+#include<algorithm>
+using namespace std;
+int main()
+{
+  //freopen("data.txt","r",stdin);
+  int i,j,n,dist[300],lr[300],wr[300],ans;
+  while(scanf("%d",&n)!=EOF)
+  {
+    for(i=1;i<=n;i++)
+    {scanf("%d",&dist[i]);lr[i]=wr[i]=1;}
+    for(i=1;i<=n;i++)
+    {
+      for(j=1;j<i;j++)
+      if(dist[i]>dist[j])lr[i]=max(lr[i],lr[j]+1);
+    }
+    for(i=n;i>0;i--)
+    for(j=n;j>i;j--)
+    if(dist[i]>dist[j])wr[i]=max(wr[i],wr[j]+1);
+    for(i=1,ans=0;i<=n;i++)
+    ans=max(lr[i]+wr[i],ans);
+    printf("%d\n",n-ans+1);
+  }
+}
+
+
+/*
+#include<iostream>
+#include<algorithm>
+#define N 200
+using namespace std;
+int queue[N],l[N],r[N];
+int main()
+{
+  int m;
+  while(cin>>m)
+  {
+    for(int i=0;i<m;i++)
+    l[i]=r[i]=1;
+    for(int i=0;i<m;i++)
+    cin>>queue[i];
+    for(int i=0;i<m;i++)
+    {
+      for(int j=0;j<i;j++)
+      if(queue[i]>queue[j])
+      l[i]=max(l[i],l[j]+1);
+    }
+    for(int i=m-1;i>=0;i--)
+    for(int j=m-1;j>i;j--)
+    if(queue[i]>queue[j])
+    r[i]=max(r[i],r[j]+1);
+    int ans=0;
+    int z;
+    for(int i=0;i<m;i++)
+    {
+       z=r[i]+l[i];
+      ans=max(ans,z);
+    }
+    cout<<m-ans+1<<endl;
+  }
+  return 0;
+}
+*/

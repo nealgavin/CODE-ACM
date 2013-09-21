@@ -1,0 +1,36 @@
+#include<iostream>
+#include<cstring>
+#define N 20004
+using namespace std;
+int isp[N];
+int main()
+{
+  int m,n,max,ans;
+  memset(isp,0,sizeof(isp));
+  isp[1]=1;
+  for(int i=2;i<N;i++)
+  {
+    if(isp[i]==0)//如果没被选择过,也就是最小的那个素数
+    {
+      for(int j=i;j<N;j+=i)//筛选出最大的素数因子i
+      {
+        isp[j]=i;
+      }
+    }
+  }
+  while(cin>>m)
+  { max=0;
+    for(int i=0;i<m;i++)
+    {
+      cin>>n;
+      if(isp[n]>max)
+      {
+        max=isp[n];
+        ans=n;
+      }
+    }
+    cout<<ans<<endl;
+  }
+  return 0;
+}
+

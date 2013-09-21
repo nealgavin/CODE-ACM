@@ -1,0 +1,53 @@
+#include<stdio.h>
+#include<algorithm>
+#include<cstring>
+#define N 103
+#define M 606
+using namespace std;
+int w[N],t,f[N][M],dis[N],tree[N][2],size;
+int in()
+{ 
+  ++size;
+  int number,id=size;//size is different from id
+  scanf("%d%d",&dis[id],&number);
+  w[id]=number;
+  dis[id]<<=1;
+  if(!number)
+  {
+    tree[id][0]=in();
+    tree[id][1]=in();
+  }
+  return id;
+}
+void treeDP(int u)
+{
+  int v,i,j;
+  if(w[u])
+  {
+    for(i=0;i<w[u];i++)
+    for(j=t;j>=dis[u]+5;--j)
+    f[u][j]=max(f[u][j],f[u][j-5]+1);
+  }
+  else
+  {
+    for(int k=0;k<=1;++k)
+    {
+      treeDP(v=tree[u][k]);
+      for(i=t;i>=0;i--)
+      for(j=i-dis[u];j>=0;j--)
+      f[u][i]=max(f[u][i],f[u][i-j]+f[v][j]);
+    }
+  }
+}
+int main()
+{
+  //freopen("1.txt","r",stdin);
+  while(scanf("%d",&t)!=EOF)
+  {
+    size=0;--t;
+    in();
+    memset(f,0,sizeof(f));
+    treeDP(1);
+    printf("%d\n",f[1][t]);
+  }
+}

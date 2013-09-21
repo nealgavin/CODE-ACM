@@ -1,0 +1,31 @@
+#include<stdio.h>
+#include<algorithm>
+#define N 300
+using namespace std;
+int main()
+{
+  //freopen("data.txt","r",stdin);
+  int m,i,j,k,l,n,x[N],y[N],v[N],w[N][N],f[N][N];
+  while(scanf("%d%d",&m,&n)!=EOF)
+  {
+    for(i=1;i<=n;i++)
+    scanf("%d%d%d",&x[i],&y[i],&v[i]);
+    scanf("%d",&k);
+    for(i=1;i<=m;i++)
+    for(j=1;j<=m;j++)
+    {
+      w[i][j]=f[i][j]=0;
+    }
+    for(l=1;l<=n;l++)
+    {
+      for(i=1;i<=x[l];i++)
+      for(j=y[l];j<=m;j++)
+      w[i][j]+=v[l];
+    }
+    for(i=1;i<=m;i++)
+    for(j=1;j<=k;j++)
+    for(l=j;l<=i;l++)
+    f[i][j]=max(f[i][j],f[l-1][j-1]+w[l][i]);
+    printf("%d\n",f[m][k]);
+  }
+}

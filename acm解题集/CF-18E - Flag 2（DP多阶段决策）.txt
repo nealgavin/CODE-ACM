@@ -1,0 +1,132 @@
+E - Flag 2
+
+Crawling in process...Crawling failedTime Limit:2000MS    Memory Limit:131072KB    64bit IO Format:%I64d & %I64u
+
+SubmitStatusPracticeCodeForces 18E
+
+
+
+Description
+
+
+According to a new ISO standard, a flag of every country should have, strangely enough, a chequered field n?×?m, each square should be wholly painted one of 26 colours. The following restrictions are set: 
+? In each row at most two different colours can be used. 
+? No two adjacent squares can be painted the same colour. 
+
+
+
+Pay attention, please, that in one column more than two different colours can be used.
+
+Berland's government took a decision to introduce changes into their country's flag in accordance with the new standard, at the same time they want these changes to be minimal. By the given description of Berland's flag you should find out the minimum amount of squares that need to be painted different colour to make the flag meet the new ISO standard. You are as well to build one of the possible variants of the new Berland's flag.
+
+
+Input
+
+
+The first input line contains 2 integers n and m (1?≤?n,?m?≤?500) — amount of rows and columns in Berland's flag respectively. Then there follows the flag's description: each of the following n lines contains m characters. Each character is a letter from a to z, and it stands for the colour of the corresponding square.
+
+
+Output
+
+
+In the first line output the minimum amount of squares that need to be repainted to make the flag meet the new ISO standard. The following n lines should contain one of the possible variants of the new flag. Don't forget that the variant of the flag, proposed by you, should be derived from the old flag with the minimum amount of repainted squares. If the answer isn't unique, output any.
+
+
+Sample Input
+
+.input, .output {border: 1px solid #888888;} .output {margin-bottom:1em;position:relative;top:-1px;} .output pre,.input pre {background-color:#EFEFEF;line-height:1.25em;margin:0;padding:0.25em;} .title {background-color:#FFFFFF;border-bottom: 1px solid #888888;font-family:arial;font-weight:bold;padding:0.25em;}
+
+Input
+3 4
+aaaa
+bbbb
+cccc
+
+
+ Output
+6
+abab
+baba
+acac
+
+
+ Input
+3 3
+aba
+aba
+zzz
+
+
+ Output
+4
+aba
+bab
+zbz
+
+思路：最开始想，枚举吧，列出所有情况，肯定能得到结果，26^(m*n);爆的毫无疑问，那就减枝呗。去掉不必要的情况，但这是不好处理的。所以呢，可以用多阶段决策来优化。每一行看成一各阶段，由此可知后面的情况并不影响前面的结果。因此 现有状态=以前阶段的最优+当前阶段的状态花费。因此，这DP就来了。这就是多阶段决策类型的DP。
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int oo=1e9;
+const int mm=504;
+const int nn=26;
+char grap[mm][mm];
+int m,n;
+int f[mm][nn][nn];
+int a_path[mm][nn][nn],b_path[mm][nn][nn];
+int cost(int x,int a,int b)///当前阶段的花费
+{
+  a+='a';b+='a';
+  int ret=0;
+  for(int i=0;i<n;i++)if(i&1)ret+=(a!=grap[x][i]);else ret+=(b!=grap[x][i]);
+  return ret;
+}
+void print(int z,int x,int y)
+{
+  if(z)print(z-1,a_path[z][x][y],b_path[z][x][y]);
+  for(int i=0;i<n;i++)
+    if(i&1)cout<<char(x+'a');
+  else cout<<char(y+'a');
+  cout<<"\n";
+}
+int main()
+{
+  while(cin>>m>>n)
+  {
+    for(int i=0;i<m;i++)cin>>grap[i];
+    for(int i=0;i<nn;i++)
+      for(int j=0;j<nn;j++)///边界,第0个阶段
+    {
+      if(i==j)f[0][i][j]=oo;
+      else f[0][i][j]=cost(0,i,j);
+    }
+    for(int i=1;i<m;i++)
+      for(int A=0;A<nn;A++)
+      for(int B=0;B<nn;B++)
+    {
+      if(A==B)continue;
+      int cur=cost(i,A,B);///当前花费
+      int mid,_min=oo,x=-1,y=-1;
+      ///计算到当前状态的最小花费
+      for(int a=0;a<nn;a++)
+        for(int b=0;b<nn;b++)
+      { if(a==A||b==B||a==b)continue;
+        if(_min>f[i-1][a][b]){_min=f[i-1][a][b];x=a;y=b;}
+      }
+      f[i][A][B]=_min+cur;a_path[i][A][B]=x;b_path[i][A][B]=y;///记录路径
+    }  int _min=oo,x,y;
+      for(int a=0;a<nn;a++)
+        for(int b=0;b<nn;b++)
+      { if(a==b)continue;
+        if(_min>f[m-1][a][b]){_min=f[m-1][a][b];x=a;y=b;}
+      }
+    cout<<f[m-1][x][y]<<"\n";
+    print(m-1,x,y);
+  }
+}
+
+
+
+
+
+

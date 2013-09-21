@@ -1,0 +1,98 @@
+Magic Tree
+
+Time Limit 1000ms
+
+Memory Limit 65536K
+
+description
+
+　　Every acmer dream for gold medal. Fotunately,there are two magic trees (which are conveniently numbered 1 and 2) in our campus, each full of gold medal. The trees are very high, so we can not touch the gold medal when they are in the tree but wait for them to fall. However, we must catch them in the air since the gold medal disappear when they hit the ground. 	Each minute, one of the two magic trees drops a medal. we can catch an medal if we are standing under a tree from which one falls. The magic tree 1 is near by the magic tree 2.So we can walk between the two trees quickly (in much less than a minute), we can stand under only one tree at any time. Moreover, we are not willing to walk back and forth between the trees endlessly (and thus misses some gold medal). 	Medal fall (one each minute) for T (1 ≤ T ≤ 1,000) minutes. We are willing to walk back and forth at most W (1 ≤ W ≤ 30) times. Given which tree will drop an medal each minute, determine the maximum number of medal which we can catch. We starts at magic tree 1.
+							
+input
+
+Line 1: Two space separated integers: T and W Lines 2~T+1: 1 or 2, the tree that will drop a medal each minute.
+							
+output
+
+Line 1: The maximum number of medal we can catch without running more than W times.
+							
+sample_input
+
+7 2
+2
+1
+1
+2
+2
+1
+1
+							
+sample_output
+
+6
+							
+hint
+
+INPUT DETAILS: 	Seven medal fall - one from tree 2, then two in a row from tree 1, then two in a row from tree 2, then two in a row from tree 1.We are willing to walk from one tree to the other twice. OUTPUT DETAILS: 	We can catch six medals by staying under tree 1 until the first two have dropped, then moving to tree 2 for the next two, then returning back to tree 1 for the final two.
+								
+							
+source
+
+思路: dp[x][y][z] 第x个时刻还可以跳y次，最后一次接到z的最优值
+if(当前是z)
+dp[x][y][z]=min(dp[x-1][y][z]+1,dp[x-1][y+1][z^1]+1);
+else 
+dp[x][y][z]=min(dp[x-1][y][z],dp[x-1][y+1][z^1])
+注意点：起始点可以是随意哪个点
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+int dp[1010][50][2];
+int f[1010];
+int main()
+{
+  int n,m;
+  while(~scanf("%d%d",&n,&m))
+  { int x;
+    memset(dp,0,sizeof(dp));
+
+    for(int i=1;i<=n;++i)
+    {
+      scanf("%d",&f[i]);
+    }
+    int ans=0;
+    for(int i=1;i<=n;++i)
+    {
+      for(int j=0;j<=m;++j)
+        if(f[i]==1)
+        {
+          dp[i][j][0]=dp[i-1][j][0]+1;
+          if(j<m)
+            dp[i][j][0]=max(dp[i][j][0],dp[i-1][j+1][1]+1);
+          dp[i][j][1]=dp[i-1][j][1];
+          if(j<m)
+            dp[i][j][1]=max(dp[i][j][1],dp[i-1][j+1][0]);
+          ans=max(ans,dp[i][j][0]);
+          ans=max(ans,dp[i][j][1]);
+        }
+        else
+        { dp[i][j][1]=dp[i-1][j][1]+1;
+          if(j<m)
+            dp[i][j][1]=max(dp[i][j][1],dp[i-1][j+1][0]+1);
+          dp[i][j][0]=dp[i-1][j][0];
+          if(j<m)
+            dp[i][j][0]=max(dp[i][j][0],dp[i-1][j+1][1]);
+          ans=max(ans,dp[i][j][0]);
+          ans=max(ans,dp[i][j][1]);
+        }
+       /// for(int i=)
+    }
+    printf("%d\n",ans);
+  }
+}
+
+
+

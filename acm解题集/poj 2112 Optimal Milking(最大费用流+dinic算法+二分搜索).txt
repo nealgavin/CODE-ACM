@@ -1,0 +1,126 @@
+Optimal Milking
+Time Limit: 2000MS	
+Memory Limit: 30000K
+Total Submissions: 9253	
+Accepted: 3341
+Case Time Limit: 1000MS
+Description
+FJ has moved his K (1 <= K <= 30) milking machines out into the cow pastures among the C (1 <= C <= 200) cows. A set of paths of various lengths runs among the cows and the milking machines. The milking machine locations are named by ID numbers 1..K; the cow locations are named by ID numbers K+1..K+C. 
+
+Each milking point can "process" at most M (1 <= M <= 15) cows each day. 
+
+Write a program to find an assignment for each cow to some milking machine so that the distance the furthest-walking cow travels is minimized (and, of course, the milking machines are not overutilized). At least one legal assignment is possible for all input data sets. Cows can traverse several paths on the way to their milking machine. 
+Input
+* Line 1: A single line with three space-separated integers: K, C, and M. 
+
+* Lines 2.. ...: Each of these K+C lines of K+C space-separated integers describes the distances between pairs of various entities. The input forms a symmetric matrix. Line 2 tells the distances from milking machine 1 to each of the other entities; line 3 tells the distances from machine 2 to each of the other entities, and so on. Distances of entities directly connected by a path are positive integers no larger than 200. Entities not directly connected by a path have a distance of 0. The distance from an entity to itself (i.e., all numbers on the diagonal) is also given as 0. To keep the input lines of reasonable length, when K+C > 15, a row is broken into successive lines of 15 numbers and a potentially shorter line to finish up a row. Each new row begins on its own line. 
+Output
+A single line with a single integer that is the minimum possible total distance for the furthest walking cow. 
+Sample Input
+2 3 2
+0 3 2 1 1
+3 0 3 2 0
+2 3 0 1 0
+1 2 1 0 2
+1 0 0 2 0
+Sample Output
+2
+Source
+USACO 2003 U S Open
+
+思路：这题，得用二分步长，判流量。用二维数组的dinic很险。很容易TLE。
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=310;
+const int oo=1e9;
+int dis[mm][mm],le[mm][mm],g[mm][mm],pre[mm],q[mm];
+int k,c,m,z;
+void build(int x)///初始化数据，即是加边
+{ memset(g,0,sizeof(g));
+  for(int i=1;i<=k;i++)
+    g[0][i]=m;
+  for(int i=k+1;i<=z;i++)
+    g[i][z+1]=1;
+  for(int i=1;i<=k;i++)
+    for(int j=k+1;j<=z;j++)
+    if(dis[i][j]<=x)
+    g[i][j]=1;
+}
+int bfs()///广搜找残留网络
+{
+  int qs=0,qt=1;
+  memset(pre,-1,sizeof(pre));
+  memset(le,0,sizeof(le));
+  q[qs]=0;pre[0]=-2;int zz;
+  while(qs!=qt&&pre[z+1]==-1)
+  {
+    zz=q[qs++];qs%=mm;
+    for(int i=0;i<=z+1;i++)
+    {
+      if(pre[i]==-1&&g[zz][i])
+      { le[zz][i]=1;
+        pre[i]=zz;q[qt++]=i;qt%=mm;
+      }
+    }
+  }
+  if(pre[z+1]==-1)return 0;
+  else return 1;
+}
+int _min(int x,int y)
+{
+  if(x<y)return x;
+  return y;
+}
+int dfs(int v,int sum)///深搜遍历所有增广路径
+{ int ret=sum,rt;
+  if(v==z+1)return sum;
+  for(int i=0;i<=z+1;i++)
+  {
+    if(le[v][i])
+    {
+      le[v][i]=0;
+      rt=dfs(i,_min(sum,g[v][i]));
+      g[v][i]-=rt;g[i][v]+=rt;
+      sum-=rt;
+    }
+  }
+  return ret-sum;
+}
+int main()
+{
+  while(cin>>k>>c>>m)
+  {
+    z=k+c;
+    for(int i=1;i<=z;i++)
+      for(int j=1;j<=z;j++)
+    {
+      cin>>dis[i][j];if(!dis[i][j])dis[i][j]=oo;
+    }
+    for(int l=1;l<=z;l++)
+      for(int i=1;i<=z;i++)
+      for(int j=1;j<=z;j++)
+      if(dis[i][l]^oo&&dis[l][j]^oo)
+    {
+      int zz=dis[i][l]+dis[l][j];
+      dis[i][j]=dis[i][j]<zz?dis[i][j]:zz;
+    }
+    int l=0,r=10009,mid,ret;
+    while(l<r)///二分距离
+    {
+      ret=0;
+      mid=(l+r)/2;
+      build(mid);ret=0;
+      while(bfs())
+        {
+         ret+=dfs(0,oo);
+        }
+      if(ret>=c)r=mid;
+      else l=mid+1;
+     }
+    cout<<r<<"\n";
+  }
+}
+
+

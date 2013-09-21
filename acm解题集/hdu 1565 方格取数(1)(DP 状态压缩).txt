@@ -1,0 +1,144 @@
+ 
+
+方格取数(1)
+
+Time Limit: 10000/5000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 2585    Accepted Submission(s): 976
+
+
+
+
+Problem Description
+
+给你一个n*n的格子的棋盘，每个格子里面有一个非负数。
+从中取出若干个数，使得任意的两个数所在的格子没有公共边，就是说所取的数所在的2个格子不能相邻，并且取出的数的和最大。
+
+
+
+ 
+
+Input
+
+包括多个测试实例，每个测试实例包括一个整数n 和n*n个非负数(n<=20)
+
+
+
+ 
+
+Output
+
+对于每个测试实例，输出可能取得的最大的和
+
+
+
+ 
+
+Sample Input
+
+3
+75 15 21 
+75 15 28 
+34 70 5 
+
+
+  
+
+Sample Output
+
+188
+
+
+ 
+
+Author
+
+ailyanlu
+
+
+
+ 
+
+Source
+
+Happy 2007
+
+
+
+ 
+
+Recommend
+
+8600
+
+ 
+
+思路：状态压缩DP，记录从上个状态到下个状态。枚举每个状态，找到匹配的合法状态。
+
+        令我很惊讶的是这代码居然只跑了468MS，怎么可能？？？我自己出了组20 接下来是20x20 的都是1的矩阵在电脑上跑半天都没出来。居然还能AC、
+
+      真不知道杭电的这题数据有多弱啊。
+
+ 
+#include<iostream>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+int dp[2][28659];
+int low[28659],pos;
+int n;
+int map[33];
+void ini()
+{ pos=0;
+  for(int i=0;i<1<<n;i++)
+    if(!(i&(i<<1)))
+    low[pos++]=i;
+}
+int get(int x)
+{
+  int ret=0,t=0;
+  while(x)
+  {
+    if(x&1)ret+=map[t];
+    t++;x>>=1;
+  }
+  return ret;
+}
+int main()
+{ ///cout<<(1<<22)<<endl;
+  while(cin>>n)
+  { memset(dp,0,sizeof(dp));
+    int v=0,_max=0;
+    ini();
+    for(int i=0;i<n;i++)
+    {
+      for(int j=0;j<n;j++)
+        cin>>map[j];
+      /*if(!i)
+      { for(int j=0;j<pos;j++)
+        dp[v][low[j]]=get(low[j]);
+      }
+       else
+       {*/
+         for(int j=0;j<pos;j++)
+         { int ma=0;
+           for(int k=0;k<pos;k++)
+           {
+             if(low[j]&low[k])continue;
+             if(ma<dp[v^1][k])
+              ma=dp[v^1][k];
+           }
+           dp[v][j]=ma+get(low[j]);
+           _max=max(_max,dp[v][j]);
+         }v^=1;
+      // }
+
+    }
+
+    cout<<_max<<"\n";
+  }
+}
+
+
+  
+
+ 

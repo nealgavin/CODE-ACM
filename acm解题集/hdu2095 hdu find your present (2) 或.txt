@@ -1,0 +1,15 @@
+#includestdio.h
+int main()
+{
+  int i,n,k,present;
+  while(scanf(%d,&n)&&n)
+  {
+    scanf(%d,&present);
+    for(i=1;in;i++)
+    {
+      scanf(%d,&k);
+      present^=k;//或的用法
+    }
+    printf(%dn,present);
+  }
+}

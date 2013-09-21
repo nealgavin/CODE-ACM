@@ -1,0 +1,26 @@
+#include<stdio.h>
+int main()
+{
+  int a,b,c,m,i;
+  scanf("%d",&m);
+  for(i=1;i<=m;i++)
+  {
+    scanf("%d%d%d",&a,&b,&c);
+    if(a>=b&&a>=c)
+    {
+      if(a*a==b*b+c*c)printf("Scenario #%d:\nyes\n",i);
+      else printf("Scenario #%d:\nno\n",i);
+    }
+    if(b>=a&&b>=c)
+    {
+      if(b*b==a*a+c*c)printf("Scenario #%d:\nyes\n",i);
+      else printf("Scenario #%d:\nno\n",i);
+    }
+    if(c>=b&&c>=a)
+    {
+      if(c*c==b*b+a*a)printf("Scenario #%d:\nyes\n",i);
+      else printf("Scenario #%d:\nno\n",i);
+    }
+    printf("\n");
+  }
+}

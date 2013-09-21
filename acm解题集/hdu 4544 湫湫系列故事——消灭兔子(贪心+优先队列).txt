@@ -1,0 +1,106 @@
+湫湫系列故事——消灭兔子
+
+Time Limit: 3000/1000 MS (Java/Others)    Memory Limit: 65535/32768 K (Java/Others)
+Total Submission(s): 612    Accepted Submission(s): 231
+
+
+Problem Description
+　　湫湫减肥
+　　越减越肥！
+　　
+　　最近，减肥失败的湫湫为发泄心中郁闷，在玩一个消灭免子的游戏。
+　　游戏规则很简单，用箭杀死免子即可。
+　　箭是一种消耗品，已知有M种不同类型的箭可以选择，并且每种箭都会对兔子造成伤害，对应的伤害值分别为Di（1 <= i <= M），每种箭需要一定的QQ币购买。
+　　假设每种箭只能使用一次，每只免子也只能被射一次，请计算要消灭地图上的所有兔子最少需要的QQ币。
+ 
+
+Input
+输入数据有多组，每组数据有四行；
+第一行有两个整数N，M（1 <= N, M <= 100000），分别表示兔子的个数和箭的种类；
+第二行有N个正整数，分别表示兔子的血量Bi（1 <= i <= N）；
+第三行有M个正整数，表示每把箭所能造成的伤害值Di（1 <= i <= M）；
+第四行有M个正整数，表示每把箭需要花费的QQ币Pi（1 <= i <= M）。
+
+特别说明：
+1、当箭的伤害值大于等于兔子的血量时，就能将兔子杀死；
+2、血量Bi，箭的伤害值Di，箭的价格Pi，均小于等于100000。
+ 
+
+Output
+如果不能杀死所有兔子，请输出”No”，否则，请输出最少的QQ币数，每组输出一行。
+ 
+
+Sample Input
+3 3
+1 2 3
+2 3 4
+1 2 3
+3 4
+1 2 3
+1 2 3 4
+1 2 3 1
+ 
+
+Sample Output
+6
+4
+ 
+
+Source
+2013腾讯编程马拉松复赛第三场（3月31日）
+ 
+
+Recommend
+liuyiding
+
+思路：每次从血量最多的兔子开始杀，选择能杀死它的最便宜的箭，前面SORT下，后面用优先队列就好了。
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<queue>
+#include<algorithm>
+using namespace std;
+const int mm=1e5+9;
+class node
+{
+  public:int kill,cost;
+}f[mm];
+int rabit[mm];
+priority_queue<int ,vector<int>,greater<int> >q;
+bool cmp(int a,int b)
+{
+  return a>b;
+}
+bool cmpp(node a,node b)
+{
+  return a.kill>b.kill;
+}
+int main()
+{ int n,m;
+  while(~scanf("%d%d",&n,&m))
+  {
+    for(int i=0;i<n;++i)
+      scanf("%d",&rabit[i]);
+    for(int i=0;i<m;++i)
+      scanf("%d",&f[i].kill);
+    for(int i=0;i<m;++i)
+      scanf("%d",&f[i].cost);
+    sort(rabit,rabit+n,cmp);
+    sort(f,f+m,cmpp);
+   while(!q.empty())q.pop();
+   long long ans=0;int num=0;
+   int j=0;
+   for(int i=0;i<n;++i)
+   {
+     while(j<m&&f[j].kill>=rabit[i])
+      q.push(f[j].cost),++j;
+      if(q.empty())break;
+     ans+=q.top();q.pop();
+   }
+   if(j<n)printf("No\n");
+   else cout<<ans<<"\n";
+  }
+}
+
+

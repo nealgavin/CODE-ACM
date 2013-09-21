@@ -1,0 +1,40 @@
+﻿#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define LL __int64
+using namespace std;
+int dp[40][10][2];//位数，最后一个数，是否有4or 62
+int bit[40],pos;
+int DP(int pp,int ee,bool has,bool big)
+{
+  if(pp==0)return (!has);
+  if(big&&dp[pp][ee][has]!=-1)return dp[pp][ee][has];
+  int kn=big?9:bit[pp];
+  int ret=0;
+  FOR(i,0,kn)
+  {
+    ret+=DP(pp-1,i,has||i==4||(i==2&&ee==6),big||kn!=i);
+  }
+  if(big)dp[pp][ee][has]=ret;
+  return ret;
+}
+int get(int x)
+{
+  pos=0;
+  while(x)
+  {
+    bit[++pos]=x%10;x/=10;
+  }
+  clr(dp,-1);
+  return DP(pos,0,0,0);
+}
+int main()
+{
+  int n,m;
+  while(cin>>n>>m)
+  { if(n==0&&m==0)break;
+    cout<<get(m)-get(n-1)<<endl;
+  }
+}

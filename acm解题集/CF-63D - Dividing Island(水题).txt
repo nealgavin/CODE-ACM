@@ -1,0 +1,112 @@
+D - Dividing Island
+Time Limit:2000MS     Memory Limit:262144KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+CodeForces 63D
+Description
+A revolution took place on the Buka Island. New government replaced the old one. The new government includes n parties and each of them is entitled to some part of the island according to their contribution to the revolution. However, they can't divide the island.
+The island can be conventionally represented as two rectangles a?×?b and c?×?d unit squares in size correspondingly. The rectangles are located close to each other. At that, one of the sides with the length of a and one of the sides with the length of c lie on one line. You can see this in more details on the picture.
+
+The i-th party is entitled to a part of the island equal to xi unit squares. Every such part should fully cover several squares of the island (it is not allowed to cover the squares partially) and be a connected figure. A "connected figure" presupposes that from any square of this party one can move to any other square of the same party moving through edge-adjacent squares also belonging to that party.
+Your task is to divide the island between parties.
+Input
+The first line contains 5 space-separated integers — a, b, c, d and n (1?≤?a,?b,?c,?d?≤?50, b?≠?d, 1?≤?n?≤?26). The second line contains n space-separated numbers. The i-th of them is equal to number xi (1?≤?xi?≤?a?×?b?+?c?×?d). It is guaranteed that .
+Output
+If dividing the island between parties in the required manner is impossible, print "NO" (without the quotes). Otherwise, print "YES" (also without the quotes) and, starting from the next line, print max(b,?d) lines each containing a?+?c characters. To mark what square should belong to what party, use lowercase Latin letters. For the party that is first in order in the input data, use "a", for the second one use "b" and so on. Use "." for the squares that belong to the sea. The first symbol of the second line  of the output data should correspond to the square that belongs to the rectangle a?×?b.The last symbol of the second line should correspond to the square that belongs to the rectangle c?×?d.
+If there are several solutions output any.
+Sample Input
+Input
+3 4 2 2 3
+5 8 3
+Output
+YES
+aaabb
+aabbb
+cbb..
+ccb..
+Input
+3 2 1 4 4
+1 2 3 4
+Output
+YES
+abbd
+cccd
+...d
+...d
+
+
+思路：本题一定有解，走S形路线，在ab与cd交汇段一定要是上走的就行了。
+失误：本题不难，很水，一看到这题就想到方法了，可是这题有个蛋疼的地方。The first symbol of the second line of the output data should correspond to the square that belongs to the rectangle a?×?b. The last symbol of the second line should correspond to the square that belongs to the rectangle c?×?d.
+这个难道是废话，不是说第一个字符要有部分属于ab,最后的字符要有部分属于cd，其实样例给的就不是，就算是，用S型路线走也肯定符合条件。我原先居然先去初始化前后，我承认我当时真2了。代码也从原先的2000+缩减到1000多一点，67行代码。一遍过了。
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int mm=110;
+int a,b,c,d,n;
+int f[mm];
+int g[mm][mm];
+void chu()
+{ memset(g,0,sizeof(g));
+  if(b<d)
+    {
+      for(int i=b+1;i<=d;++i)
+        for(int j=1;j<=a;++j)
+        g[i][j]=999;
+    }
+    else
+    {
+      for(int i=d+1;i<=b;++i)
+        for(int j=a+1;j<=c;++j)
+        g[i][j]=999;
+    }
+}
+int main()
+{
+  while(cin>>a>>b>>c>>d>>n)
+  { int sum=0;
+    for(int i=0;i<n;++i)
+     {
+       cin>>f[i];
+       sum+=f[i];
+     }
+    c+=a;
+    chu();///初始.路径
+    bool flag=0;
+    int z;int zz=0;
+    if(b<d)z=d;
+    else z=b,flag=1;
+    for(int i=0;i<n;++i)
+    {
+      for(int j=1;j<=c;++j)
+      { int ak=j;
+        if(a%2==0)++ak;///确保ab cd交汇之处是向上走的
+        if(ak&1)///确保s型路线
+        {for(int k=z;k>=1;--k)
+          if(f[i]&&!g[k][j])
+          --f[i],g[k][j]=i+1;
+        }
+        else
+        {
+          for(int k=1;k<=z;++k)
+            if(f[i]&&!g[k][j])
+            --f[i],g[k][j]=i+1;
+        }
+      }
+    }
+    cout<<"YES\n";
+    for(int i=1;i<=z;++i)
+    {for(int j=1;j<=c;j++)
+      if(g[i][j]==999)
+      cout<<'.';
+      else cout<<char(g[i][j]+'a'-1);
+     cout<<"\n";
+    }
+  }
+}
+
+

@@ -1,0 +1,80 @@
+#include<stdio.h>
+#include<cstring>
+#include<algorithm>
+#define N 105
+using namespace std;
+char people[N][N];
+int w[N][N];//œ‡À∆≥§∂»
+bool s[N];
+int s1[N],p,n,shu[N][N],len[N];
+int root[N];
+int get(int x,int y)
+{
+  int i,j;
+  memset(w,0,sizeof(w));
+  s1[x]=strlen(people[x]);
+  s1[y]=strlen(people[y]);
+  for(i=1;i<=s1[x];i++)
+  for(j=1;j<=s1[y];j++)
+  {
+    w[i][j]=max(w[i-1][j],max(w[i][j-1],w[i-1][j-1]+(people[x][i-1]==people[y][j-1])));
+  }
+  return w[s1[x]][s1[y]];
+}
+void make_set(int i)
+{
+  root[i]=i;
+}
+int find_set(int i)
+{
+  if(root[i]!=i)
+  root[i]=find_set(root[i]);
+  return root[i];
+}
+void unio(int x,int y)
+{
+  root[y]=x;
+}
+int main()
+{
+  //freopen("3.txt","r",stdin);
+  int i,j,k,ans;
+  while(scanf("%d%d",&n,&p)!=EOF)
+  {
+    ans=0;
+    memset(s,0,sizeof(s));
+    memset(shu,0,sizeof(shu));
+    for(i=1;i<=n;i++)
+    make_set(i);
+    for(i=1;i<=n;i++)
+    scanf("%s",people[i]);
+    for(i=1;i<=n;i++)
+    for(j=1;j<i;j++)
+    {
+
+      if(((100*get(i,j)*2)/(s1[i]+s1[j]))>=p)
+      if(find_set(i)!=find_set(j))unio(i,j);
+    }
+    ans=0;
+    for(i=1;i<=n;i++)
+    if(find_set(i)!=i&&(!s[i]))
+    {++ans;
+     int zz=0;
+     for(j=1;j<=n;j++)
+     if((find_set(i)==find_set(j))&&(!s[j]))
+     {shu[ans][++zz]=j;s[j]=1;}
+     len[ans]=zz;
+    }
+    printf("%d\n",ans);
+    for(i=1;i<=ans;i++)
+    {for(j=1;j<=len[i];)
+    {
+      printf("%d",shu[i][j]);
+      j++;
+      if(j<=len[i])
+      printf(" ");
+    }
+    printf("\n");
+    }
+  }
+}

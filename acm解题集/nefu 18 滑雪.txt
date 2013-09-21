@@ -1,0 +1,119 @@
+/**
+思路：从最低点开始依次搜索上下左右，当遇到到高度比其小且ans[][]
+      是上下左右四点中最大时就加上它，更新当前点的ans[][]
+*/
+#include<iostream>
+#include<vector>
+using namespace std;
+const int mn=10010;///最大高度
+const int mm=120;///最大矩阵宽度
+const int dx[]={0,-1,1,0};///遍历上下左右四个方向
+const int dy[]={-1,0,0,1};
+int map[mm][mm];///存输入的各个点的信息
+vector<int>order[mm*mm];///这个是容器，相当于链表
+vector<int>::iterator it;///容器链表的线性指针
+///二维数组存当前点为起滑点的最长区域长度，max_ans存最终答案
+int ans[mm][mm],max_ans;
+int row,col;///行，列
+int main()
+{
+  cin>>row>>col;
+  max_ans=0;
+  ///起滑点本身长度就为1所以初始化为1
+  for(int i=0;i<row;i++)
+  for(int j=0;j<col;j++)
+  ans[i][j]=1;
+  ///存入信息
+  for(int i=0;i<row;i++)
+  for(int j=0;j<col;j++)
+  cin>>map[i][j],order[map[i][j]].push_back(i*col+j);
+  /**order[]相当于直接排序了，后面是把二维坐标换算乘一维数组中的坐标
+    待会会把一维数组的坐标转化为二维数组坐标
+    假设z=i*col+j;
+    那么i=z/col;j=z%col;
+    下面的这行代码就是这个道理
+    int ii=*it/col,jj=*it%col;
+  */
+  for(int i=0;i<mn;i++)
+  if(order[i].size())
+  {
+    for(it=order[i].begin();it!=order[i].end();it++)
+    {///it 是指针游标，存地址的*it就是取出数据
+      int ii=*it/col,jj=*it%col;
+      int di,dj;int max_path=0;
+      ///遍历上下左右四个方向，找到最大值加上
+      for(int i=0;i<4;i++)
+      {
+        di=ii+dx[i];dj=jj+dy[i];
+        ///判断没越界且符合添加条件
+        ///就是当前点比搜索点高
+        if(di>=0&&di<row&&dj>=0&&dj<col&&map[di][dj]<map[ii][jj])
+        {
+           if(max_path<ans[di][dj])max_path=ans[di][dj];
+        }
+      }
+      ans[ii][jj]+=max_path;
+      if(ans[ii][jj]>max_ans)max_ans=ans[ii][jj];
+    }
+  }
+  cout<<max_ans<<"\n";
+}
+
+直接搜索
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+using namespace std;
+int n,m;
+int map[128][128];
+int Data[128][128];
+int walk[4][2]={{0,1},{1,0},{0,-1},{-1,0}};
+int max(int a,int b)
+{
+    if(b>a)return b;
+    else
+    return a;
+}
+int dfs(int r,int c)
+{
+    int r2,c2;
+
+    if(Data[r][c]!=0)return Data[r][c];
+    // printf("R1 C1      %d %d**********\n",r,c);
+    for(int i=0;i<4;i++)
+    {r2=r+walk[i][0];c2=c+walk[i][1];
+        if(r2>0&&r2<=n&&c2>0&&c2<=m)
+            if(map[r2][c2]<map[r][c])
+                {
+                   // printf("R2 C2:  %d   %d\n",r2,c2);
+                    Data[r][c]=max(dfs(r2,c2)+1,Data[r][c]);
+
+                }
+    }
+
+    return Data[r][c];
+
+}
+int main()
+{
+   while(scanf("%d%d",&n,&m)!=EOF)
+   {int ans=0;
+       for(int i=1;i<=n;i++)
+        for(int j=1;j<=m;j++)
+            {
+                scanf("%d",&map[i][j]);
+                Data[i][j]=0;
+
+            }
+    for(int i=1;i<=n;i++)
+        for(int j=1;j<=m;j++)
+            {
+                int k=dfs(i,j);
+              ans=max(k,ans);
+            // cout<<i<<"  "<<j<<"  :"<<k<<endl;
+            }
+            printf("%d\n",ans+1);
+   }
+    return 0;
+}
+ 

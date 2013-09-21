@@ -1,0 +1,214 @@
+FatMouse and Cheese
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 2977    Accepted Submission(s): 1160
+
+
+
+
+Problem Description
+
+FatMouse has stored some cheese in a city. The city can be considered as a square grid of dimension n: each grid location is labelled (p,q) where 0 <= p < n and 0 <= q < n. At each grid location Fatmouse has hid between 0 and 100 blocks of cheese in a hole. Now he's going to enjoy his favorite food.
+
+FatMouse begins by standing at location (0,0). He eats up the cheese where he stands and then runs either horizontally or vertically to another location. The problem is that there is a super Cat named Top Killer sitting near his hole, so each time he can run at most k locations to get into the hole before being caught by Top Killer. What is worse -- after eating up the cheese at one location, FatMouse gets fatter. So in order to gain enough energy for his next run, he has to run to a location which have more blocks of cheese than those that were at the current hole.
+
+Given n, k, and the number of blocks of cheese at each grid location, compute the maximum amount of cheese FatMouse can eat before being unable to move. 
+
+
+
+
+
+
+
+Input
+
+There are several test cases. Each test case consists of 
+
+a line containing two integers between 1 and 100: n and k 
+n lines, each with n numbers: the first line contains the number of blocks of cheese at locations (0,0) (0,1) ... (0,n-1); the next line contains the number of blocks of cheese at locations (1,0), (1,1), ... (1,n-1), and so on. 
+The input ends with a pair of -1's. 
+
+
+
+
+
+
+
+Output
+
+For each test case output in a line the single integer giving the number of blocks of cheese collected. 
+
+
+
+
+
+
+
+Sample Input
+
+3 1
+1 2 5
+10 11 6
+12 12 7
+-1 -1
+ 
+
+
+
+
+Sample Output
+
+37
+ 
+
+
+
+
+Source
+
+Zhejiang University Training Contest 2001 
+
+
+思路1：用记忆化搜索，dp[i][j]=max(dp[x][y]+map[i][j],dp[i][j]);任意i,j走k步且符合map[i][j]<map[x][y];
+
+           初始标记mark[0][0]=1;递归搜索i,j若i,j已标记就按上式，否则就继续递归。
+
+思路2：先将所有的数从小到大排序，然后找到原先0,0点所在的数开始更新。往上下左右走k步，且符合条件的就加上。这样一边就搞定了。
+
+3 2
+
+7 2 5
+
+10 11 6
+
+12 12 8
+
+那么拍完序后，搜的顺序为， 7 8 10 11 12 12
+
+2 5 6不用搜，因为永远不符合条件。
+
+思路1:代码过了。
+
+思路2：代码没过，不过感觉思路没问题，代码不知道哪出问题，求赐教。
+//思路1：代码过了
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int mm=1110;
+const int dx[]={0,0,1,-1};
+const int dy[]={1,-1,0,0};
+int map[mm][mm];
+bool mark[mm][mm];
+int dp[mm][mm],ans;
+bool vis[mm][mm];
+int n,k;
+void DP(int x,int y)
+{ int xx,yy;
+  mark[x][y]=1;vis[x][y]=1;
+  for(int i=0;i<4;i++)
+  for(int j=1;j<=k;j++)
+  {
+    xx=x+dx[i]*j;yy=y+dy[i]*j;
+    if(xx>=0&&xx<n&&yy>=0&&yy<n&&!vis[xx][yy]&&map[xx][yy]>map[x][y])
+    {
+      if(mark[xx][yy])
+      {
+        dp[x][y]=max(dp[x][y],dp[xx][yy]+map[x][y]);
+      }
+      else
+      {
+        DP(xx,yy);
+        dp[x][y]=max(dp[x][y],dp[xx][yy]+map[x][y]);
+      }
+    }
+  }
+  if(!dp[x][y])dp[x][y]=map[x][y];
+  vis[x][y]=0;
+}
+int main()
+{
+  while(cin>>n>>k)
+  { if(n==-1&&k==-1)break;
+    for(int i=0;i<n;i++)
+    for(int j=0;j<n;j++)
+    cin>>map[i][j];
+    memset(vis,0,sizeof(vis));
+    memset(mark,0,sizeof(mark));
+    memset(dp,0,sizeof(dp));
+    mark[0][0]=1;
+    DP(0,0);
+    cout<<dp[0][0]<<"\n";
+  }
+}
+
+
+
+//思路2：代码没过，感觉思路没问题，求赐教
+
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int mm=1002;
+int map[mm][mm];
+int cost[mm][mm];
+bool vis[mm][mm];
+class node
+{ public:
+  int x;
+  int val;
+}s[mm*mm];
+int n,k,pos;
+bool cmp(node a,node b)
+{
+  return a.val<b.val;
+}
+int main()
+{
+  while(cin>>n>>k)
+  {
+    if(n==-1&&k==-1)break;
+    pos=0;
+    for(int i=0;i<n;i++)
+    for(int j=0;j<n;j++)
+    {cin>>map[i][j];
+     cost[i][j]=map[i][j];
+     s[pos].val=map[i][j];
+     s[pos++].x=i*n+j;
+    }
+    sort(s,s+pos,cmp);//排序
+   // memset(cost,0,sizeof(cost));
+   memset(vis,0,sizeof(vis));
+    int beg,z;
+    for(int i=0;i<pos;i++)//找0,0 点并标记不符合条件的点
+    if(s[i].x==0){beg=i;break;}
+    else {z=s[i].x;vis[z/n][z%n]=1;}
+    int ans=0,x,y,xx,yy;
+    int a,b;
+    for(int i=beg;i<pos;i++)//从小到大搜一遍
+    {
+      x=s[i].x/n;y=s[i].x%n;
+      a=x-k;b=x+k;//上下左右搜k个点
+      if(a<0)a=0;if(b>=n)b=n-1;
+      for(int j=a;j<=b;j++)
+      { if(j==x||vis[j][y])continue;
+        if(map[j][y]<map[x][y]&&cost[j][y]+map[x][y]>cost[x][y])
+        cost[x][y]=cost[j][y]+map[x][y];
+      }
+      a=y-k;b=y+k;
+      if(a<0)a=0;if(b>=n)b=n-1;
+      for(int j=a;j<=b;j++)
+      { if(j==y||vis[x][j])continue;
+        if(map[x][j]<map[x][y]&&cost[x][j]+map[x][y]>cost[x][y])
+        cost[x][y]=cost[x][j]+map[x][y];
+      }
+      if(cost[x][y]>ans)ans=cost[x][y];//记录最大值
+    }
+    cout<<ans<<"\n";
+  }
+}
+
+
+
+

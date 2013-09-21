@@ -1,0 +1,33 @@
+#include<stdio.h>
+#include<algorithm>
+using namespace std;
+struct A
+{
+  int value;
+  int num;
+};
+A hdu[200];
+bool cmp(A a,A b)
+{
+  return a.value>b.value;
+}
+int main()
+{
+  int v,n,i,j,sum;
+  while(scanf("%d%d",&v,&n)&&v)
+  {
+    for(i=0;i<n;i++)
+    scanf("%d%d",&hdu[i].value,&hdu[i].num);
+    sort(hdu,hdu+n,cmp);
+    sum=0;
+    for(i=0;i<n;i++)
+    if(hdu[i].num<=v)
+    {sum+=hdu[i].value*hdu[i].num;v-=hdu[i].num;}
+    else
+    {
+      sum+=hdu[i].value*v;break;
+    }
+    printf("%d\n",sum);
+  }
+  return 0;
+}

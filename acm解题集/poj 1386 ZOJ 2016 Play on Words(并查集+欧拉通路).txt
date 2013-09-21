@@ -1,0 +1,90 @@
+Play on Words
+Time Limit: 1000MS	
+Memory Limit: 10000K
+Total Submissions: 7826	
+Accepted: 2759
+Description
+Some of the secret doors contain a very interesting word puzzle. The team of archaeologists has to solve it to open that doors. Because there is no other way to open the doors, the puzzle is very important for us. 
+
+There is a large number of magnetic plates on every door. Every plate has one word written on it. The plates must be arranged into a sequence in such a way that every word begins with the same letter as the previous word ends. For example, the word ``acm'' can be followed by the word ``motorola''. Your task is to write a computer program that will read the list of words and determine whether it is possible to arrange all of the plates in a sequence (according to the given rule) and consequently to open the door. 
+Input
+The input consists of T test cases. The number of them (T) is given on the first line of the input file. Each test case begins with a line containing a single integer number Nthat indicates the number of plates (1 <= N <= 100000). Then exactly Nlines follow, each containing a single word. Each word contains at least two and at most 1000 lowercase characters, that means only letters 'a' through 'z' will appear in the word. The same word may appear several times in the list.
+Output
+Your program has to determine whether it is possible to arrange all the plates in a sequence such that the first letter of each word is equal to the last letter of the previous word. All the plates from the list must be used, each exactly once. The words mentioned several times must be used that number of times. 
+If there exists such an ordering of plates, your program should print the sentence "Ordering is possible.". Otherwise, output the sentence "The door cannot be opened.". 
+Sample Input
+3
+2
+acm
+ibm
+3
+acm
+malform
+mouse
+2
+ok
+ok
+Sample Output
+The door cannot be opened.
+Ordering is possible.
+The door cannot be opened.
+Source
+Central Europe 1999
+
+思路：把每个单词看成图的一条边，首尾字母看成是点，题目就转化成判断欧拉通路了。因为还得判联通，所以用并查集就OK了
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=28;
+int od[mm];
+int root[mm],ran[mm];
+int look(int x)
+{
+  if(x^root[x])root[x]=look(root[x]);
+  return root[x];
+}
+void uni(int x,int y)
+{ x=look(x);y=look(y);
+  if(ran[x]>ran[y])root[y]=x,ran[x]+=ran[y];
+  else root[x]=y,ran[y]+=ran[x];
+}
+int n,cas;
+bool vis[mm];
+char s[10010];
+int main()
+{ cin>>cas;
+  while(cas--)
+  { cin>>n;
+    memset(od,0,sizeof(od));
+    memset(vis,0,sizeof(vis));
+    for(int i=0;i<mm;i++)
+      root[i]=i,ran[i]=1;
+    int x;
+    for(int i=0;i<n;i++)
+    {
+      cin>>s; int len=strlen(s);
+      ++od[s[0]-'a'];--od[s[len-1]-'a'];
+      uni(s[0]-'a',s[len-1]-'a');
+      vis[s[0]-'a']=vis[s[len-1]-'a']=1;
+      x=s[0]-'a';
+    }bool flag=0;int a=0,b=0;
+    x=look(x);
+    for(int i=0;i<mm;i++)
+    {
+      if(od[i]==1)++a;
+      else if(od[i]==-1)++b;
+      else if(od[i]!=0)flag=1;
+      if(vis[i])
+      {
+        if(x^look(i))flag=1;
+      }
+    }
+    if((a==0&&b==0)||(a==1&&b==1));
+    else flag=1;
+    if(flag)cout<<"The door cannot be opened.\n";
+    else cout<<"Ordering is possible.\n";
+  }
+}
+
+

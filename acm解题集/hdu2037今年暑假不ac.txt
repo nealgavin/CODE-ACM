@@ -1,0 +1,38 @@
+#include<stdio.h>
+#include<algorithm>
+using namespace std;
+struct program
+{
+  int start;
+  int end;
+};
+program jiemu[203];int f[202];
+bool cmp(program a,program b)
+{
+  if(a.end==b.end)return a.start<b.start;
+  return a.end<b.end;
+}
+int main()
+{
+  //freopen("1.txt","r",stdin);
+  int n,i,j,ans;
+  while(scanf("%d",&n)&&n)
+  {
+    ans=0;
+    for(i=1;i<=n;i++)
+    {
+      scanf("%d%d",&jiemu[i].start,&jiemu[i].end);
+    }
+    sort(jiemu+1,jiemu+n+1,cmp);
+    f[0]=0;
+    for(i=1,j=1;i<=jiemu[n].end;i++)
+    {
+      f[i]=f[i-1];
+      for(;j<=n&&i==jiemu[j].end;j++)
+      {f[i]=f[jiemu[j].start]+1;}
+      ans=max(ans,f[i]);
+    }
+    printf("%d\n",ans);
+  }
+  return 0;
+}

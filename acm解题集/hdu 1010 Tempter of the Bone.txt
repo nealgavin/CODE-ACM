@@ -1,0 +1,118 @@
+Tempter of the Bone
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 38029    Accepted Submission(s): 10265
+
+
+Problem Description
+The doggie found a bone in an ancient maze, which fascinated him a lot. However, when he picked it up, the maze began to shake, and the doggie could feel the ground sinking. He realized that the bone was a trap, and he tried desperately to get out of this maze.
+
+The maze was a rectangle with sizes N by M. There was a door in the maze. At the beginning, the door was closed and it would open at the T-th second for a short period of time (less than 1 second). Therefore the doggie had to arrive at the door on exactly the T-th second. In every second, he could move one block to one of the upper, lower, left and right neighboring blocks. Once he entered a block, the ground of this block would start to sink and disappear in the next second. He could not stay at one block for more than one second, nor could he move into a visited block. Can the poor doggie survive? Please help him.
+
+ 
+
+Input
+The input consists of multiple test cases. The first line of each test case contains three integers N, M, and T (1 < N, M < 7; 0 < T < 50), which denote the sizes of the maze and the time at which the door will open, respectively. The next N lines give the maze layout, with each line containing M characters. A character is one of the following:
+
+'X': a block of wall, which the doggie cannot enter; 
+'S': the start point of the doggie; 
+'D': the Door; or
+'.': an empty block.
+
+The input is terminated with three 0's. This test case is not to be processed.
+
+ 
+
+Output
+For each test case, print in one line "YES" if the doggie can survive, or "NO" otherwise.
+
+ 
+
+Sample Input
+4 4 5
+S.X.
+..X.
+..XD
+....
+3 4 5
+S.X.
+..X.
+...D
+0 0 0
+ 
+
+Sample Output
+NO
+YES
+ 
+
+Author
+ZHANG, Zheng
+ 
+
+Source
+ZJCPC2004 
+ 
+
+Recommend
+JGShining
+
+深搜加优化剪枝
+#include<cstdio>
+#include<cstring>
+#include<cstdlib>
+#include<algorithm>
+using namespace std;
+const int tx[]={0,0,1,-1};
+const int ty[]={1,-1,0,0};
+char map[10][10];
+int n,m,t,ans;
+int dx,dy;
+void dfs(int x,int y,int t)
+{
+   int z=abs(x-dx)+abs(y-dy);
+    if(z>t)return;
+    if(ans)return;
+  for(int i=0;i<4;i++)
+  {
+    int nx=x+tx[i];
+    int ny=y+ty[i];
+
+    if(nx>=0&&nx<n&&ny>=0&&ny<m&&map[nx][ny]!='X'&&t)
+    {
+      if(map[nx][ny]=='.')
+      {
+        map[nx][ny]='X';
+        t--;dfs(nx,ny,t);t++;map[nx][ny]='.';
+      }
+      if(map[nx][ny]=='D'&&t==1){ans=1;return;}
+    }
+  }
+  return;
+}
+int main()
+{
+  int i,j,nx,ny;
+  //freopen("3.txt","r",stdin);
+  while(scanf("%d%d%d",&n,&m,&t)&&(n||m||t))
+  { ans=0;
+    for(i=0;i<n;i++)
+    scanf("%s",map[i]);
+    for(i=0;i<n;i++)
+    for(j=0;j<m;j++)
+    {
+      if(map[i][j]=='S')
+      {nx=i;ny=j;}
+      if(map[i][j]=='D')
+      {dx=i;dy=j;}
+    }
+    if(abs(nx-dx)+abs(ny-dy)>t||(nx+ny+dx+dy+t)&1)
+    {
+      printf("NO\n");continue;
+    }dfs(nx,ny,t);
+    if(ans)
+    printf("YES\n");
+    else
+    printf("NO\n");
+  }
+  return 0;
+}

@@ -1,0 +1,62 @@
+E - TV Game
+Time Limit:2000MS Memory Limit:262144KB 64bit IO Format:%I64d & %I64u
+Submit Status
+Description
+There is a new TV game on BerTV. In this game two players get a number A consisting of 2n digits. Before each turn players determine who will make the next move. Each player should make exactly n moves. On it's turn i-th player takes the leftmost digit of A and appends it to his or her number Si. After that this leftmost digit is erased from A. Initially the numbers of both players (S1 and S2) are ?empty?. Leading zeroes in numbers A,?S1,?S2 are allowed. In the end of the game the first player gets S1 dollars, and the second gets S2 dollars.
+One day Homer and Marge came to play the game. They managed to know the number A beforehand. They want to find such sequence of their moves that both of them makes exactly n moves and which maximizes their total prize. Help them.
+Input
+The first line contains integer n (1?≤?n?≤?18). The second line contains integer A consisting of exactly 2n digits. This number can have leading zeroes.
+Output
+Output the line of 2n characters ?H? and ?M? — the sequence of moves of Homer and Marge, which gives them maximum possible total prize. Each player must make exactly n moves. If there are several solutions, output any of them.
+Sample Input
+Input
+2
+1234
+Output
+HHMM
+Input
+2
+9911
+Output
+HMHM
+
+思路：每一位不是给W就是给H，很明显是多阶段决策。
+           有点难想的是从后往前整，先整小的为逐次分配出最优结果。
+          f[x][y]表示给x位给W，y位给H所得到结果的最优值。
+          f[x][y]=max(f[x-1][y]+该位给W所增加的值，f[x][y-1]+该位给H所增加的值)
+          最后把路径输出即可。
+失误：DP做的多了，感觉有的有点畏惧感，有点思路，却挺怕不对而花很多时间来整这思路。╮(╯▽╰)╭
+          这题在大牛眼中应该是水DP吧，不知道我这只菜鸟啥时候也能成大牛啊。
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=100;
+long long f[mm][mm],w[mm];
+int main()
+{
+  int m;char s[mm];
+  while(cin>>m>>s)
+  { w[1]=1;
+    for(int i=2;i<=18;i++)
+      w[i]=w[i-1]*10;
+    memset(f,0,sizeof(f));
+    for(int i=0;i<=m;i++)
+      for(int j=0;j<=m;j++)
+    { long long z=s[m+m-i-j]-'0';
+      if(i)f[i][j]=f[i-1][j]+w[i]*z;
+      if(j)f[i][j]=f[i][j]>f[i][j-1]+w[j]*z?f[i][j]:f[i][j-1]+w[j]*z;
+    }
+    for(int i=m,j=m;i>0||j>0;)
+    { long long z=s[m+m-i-j]-'0';
+      if(i&&f[i][j]-f[i-1][j]==z*w[i])
+        {--i;cout<<"H";
+        }
+      else {--j;cout<<"M";}
+    }
+    cout<<"\n";
+  }
+}
+
+
+
+

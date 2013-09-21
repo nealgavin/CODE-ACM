@@ -1,0 +1,23 @@
+#include<stdio.h>
+#include<algorithm>
+#define MAX 0x7fffffff
+using namespace std;
+int main()
+{
+  int dist[1004],mileage[11],i,j,m;
+  //freopen("data.txt","r",stdin);
+  while(scanf("%d",&mileage[1])!=EOF)
+  {
+    for(i=2;i<=10;i++)
+    scanf("%d",&mileage[i]);
+    scanf("%d",&m);
+    dist[0]=0;
+    for(i=1;i<=m;i++)
+    dist[i]=MAX;
+    for(i=1;i<=m;i++)
+    for(j=1;j<=10;j++)
+    if(i>=j)
+    dist[i]=min(dist[i],dist[i-j]+mileage[j]);
+   printf("%d\n",dist[m]);
+  }
+}

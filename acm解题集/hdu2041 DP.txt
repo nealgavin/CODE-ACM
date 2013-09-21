@@ -1,0 +1,16 @@
+#include<stdio.h>
+int main()
+{
+  __int64 f[100];
+  int m,i,n;
+  f[1]=f[2]=1;
+  for(i=1;i<50;i++)
+  f[i+2]=f[i+1]+f[i];
+  scanf("%d",&m);
+  while(m--)
+  {
+    scanf("%d",&n);
+    printf("%I64d\n",f[n]);
+  }
+  return 0;
+}

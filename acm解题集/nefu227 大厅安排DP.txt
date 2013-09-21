@@ -1,0 +1,32 @@
+#include<stdio.h>
+#include<algorithm>
+struct ti
+{
+  int star,end;
+};
+using namespace std;
+ti ying[103];
+bool cmp(ti a,ti b)
+{
+  return a.end<b.end;
+}
+int main()
+{
+  //freopen("data.txt","r",stdin);
+  int n,i,j,dist[10004];
+  while(scanf("%d",&n)!=EOF)
+  {
+    for(i=1;i<=n;i++)
+    scanf("%d%d",&ying[i].star,&ying[i].end);
+    sort(ying+1,ying+n+1,cmp);
+    for(i=1,j=1,dist[0]=0;i<=ying[n].end;i++)//Ã¶¾ÙÑ¡¿ì
+    {
+      dist[i]=dist[i-1];
+      for(;j<=n&&ying[j].end==i;j++)
+      {
+        dist[i]=max(dist[i],dist[ying[j].star]+ying[j].end-ying[j].star);
+      }
+    }
+    printf("%d\n",dist[ying[n].end]);
+  }
+}

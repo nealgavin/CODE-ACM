@@ -1,0 +1,156 @@
+Dividing
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 10438    Accepted Submission(s): 2918
+
+
+
+
+Problem Description
+
+Marsha and Bill own a collection of marbles. They want to split the collection among themselves so that both receive an equal share of the marbles. This would be easy if all the marbles had the same value, because then they could just split the collection in half. But unfortunately, some of the marbles are larger, or more beautiful than others. So, Marsha and Bill start by assigning a value, a natural number between one and six, to each marble. Now they want to divide the marbles so that each of them gets the same total value. 
+Unfortunately, they realize that it might be impossible to divide the marbles in this way (even if the total value of all marbles is even). For example, if there are one marble of value 1, one of value 3 and two of value 4, then they cannot be split into sets of equal value. So, they ask you to write a program that checks whether there is a fair partition of the marbles.
+
+
+ 
+
+
+
+
+Input
+
+Each line in the input describes one collection of marbles to be divided. The lines consist of six non-negative integers n1, n2, ..., n6, where ni is the number of marbles of value i. So, the example from above would be described by the input-line ``1 0 1 2 0 0''. The maximum total number of marbles will be 20000. 
+
+The last line of the input file will be ``0 0 0 0 0 0''; do not process this line.
+
+
+ 
+
+
+
+
+Output
+
+For each colletcion, output ``Collection #k:'', where k is the number of the test case, and then either ``Can be divided.'' or ``Can't be divided.''. 
+
+Output a blank line after each test case.
+
+
+ 
+
+
+
+
+Sample Input
+
+1 0 1 2 0 0
+1 0 0 0 1 1
+0 0 0 0 0 0
+ 
+
+
+
+
+Sample Output
+
+Collection #1:
+Can't be divided.
+
+Collection #2:
+Can be divided.
+ 
+
+
+
+
+Source
+
+Mid-Central European Regional Contest 1999 
+
+
+
+
+
+
+Recommend
+
+JGShining
+
+
+思路：直接背包的时间是6*N*N毫无疑问TLE。所以需要二进制优化。
+
+        for(int i=1;i<=6;i++)
+        for(int j=1;j<=v[i];j++)
+        for(int k=sum-i*j;k>=0;k--)
+        if(dp[k])dp[k+j*i]=1;   
+
+但仔细考虑这个过程，手动模拟一下你会发现很多的重复标记。
+
+因此可以使用二进制来减小这些重复标记 的过程。1 2, 4 8 16...
+
+具体手动算一下，就明白了。
+
+for(int i=1;i<=6;i++)
+    { for(int j=1;j<=v[i];j*=2)
+      { v[i]-=j;
+        for(int k=sum-i*j;k>=0;k--)
+        {
+        if(dp[k])dp[k+j*i]=1;
+        }
+     }
+     if(v[i])
+     {
+       for(int k=sum-i*v[i];k>=0;k--)
+       if(dp[k])dp[k+i*v[i]]=1;
+     }
+    }                                            
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=620010;
+int dp[mm];
+int v[7];
+int main()
+{ int sum;
+  int cas=0;
+  while(1)
+  { sum=0;++cas;
+    for(int i=1;i<=6;i++)
+    {
+      cin>>v[i];
+      sum+=v[i]*i;
+    }
+    if(!sum)break;
+    cout<<"Collection #"<<cas<<":\n";
+    if(sum&1)
+    {cout<<"Can't be divided.\n\n";
+     continue;
+    }
+    sum/=2;
+    memset(dp,0,sizeof(dp));
+    dp[0]=1;
+    for(int i=1;i<=6;i++)
+    { for(int j=1;j<=v[i];j*=2)
+      { v[i]-=j;
+        for(int k=sum-i*j;k>=0;k--)
+        {
+        if(dp[k])dp[k+j*i]=1;
+        }
+     }
+     if(v[i])
+     {
+       for(int k=sum-i*v[i];k>=0;k--)
+       if(dp[k])dp[k+i*v[i]]=1;
+     }
+    }
+    if(dp[sum])cout<<"Can be divided.\n";
+    else cout<<"Can't be divided.\n";
+    cout<<"\n";
+  }
+}
+
+
+
+
+

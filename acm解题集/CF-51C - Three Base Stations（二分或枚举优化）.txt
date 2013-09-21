@@ -1,0 +1,136 @@
+C - Three Base Stations
+Time Limit:2000MS     Memory Limit:262144KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+CodeForces 51C
+Description
+The New Vasjuki village is stretched along the motorway and that's why every house on it is characterized by its shift relative to some fixed point — the xi coordinate. The village consists of n houses, the i-th house is located in the point with coordinates of xi.
+TELE3, a cellular communication provider planned to locate three base stations so as to provide every house in the village with cellular communication. The base station having power d located in the point t provides with communication all the houses on the segment[t?-?d,?t?+?d] (including boundaries).
+To simplify the integration (and simply not to mix anything up) all the three stations are planned to possess the equal power of d. Which minimal value of d is enough to provide all the houses in the village with cellular communication.
+Input
+The first line contains an integer n (1?≤?n?≤?2· 105) which represents the number of houses in the village. The second line contains the coordinates of houses — the sequence x1,?x2,?...,?xn of integer numbers (1?≤?xi?≤?109). It is possible that two or more houses are located on one point. The coordinates are given in a arbitrary order.
+Output
+Print the required minimal power d. In the second line print three numbers — the possible coordinates of the base stations' location. Print the coordinates with 6 digits after the decimal point. The positions of the stations can be any from 0 to 2· 109 inclusively. It is accepted for the base stations to have matching coordinates. If there are many solutions, print any of them.
+Sample Input
+Input
+4
+1 2 3 4
+Output
+0.500000
+1.500000 2.500000 3.500000
+Input
+3
+10 20 30
+Output
+0
+10.000000 20.000000 30.000000
+Input
+5
+10003 10004 10001 10002 1
+Output
+0.500000
+1.000000 10001.500000 10003.500000
+
+本题有两种思路：一种，枚举三段，找最小，然后优化，第二种，使用二分距离判断是否符合条件。本题有个隐藏条件，那就最终的距离只可能是前面一个整数，后面跟个0.5或0.
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int mm=2e5+9;
+const int oo=1e9;
+int dis[mm];int n;
+double a,b,c,len=oo;
+void ok(int x,int y)
+{ if(y<0)y=0;
+  int z;
+  z=dis[x]-dis[0];
+  z=max(dis[y]-dis[min(x+1,n-1)],z);
+  z=max(dis[n-1]-dis[min(y+1,n-1)],z);
+  if(z<len)
+  {
+    len=z;a=dis[x]+dis[0];b=dis[y]+dis[min(x+1,n-1)];c=dis[n-1]+dis[min(y+1,n-1)];
+  }
+}
+int main()
+{
+
+    scanf("%d",&n);
+   len=oo;
+    for(int i=0;i<n;i++)
+      scanf("%d",&dis[i]);
+    sort(dis,dis+n);
+    for(int i=0,j=0;i<n;i++)
+    { 
+      while(j<n-1&&dis[n-1]-dis[j+1]>dis[j]-dis[i+1])
+        ++j;
+      ok(i,j);ok(i,j-1);
+    }
+    len/=2.0;a/=2.0;b/=2.0;c/=2.0;
+   printf("%.6lf\n%.6lf %.6lf %.6lf\n",len,a,b,c);
+
+}
+
+二分代码
+#include<iostream>
+#include<cstring>
+#include<iomanip>
+#include<algorithm>
+using namespace std;
+const int mm=2e5+9;
+const double oo=1e39;
+const double ex=1e-7;
+double locat[mm];
+int n,ans[mm];
+int blook(int x)///返回比x大的第一个数的下标
+{
+  int l=0,r=n,mid=(l+r)/2;
+  while(l<r)
+  {
+    if(locat[mid]>x)r=mid;
+    else l=mid+1;
+    mid=(l+r)/2;
+  }
+  return mid;
+}
+bool ok(int x)
+{ int z=0;
+  for(int i=0;i<3;i++)
+  {
+    z=blook(locat[z]+x);
+    ans[i]=z;
+    if(z==n)return 1;
+  }
+  return 0;
+}
+
+int main()
+{
+  while(cin>>n)
+  {
+    for(int i=0;i<n;i++)
+      cin>>locat[i];
+    sort(locat,locat+n);
+    int r=2e9+9,l=0,mid;
+    while(l<r)
+    {
+      mid=(l+r)/2;
+      if(ok(mid))r=mid;
+      else l=mid+1;
+    }
+    ok(l);
+    double len=l;len/=2.0;
+    double a,b,c;a=locat[ans[0]-1]+locat[0];b=locat[ans[1]-1]+locat[ans[0]];
+    c=locat[ans[2]-1]+locat[ans[1]];
+    cout.setf(ios::fixed);
+    cout<<setprecision(6)<<len<<"\n"<<a/2.0<<" "<<b/2.0<<" "<<c/2.0<<endl;
+  }
+}
+
+
+
+

@@ -1,0 +1,99 @@
+Intervals
+Time Limit: 2000MS	
+Memory Limit: 65536K
+Total Submissions: 18338	
+Accepted: 6869
+Description
+You are given n closed, integer intervals [ai, bi] and n integers c1, ..., cn. 
+Write a program that: 
+reads the number of intervals, their end points and integers c1, ..., cn from the standard input, 
+computes the minimal size of a set Z of integers which has at least ci common elements with interval [ai, bi], for each i=1,2,...,n, 
+writes the answer to the standard output. 
+Input
+The first line of the input contains an integer n (1 <= n <= 50000) -- the number of intervals. The following n lines describe the intervals. The (i+1)-th line of the input contains three integers ai, bi and ci separated by single spaces and such that 0 <= ai <= bi <= 50000 and 1 <= ci <= bi - ai+1.
+Output
+The output contains exactly one integer equal to the minimal size of set Z sharing at least ci elements with interval [ai, bi], for each i=1,2,...,n.
+Sample Input
+5
+3 7 3
+8 10 3
+6 8 1
+1 3 1
+10 11 1
+Sample Output
+6
+Source
+Southwestern Europe 2002
+
+思路：建边（a-1,b）<=-c;(a,a+1)<=-0;(a+1,a)<=1;
+
+///1025MS
+#include<iostream>
+#include<cstring>
+#include<queue>
+#include<vector>
+using namespace std;
+const int mm=51010;
+const int oo=1e9;
+const int m=50004;
+class node
+{
+  public:int v,c,to;
+}e[23*mm];
+int q[mm];
+int dis[mm],vis[mm],n,l,r,pre[mm],pos;
+void add(int u,int v,int c)
+{
+  e[pos].v=v;e[pos].c=c;e[pos].to=pre[u];pre[u]=pos++;
+}
+void spfa()
+{ memset(vis,0,sizeof(vis));
+  for(int i=l;i<=r;i++)
+    dis[i]=oo;
+  dis[l]=0;
+  int s=0,t=1;
+  q[s]=l; vis[l]=1;int z;
+  while(s!=t)
+  {
+    z=q[s];s=(s+1)%m;vis[z]=0;
+    int v,c;
+    for(int p=pre[z];p!=-1;p=e[p].to)
+    {
+      v=e[p].v;c=e[p].c;
+      if(dis[v]>dis[z]+c)
+      {
+        dis[v]=dis[z]+c;
+        if(!vis[v])
+        {
+          vis[v]=1;q[t]=v;t=(t+1)%m;
+        }
+      }
+    }
+  }
+}
+int main()
+{
+  while(cin>>n)
+  { pos=0;
+    memset(pre,-1,sizeof(pre));
+    int a,b,c;l=oo;r=-oo;
+  memset(e,0,sizeof(e));
+    for(int i=0;i<n;i++)
+    {
+      cin>>a>>b>>c;
+      add(a-1,b,-c);
+      if(a<l)l=a;if(b>r)r=b;
+    }
+    --l;
+    ///s[b]-s[a]<=c (a-1,b)中至少有c
+    for(int i=l;i<r;i++)
+    { add(i+1,i,1);add(i,i+1,0);
+    }
+    ///l^=r;r^=l;l^=r;
+    spfa();
+    cout<<dis[l]-dis[r]<<"\n";
+  }
+}
+
+
+

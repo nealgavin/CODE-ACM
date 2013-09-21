@@ -1,0 +1,138 @@
+
+H - A Simple Problem with Integers
+Time Limit:5000MS     Memory Limit:131072KB     64bit IO Format:%I64d & %I64u
+SubmitStatus
+
+
+
+Description
+
+
+
+You have N integers, A1, A2, ... , AN. You need to deal with two kinds of operations. One type of operation is to add some given number to each number in a given interval. The other is to ask for the sum of numbers in a given interval.
+
+
+Input
+
+
+
+The first line contains two numbers N and Q. 1 ≤ N,Q ≤ 100000.
+The second line contains N numbers, the initial values of A1, A2, ... , AN. -1000000000 ≤ Ai ≤ 1000000000.
+Each of the next Q lines represents an operation.
+"C a b c" means adding c to each of Aa, Aa+1, ... , Ab. -10000 ≤ c ≤ 10000.
+"Q a b" means querying the sum of Aa, Aa+1, ... , Ab.
+
+
+Output
+
+
+
+You need to answer all Q commands in order. One answer in a line.
+
+
+Sample Input
+
+10 5
+1 2 3 4 5 6 7 8 9 10
+Q 4 4
+Q 1 10
+Q 2 4
+C 3 6 3
+Q 2 4
+
+
+ Sample Output
+
+4
+55
+9
+15
+
+Hint
+
+
+The sums may exceed the range of 32-bit integers.
+
+
+
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#define N 100300
+using namespace std;
+class node
+{
+  public:
+  int l,r;
+  long long sum,lazy;
+}root[4*N];
+long long shu[N];
+void build(int t,int l,int r)
+{
+  root[t].l=l;root[t].r=r;root[t].lazy=0;
+  if(root[t].l==root[t].r){cin>>root[t].sum;return;}
+  build(t<<1,l,(l+r)/2);build(t<<1|1,(l+r)/2+1,r);
+  root[t].sum=root[t<<1].sum+root[t<<1|1].sum;
+}
+void update(int t,int l,int r,long long date)
+{
+  if(root[t].l==l&&root[t].r==r)
+  {root[t].sum+=(root[t].r-root[t].l+1)*date;root[t].lazy+=date;return;}//这里的+原下没加WA
+  else
+  {
+    if(root[t].lazy!=0)
+    {
+      root[t<<1].lazy+=root[t].lazy;root[t<<1|1].lazy+=root[t].lazy;
+      root[t<<1].sum+=(root[t<<1].r-root[t<<1].l+1)*root[t].lazy;
+      root[t<<1|1].sum+=(root[t<<1|1].r-root[t<<1|1].l+1)*root[t].lazy;
+      root[t].lazy=0;
+    }
+    if(root[t<<1].r>=r)update(t<<1,l,r,date);
+    else if(root[t<<1|1].l<=l)update(t<<1|1,l,r,date);
+    else {update(t<<1,l,root[t<<1].r,date);update(t<<1|1,root[t<<1|1].l,r,date);}
+    root[t].sum=root[t<<1].sum+root[t<<1|1].sum;//这个很关键没加WA
+  }
+}
+long long query(int t,int l,int r)
+{
+  long long s;
+  if(root[t].l==l&&root[t].r==r)return root[t].sum;
+  else
+  {
+    if(root[t].lazy!=0)
+    {
+      root[t<<1].lazy+=root[t].lazy;root[t<<1|1].lazy+=root[t].lazy;
+      root[t<<1].sum+=(root[t<<1].r-root[t<<1].l+1)*root[t].lazy;
+      root[t<<1|1].sum+=(root[t<<1|1].r-root[t<<1|1].l+1)*root[t].lazy;
+      root[t].lazy=0;
+    }
+   if(root[t<<1].r>=r)s=query(t<<1,l,r);
+   else if(root[t<<1|1].l<=l)
+   s=query(t<<1|1,l,r);
+   else s=query(t<<1,l,root[t<<1].r)+query(t<<1|1,root[t<<1|1].l,r);
+
+  }
+  return s;
+}
+int main()
+{
+  int n,m;
+
+   scanf("%d%d",&n,&m);
+  build(1,1,n);
+  char f;
+  long long a,b,c;
+  for(int i=0;i<m;i++)
+  {
+    cin>>f>>a>>b;
+    if(f=='C')
+    {
+      cin>>c;
+      update(1,a,b,c);
+    }
+    else
+    cout<<query(1,a,b)<<"\n";
+  }
+
+}

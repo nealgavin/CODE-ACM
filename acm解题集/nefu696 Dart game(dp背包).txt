@@ -1,0 +1,136 @@
+Dart game
+
+Time Limit 1000ms
+
+Memory Limit 65536K
+
+description
+
+　　　Darts originated in Australia. Australia's aborigines initially for hunting and hit the enemy's weapon. 
+　　　A game of darts in which the players attempt to score points by throwing the darts at a target.
+Figure：DART BOARD
+　　　Darts movement rules of the game is very simple, the target is 1-20 points and the central circle is 50 small zoning, edge is 25 division, the rough circle line of fan-shaped covered area is 1-20 points and three times the corresponding division. This game is generally played by two people but can be played by teams. Each player starts with N points. The goal for each player is to reach zero by subtracting the amount they score from the amount they had left,but final throwing must be double division. And the first to reduce his/her score to zero wins.
+　　　So the task is : 
+　　　Given a dart scores N that a player starts with, you are required to calculate how many different ways to reach zero. One is different way to another means at least one dart hits different division.Ways which have different orders and same divisions are the same way. For example,if N=4,there are 4 different ways reach to zero:the first is double 2,the second is 2 and double 1, the third is twice of double 1,the fourth is twice of 1 and double 1 .
+　　　The answer may be very large,you have to module it by 2011. 
+							
+input
+
+The input contains several test cases.
+   Each test case contains an integer N ( 0 < N ≤ 1001 ) in a line.
+   N=0 means end of input and need not to process.
+							
+output
+
+For each test case, output how many different ways to reach zero.
+							
+sample_input
+
+5
+4
+3
+2
+1
+0
+							
+sample_output
+
+6
+4
+1
+1
+0
+							
+hint
+
+　　5=1+1×2+1×2
+　　5=1+1+1+1×2
+　　5=3+1×2
+　　5=1×3+1×2
+　　5=1+2+1×2
+　　5=1+2×2
+　　4=2×2
+　　4=1+1+1×2
+　　4=2+1×2
+　　4=1×2+1×2
+　　3=1+1×2
+　　2=1×2
+　　1:no way
+								
+							
+source
+
+
+题目数据有问题！！！！
+思路：先对1倍和三倍的进行背包处理，dd[],再对二倍的进行背包处理dp[]
+         去除二倍不取的情况，dp[0]=0;然后结果就是二倍有，其他任意取，las[i+j]=dp[i]*dp[j]
+注意一倍有25，二倍有50
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=1e3+9;
+const int mod=2011;
+int dp[mm],dd[mm];
+int las[mm];
+int main()
+{
+  memset(dp,0,sizeof(dp));
+  memset(dd,0,sizeof(dd));
+  memset(las,0,sizeof(las));
+  int z;
+  dd[0]=1;
+  for(int i=1;i<=20;++i)///一倍，三倍背包
+  {
+    for(int j=0;j<2;++j)
+    {
+      if(j)z=3*i;
+      else z=i;
+      for(int k=z;k<mm;++k)
+       if(dd[k-z])
+      {dd[k]+=dd[k-z];
+       dd[k]%=mod;
+      }
+    }
+  }
+  z=25;
+  for(int k=z;k<mm;++k)
+       if(dd[k-z])
+      {dd[k]+=dd[k-z];
+       dd[k]%=mod;
+      }
+  dp[0]=1;
+  for(int i=1;i<=20;++i)///二倍背包
+  {
+    for(int j=i*2;j<mm;++j)
+      if(dp[j-i*2])
+      {dp[j]+=dp[j-i*2];
+       dp[j]%=mod;
+      }
+  }
+  for(int j=50;j<mm;++j)
+      if(dp[j-50])
+      {dp[j]+=dp[j-50];
+       dp[j]%=mod;
+      }
+///底下的问题
+  dp[0]=0;///去除二倍不取的情况
+  int zz=mm-1;
+  for(int i=0;i<mm;++i)
+    for(int j=0;j<mm;++j)
+   if(i+j<mm)
+  {
+    las[i+j]+=dp[i]*dd[j];
+    las[i+j]%=mod;
+  }
+  int n;
+  while(~scanf("%d",&n)&&n)
+  {
+    printf("%d\n",las[n]);
+
+  }
+}
+
+
+
+

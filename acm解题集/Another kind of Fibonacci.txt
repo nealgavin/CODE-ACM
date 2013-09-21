@@ -1,0 +1,140 @@
+
+
+E - Another kind of Fibonacci
+Time Limit:1000MS     Memory Limit:65536KB     64bit IO Format:%I64d & %I64u
+SubmitStatus
+
+
+
+Description
+
+
+As we all known , the Fibonacci series : F(0) = 1, F(1) = 1, F(N) = F(N - 1) + F(N - 2) (N >= 2).Now we define another kind of Fibonacci : A(0) = 1 , A(1) = 1 , A(N) = X * A(N - 1) + Y * A(N - 2) (N >= 2).And we want to Calculate S(N) , S(N) = A(0)2 +A(1)2+бнбн+A(n)2.
+
+
+
+ 
+
+
+Input
+
+
+There are several test cases.
+Each test case will contain three integers , N, X , Y .
+N : 2<= N <= 231 ? 1
+X : 2<= X <= 231? 1
+Y : 2<= Y <= 231 ? 1
+
+
+ 
+
+
+Output
+
+
+For each test case , output the answer of S(n).If the answer is too big , divide it by 10007 and give me the reminder.
+
+ 
+
+
+Sample Input
+
+
+2 1 1 
+3 2 3 
+  
+
+
+Sample Output
+
+
+6
+196
+ 
+
+
+
+
+
+
+
+
+
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<cmath>
+#define MAX 4
+#define mod 10007
+using namespace std;
+struct A
+{
+  int s[MAX][MAX];
+};
+ const A I={1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+A P;
+void chu(int x,int y)
+{
+  P.s[0][0]=1;
+  P.s[0][1]=1;
+  P.s[0][2]=0;
+  P.s[0][3]=0;
+  P.s[1][0]=0;
+  P.s[1][1]=(x*x)%mod;
+  P.s[1][2]=(y*y)%mod;
+  P.s[1][3]=(2*x*y)%mod;
+  P.s[2][0]=0;
+  P.s[2][1]=1;
+  P.s[2][2]=0;
+  P.s[2][3]=0;
+  P.s[3][0]=0;
+  P.s[3][2]=0;
+  P.s[3][1]=x%mod;P.s[3][3]=y%mod;
+}
+A chen(A a,A b)
+{
+  A c;
+  for(int i=0;i<MAX;i++)
+  {
+    for(int j=0;j<MAX;j++)
+    {
+      c.s[i][j]=0;
+      for(int k=0;k<MAX;k++)
+      {
+        c.s[i][j]+=(a.s[i][k]*b.s[k][j])%mod;
+      }
+        c.s[i][j]%=mod;
+    }
+  }
+  return c;
+}
+A quick_pow(int m)
+{
+  A b,ans;
+  b=I;
+  ans=P;
+  while(m)
+  {
+     if(m&1)
+     b=chen(b,ans);
+     m>>=1;
+     ans=chen(ans,ans);
+  }
+  return b;
+}
+int main()
+{
+  int n;
+  int f;
+  int  x,y;
+  while(scanf("%d%d%d",&n,&x,&y)!=EOF)
+  {
+    x%=mod;
+    y%=mod;
+    chu(x,y);
+    A K;
+    K=quick_pow(n);
+    f=K.s[0][0]+K.s[0][1]+K.s[0][2]+K.s[0][3];
+    printf("%d\n",(int)f%mod);
+  }
+}

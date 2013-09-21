@@ -1,0 +1,124 @@
+Max Sum Plus Plus
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 11158    Accepted Submission(s): 3673
+
+
+
+
+Problem Description
+
+Now I think you have got an AC in Ignatius.L's "Max Sum" problem. To be a brave ACMer, we always challenge ourselves to more difficult problems. Now you are faced with a more difficult problem.
+
+Given a consecutive number sequence S1, S2, S3, S4 ... Sx, ... Sn (1 ≤ x ≤ n ≤ 1,000,000, -32768 ≤ Sx ≤ 32767). We define a function sum(i, j) = Si + ... + Sj (1 ≤ i ≤ j ≤ n).
+
+Now given an integer m (m > 0), your task is to find m pairs of i and j which make sum(i1, j1) + sum(i2, j2) + sum(i3, j3) + ... + sum(im, jm) maximal (ix ≤ iy ≤ jx or ix ≤ jy ≤ jx is not allowed).
+
+But I`m lazy, I don't want to write a special-judge module, so you don't have to output m pairs of i and j, just output the maximal summation of sum(ix, jx)(1 ≤ x ≤ m) instead. ^_^
+
+
+ 
+
+
+
+
+Input
+
+Each test case will begin with two integers m and n, followed by n integers S1, S2, S3 ... Sn.
+Process to the end of file.
+
+
+ 
+
+
+
+
+Output
+
+Output the maximal summation described above in one line.
+
+
+ 
+
+
+
+
+Sample Input
+
+1 3 1 2 3
+2 6 -1 4 -2 3 -2 3
+ 
+
+
+
+
+Sample Output
+
+6
+8
+
+Hint
+Huge input, scanf and dynamic programming is recommended.
+ 
+ 
+
+
+
+
+Author
+
+JGShining（极光炫影）
+
+
+思路：s[i][j]为i段包含j的最大和。ma[i][j]为前j个分为i段的最大和。答案就是ma[m][n]
+
+       d[j]存的是数
+
+        s[i][j]=max(s[i][j-1]+d[j],ma[i-1][j-1]+d[j]);
+
+       ma[i][j]=max(s[i][k]) (i<=k<=j)
+
+       又因为题目数给的太大一百万。所以二维数组不好开。想想可以用一维。
+
+       s[j]为i段含j最大和，ma【j】为i段前j个最大和。
+
+      s[j]=max(s[j-1]+d[j],ma[j-1]+d[j])
+
+      ma[j]=max(s[k]) （i<=k<=j）
+
+     ma[j]要先用后更新。这样就不会有问题了。
+
+#include<cstdio>
+#include<cstring>
+const int mm=1000010;
+const int oo=1e9;
+int d[mm],s[mm],ma[mm];
+int n,m;
+int main()
+{
+  while(scanf("%d%d",&m,&n)!=EOF)
+  {
+    for(int i=1;i<=n;i++)
+      scanf("%d",&d[i]);
+    memset(s,0,sizeof(s));
+    memset(ma,0,sizeof(ma));
+    int _min,_max;
+    for(int i=1;i<=m;i++)
+    { _max=-oo;int j;
+      for(j=i;j<=n;j++)
+       {if(s[j-1]<ma[j-1])
+        s[j]=ma[j-1]+d[j];
+        else s[j]=s[j-1]+d[j];
+        ma[j-1]=_max;
+        if(s[j]>_max)
+          _max=s[j];
+       }
+       ma[j-1]=_max;
+    }
+    printf("%d\n",_max);
+  }
+}
+
+
+
+

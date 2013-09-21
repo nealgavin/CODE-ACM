@@ -1,0 +1,139 @@
+Car race game
+
+Time Limit 1000ms
+
+Memory Limit 65536K
+
+description
+
+　　Bob is a game programming specialist. In his new car race game, there are some racers(n means the amount of racers (1<=n<=100000)) racers star from someplace(xi means Starting point coordinate),and they possible have different speed(V means speed).so it possibly takes place to overtake(include staring the same point ). now he want to calculate the maximal amount of overtaking. 
+							
+input
+
+　　The first line of the input contains an integer n-determining the number of racers.	Next n lines follow, each line contains two integer Xi and Vi.(xi means the ith racer's Starting point coordinate, Vi means the ith racer's speed.0<xi, vi<1000000).<="" font="">
+							
+output
+
+　　For each data set in the input print on a separate line, on the standard output, the integer that represents the maximal amount of overtaking.
+							
+sample_input
+
+2
+2 1
+2 2
+5
+2 6
+9 4
+3 1
+4 9
+9 1
+7
+5 5
+6 10
+5 6
+3 10
+9 10
+9 5
+2 2
+							
+sample_output
+
+1
+6
+7
+							
+hint
+
+
+								
+							
+source
+
+
+思路：先把其速度或位置离散化，然后排序，用线段树查找之前会被超车的数目。
+          坚决不能用MAP啊，TLE了，郁闷的很啊。
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<map>
+#include<algorithm>
+using namespace std;
+const int mm=1e5+9;
+///map<int,int>mp;
+class node
+{
+  public:int x,v;
+}f[mm];
+int p[mm],in[mm];
+int n,kos;
+bool cmp(node a,node b)
+{
+  if(a.x^b.x)return a.x>b.x;
+  else return a.v<b.v;
+}
+int lowbit(int x)
+{
+  return x&(-x);
+}
+int sum(int end)
+{
+    int sum = 0;
+    while(end > 0)
+   {
+      sum += in[end];
+      end -= lowbit(end);
+   }
+   return sum;
+ }
+ //增加某个元素的大小
+ void add(int pos, int num)
+ {  if(pos==0)return;
+    while(pos <= kos)
+   {
+      in[pos] += num;
+      pos += lowbit(pos);
+   }
+ }
+int blook(int l,int r,int num)
+{
+  int mid=(l+r)/2;
+  while(l<=r)
+  {
+    if(p[mid]==num)return mid+1;
+    else if(p[mid]>num)r=mid-1;
+    else l=mid+1;
+    mid=(l+r)/2;
+  }
+  return -1;
+}
+int main()
+{ 
+  while(~scanf("%d",&n))
+  { /// mp.clear();
+    for(int i=0;i<n;++i)
+      {scanf("%d%d",&f[i].x,&f[i].v);
+       p[i]=f[i].v;
+      }
+    sort(p,p+n);
+    int ppp=0;
+    for(int i=1;i<n;++i)
+      if(p[i]!=p[ppp])p[++ppp]=p[i];
+    kos=ppp+1;
+    for(int i=0;i<n;++i)
+      f[i].v=blook(0,ppp,f[i].v);
+    sort(f,f+n,cmp);
+    memset(in,0,sizeof(in));
+    long long ans=0;
+    for(int i=0;i<n;++i)
+    {
+      ans+=sum(f[i].v-1);
+      add(f[i].v,1);
+    }
+    printf("%lld\n",ans);
+  }
+}
+
+
+
+

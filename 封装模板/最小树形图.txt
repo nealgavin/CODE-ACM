@@ -1,0 +1,99 @@
+﻿#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<cmath>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+typedef double type;
+using namespace std;
+const int nn=105;
+const int mm=1e4+9;
+const double oo=1e9;
+class Point
+{
+  public:double u,v;
+}p[nn];
+class Edge
+{
+public:
+  int u,v;
+  type w;
+}e[mm];
+int pre[nn],id[nn],vis[nn],n,m;
+type in[nn];
+type dis(Point a,Point b)
+{
+  return sqrt((a.u-b.u)*(a.u-b.u)+(a.v-b.v)*(a.v-b.v) );
+}
+type Direct_MST(int root,int V,int E)
+{
+  type ret=0;
+  while(1)
+  {
+    //找出每个的最小入边
+    FOR(i,0,V-1)in[i]=oo;
+    in[root]=0;
+    FOR(i,0,E-1)
+    {
+      int u=e[i].u,v=e[i].v;
+      if(e[i].w<in[v]&&u!=v){pre[v]=u;in[v]=e[i].w; }
+    }
+    FOR(i,0,V-1)
+    {
+      if(i==root)continue;
+      if(in[i]==oo)return -1;//还有无入度点
+    }
+    ///find cicle
+    clr(vis,-1);clr(id,-1);
+    int bcc_no=0;
+    FOR(i,0,V-1)
+    {
+      ret+=in[i];
+      int v=i;
+      while(vis[v]!=i&&id[v]==-1&&v!=root)
+      { vis[v]=i;//每次的标号都不同，所以不需要初始化
+        v=pre[v];
+      }
+      if(v!=root&&id[v]==-1)//缩点
+      {
+        for(int u=pre[v];u!=v;u=pre[u])
+          id[u]=bcc_no;
+        id[v]=bcc_no++;
+      }
+    }
+    if(bcc_no==0)break;//no cicle
+    FOR(i,0,V-1)
+    if(id[i]==-1)
+      id[i]=bcc_no++;
+    //create new graph
+    FOR(i,0,E-1)
+    {
+      int u=e[i].u,v=e[i].v;
+      e[i].u=id[u];
+      e[i].v=id[v];
+      if(id[u]^id[v])e[i].w-=in[v];
+    }
+    V=bcc_no;
+    root=id[root];
+  }
+  return ret;
+}
+int main()
+{
+  while(~scanf("%d%d",&n,&m))
+  {
+    FOR(i,0,n-1)scanf("%lf%lf",&p[i].u,&p[i].v);
+    FOR(i,0,m-1)
+    {
+      scanf("%d%d",&e[i].u,&e[i].v);
+      e[i].u--;e[i].v--;
+      if(e[i].u!=e[i].v)e[i].w=dis(p[ e[i].u ],p[ e[i].v ]);
+      else e[i].w=oo;//去自环
+    }
+    type ans=Direct_MST(0,n,m);
+    if(ans==-1)printf("poor snoopy\n");
+    else printf("%.2lf\n",ans);
+    //cout<<ans<<endl;
+  }
+  return 0;
+}

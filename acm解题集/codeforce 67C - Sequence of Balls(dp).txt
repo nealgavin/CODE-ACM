@@ -1,0 +1,91 @@
+C - Sequence of Balls
+Time Limit:1000MS     Memory Limit:262144KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+CodeForces 67C
+Description
+You are given a sequence of balls A by your teacher, each labeled with a lowercase Latin letter 'a'-'z'. You don't like the given sequence. You want to change it into a new sequence, B that suits you better. So, you allow yourself four operations:
+You can insert any ball with any label into the sequence at any position.
+You can delete (remove) any ball from any position.
+You can replace any ball with any other ball.
+You can exchange (swap) two adjacent balls.
+Your teacher now places time constraints on each operation, meaning that an operation can only be performed in certain time. So, the first operation takes time ti, the second one takes td, the third one takes tr and the fourth one takes te. Also, it is given that 2· te?≥?ti?+?td.
+Find the minimal time to convert the sequence A to the sequence B.
+Input
+The first line contains four space-separated integers ti,?td,?tr,?te (0?<?ti,?td,?tr,?te?≤?100). The following two lines contain sequences Aand B on separate lines. The length of each line is between 1 and 4000 characters inclusive.
+Output
+Print a single integer representing minimum time to convert A into B.
+Sample Input
+Input
+1 1 1 1
+youshouldnot
+thoushaltnot
+Output
+5
+Input
+2 4 10 3
+ab
+ba
+Output
+3
+Input
+1 10 20 30
+a
+za
+Output
+1
+Hint
+In the second sample, you could delete the ball labeled 'a' from the first position and then insert another 'a' at the new second position with total time 6. However exchanging the balls give total time 3.
+
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int mm=4e3+9;
+int dp[mm][mm],pa[mm][133],pb[mm][133];
+int t1,t2,t3,t4;
+int la,lb;
+char a[mm],b[mm];
+int main()
+{
+  while(scanf("%d%d%d%d",&t1,&t2,&t3,&t4)!=EOF)
+  { scanf("%s%s",a,b);
+    la=strlen(a);lb=strlen(b);
+    memset(dp,0,sizeof(dp));
+    memset(pa,0,sizeof(pa));
+    memset(pb,0,sizeof(pb));
+    for(int i=1;i<=la;++i)
+    { dp[i][0]=i*t2;///删除费用
+      for(int j='a';j<='z';++j)pa[i][j]=pa[i-1][j];
+      pa[i][a[i-1]]=i;///含有a[i-1]字符的最近的标号
+    }
+    for(int i=1;i<=lb;++i)
+    {
+      dp[0][i]=i*t1;///插入费用
+      for(int j='a';j<='z';++j)pb[i][j]=pb[i-1][j];
+      pb[i][b[i-1]]=i;
+    }
+    for(int i=1;i<=la;++i)
+      for(int j=1;j<=lb;++j)
+    { /**找出相同逆序的如a*b,b*a *为省略字符，
+			  花费=交换+删除到符合条件+插入到符合条件
+			  操作顺序先删，再交换，在插入
+			**/
+      dp[i][j]=min(dp[i-1][j]+t2,min(dp[i][j-1]+t1,dp[i-1][j-1]+t3*(a[i-1]!=b[j-1])));
+      int ii=pa[i-1][b[j-1]],jj=pb[j-1][a[i-1]];
+      if(ii&&jj)
+      {
+        dp[i][j]=min(dp[i][j],dp[ii-1][jj-1]+t4+t1*(j-1-jj)+t2*(i-1-ii));
+      }
+    }
+    printf("%d\n",dp[la][lb]);
+  }
+}
+
+

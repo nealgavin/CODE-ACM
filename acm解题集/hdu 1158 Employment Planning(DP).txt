@@ -1,0 +1,121 @@
+
+
+Employment Planning
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 2597    Accepted Submission(s): 1013
+
+
+
+
+Problem Description
+
+A project manager wants to determine the number of the workers needed in every month. He does know the minimal number of the workers needed in each month. When he hires or fires a worker, there will be some extra cost. Once a worker is hired, he will get the salary even if he is not working. The manager knows the costs of hiring a worker, firing a worker, and the salary of a worker. Then the manager will confront such a problem: how many workers he will hire or fire each month in order to keep the lowest total cost of the project. 
+
+
+
+
+
+
+
+Input
+
+The input may contain several data sets. Each data set contains three lines. First line contains the months of the project planed to use which is no more than 12. The second line contains the cost of hiring a worker, the amount of the salary, the cost of firing a worker. The third line contains several numbers, which represent the minimal number of the workers needed each month. The input is terminated by line containing a single '0'.
+
+
+ 
+
+
+
+
+Output
+
+The output contains one line. The minimal total cost of the project.
+
+
+ 
+
+
+
+
+Sample Input
+
+3 
+4 5 6
+10 9 11
+0
+ 
+
+
+
+
+Sample Output
+
+199
+ 
+
+
+
+
+Source
+
+Asia 1997, Shanghai (Mainland China) 
+
+
+
+
+
+
+Recommend
+
+Ignatius
+
+
+思路：二维Dp,  dp[x][y],第x个月雇了y个人的最小花费。
+
+
+令我 很郁闷的是我注释的那行为啥WA？想不明白。
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=100010;
+const int oo=1e9;
+int dp[14][mm];
+int mou[14];
+int main()
+{
+  int cas;
+  while(cin>>cas&&cas)
+  {
+    int ans=oo;
+    int hire,sary,fire,up,z;
+    cin>>hire>>sary>>fire;
+    up=0;
+    for(int i=0;i<cas;i++)
+    {
+      cin>>mou[i];up=up>mou[i]?up:mou[i];
+    }
+     for(int i=mou[0];i<=up;i++)
+      dp[0][i]=(hire+sary)*i;
+    for(int i=1;i<cas;i++)
+    {
+      for(int j=mou[i];j<=up;j++)
+      { dp[i][j]=oo;
+        for(int k=mou[i-1];k<=up;k++)
+        {
+          if(j>=k)z=(j-k)*hire+j*sary+dp[i-1][k];
+          else z=(k-j)*fire+j*sary+dp[i-1][k];
+          dp[i][j]=dp[i][j]<z?dp[i][j]:z;
+          ///if(i==cas-1&&dp[i][j]<ans)ans=dp[i][j];
+        }
+      }
+    }
+    for(int i=mou[cas-1];i<=up;i++)
+      ans=ans<dp[cas-1][i]?ans:dp[cas-1][i];
+    cout<<ans<<"\n";
+  }
+}
+
+
+
+

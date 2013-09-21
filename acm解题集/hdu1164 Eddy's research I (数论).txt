@@ -1,0 +1,91 @@
+/*
+Eddy's research I 
+
+Time Limit : 2000/1000ms (Java/Other)   Memory Limit : 65536/32768K (Java/Other)
+
+Total Submission(s) : 2   Accepted Submission(s) : 2
+
+Font: Times New Roman | Verdana | Georgia
+
+ Font Size: ¡û ¡ú
+
+Problem Description
+
+ Eddy's interest is very extensive, recently he is interested in prime number. Eddy discover the all number owned can be divided into the multiply of prime number, but he can't write program, so Eddy has to ask intelligent you to help him, he asks you to write a program which can do the number to divided into the multiply of prime number factor .
+
+ 
+
+Input
+
+ The input will contain a number 1 < x<= 65535 per line representing the number of elements of the set.
+ 
+
+Output
+
+ You have to print a line in the output for each entry with the answer to the previous question.
+ 
+
+Sample Input
+
+11
+9412
+
+ Sample Output
+
+11
+2*2*13*181
+
+ Author
+
+ eddy 
+*/
+#include<iostream>
+#include<cstring>
+#define N 68535
+#define M 300
+using namespace std;
+bool isnop[N];//ÅÐ¶ÏËØÊý
+int prime[N];//°´Ë³Ðò´æËØÊý
+int ans;
+void isprime()
+{
+   ans=-1;
+  memset(isnop,0,sizeof(isnop));
+  isnop[0]=isnop[1]=1;
+  for(int i=2;i<M;i++)
+  {
+    if(!isnop[i])
+    {
+      prime[++ans]=i;
+      for(int j=i+i;j<N;j+=i)
+      isnop[j]=1;
+    }
+  }
+  for(int i=M-1;i<N;i++)
+  if(!isnop[i])
+  prime[++ans]=i;
+}
+int main()
+{
+  int m,i;
+  isprime();
+  while(cin>>m)
+  {
+    i=0;
+    while(1)
+    {
+      if(m%prime[i]==0&&m)
+      {
+        m/=prime[i];
+        if(m!=1)
+        cout<<prime[i]<<"*";
+        else
+        {
+          cout<<prime[i]<<endl;
+          break;
+        }
+      }
+      else ++i;
+    }
+  }
+}

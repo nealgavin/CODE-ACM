@@ -1,0 +1,109 @@
+
+String change
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 802    Accepted Submission(s): 370
+
+
+Problem Description
+In this problem you will receive two strings S1 and S2 that contain only lowercase letters.
+Each time you can swap any two characters of S1. After swap,both of the two letters will increase their value by one. If the previous letter is 'z',it will become 'a' after being swapped.
+That is to say ,"a" becomes "b","b" becomes "c"....."z" becomes "a" and so on.
+You can do the change operation in S1 as many times as you want.
+Please tell us whether you can change S1 to S2 after some operations or not.
+ 
+
+Input
+There are several cases.The first line of the input is a single integer T (T <= 41) which is the number of test cases.Then comes the T test cases .
+
+For each case,the first line is S1,the second line is S2.S1 has the same length as S2 and the length of the string is between 2 and 60.
+ 
+
+Output
+For each case,output "Case #X: " first, X is the case number starting from 1.If it is possible change S1 to S2 output "YES",otherwise output "NO".
+ 
+
+Sample Input
+3
+ab
+ba
+
+bac
+ddb
+
+aaabb
+cbccd
+ 
+
+Sample Output
+Case #1: NO
+Case #2: YES
+Case #3: YES
+Hint
+
+For the first case,it's impossible to change "ab" to "ba" .
+
+For the second case,swap(S1[0],S1[2])->swap(S1[1],S1[2]),meanwhile:bac->dac->ddb.
+
+For the third case,swap(S1[0],S1[3])->swap(S1[1],S1[2])->swap(S1[2],S1[3])->swap(S1[3],S1[4]),
+meanwhile:aaabb->caabb->cbbbb->cbccb->cbccd.
+ 
+ 
+
+Author
+miketc@UESTC_Goldfinger
+ 
+
+Source
+2012 Multi-University Training Contest 6
+ 
+
+Recommend
+zhuyuanchen520
+
+思路：推理后发现超过两张牌的情况，只要是奇偶一样都可以用变换。
+
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+using namespace std;
+const int mm=99;
+char s[mm],t[mm];
+int cas;
+int main()
+{
+  while(~scanf("%d",&cas))
+  {
+    for(int ca=1;ca<=cas;++ca)
+    { scanf("%s%s",s,t);
+      printf("Case #%d: ",ca);
+      int len=strlen(s);
+      bool a=0,b=0;
+      bool flag=0;
+      int k1,k2;
+      if(len==2)
+      { k1=(s[0]-t[0]+26)%26;
+        k2=(s[1]-t[1]+26)%26;
+        if(k1==k2&&k1%2==0)flag=1;
+        k1=(s[0]-t[1]+26)%26;
+        k2=(s[1]-t[0]+26)%26;
+        if(k1==k2&&k1%2==1)flag=1;
+        if(flag)printf("YES\n");
+        else printf("NO\n");
+      }
+      else
+      {
+        for(int i=0;i<len;++i)
+        {
+          a^=s[i]&1;
+          b^=t[i]&1;
+        }
+        if(a==b)printf("YES\n");
+        else printf("NO\n");
+      }
+    }
+  }
+  return 0;
+}
+
+

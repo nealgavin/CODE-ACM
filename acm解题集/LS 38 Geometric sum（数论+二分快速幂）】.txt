@@ -1,0 +1,63 @@
+Geometric sum
+Compute (a+a2+…an)modm.
+
+Input
+Three integers a,n,m.
+
+(1≤a,n,m≤1018)
+
+Output
+The only integer denotes the result.
+
+Sample input
+2 2 1000000000
+Sample output
+6 
+
+思路；看代码吧
+#include<iostream>
+#include<cstring>
+using namespace std;
+long long c,x,n;
+long long mul(long long a,long long b)///(a*b)%c
+{ long long ret=0;
+  a%=c;b%=c;
+  while(a)
+  {
+    if(a&1)
+    ret=(ret+b)%c;
+    a>>=1;b<<=1;b%=c;
+  }
+  return ret;
+}
+long long sqr(long long x,long long n)///(x^n)%c
+{ long long ret=1;
+  if(n==1)return x%c;
+  while(n)
+  {if(n&1)ret=mul(x,ret);
+   x=mul(x,x);n>>=1;
+  }
+  return ret;
+}
+long long pow(long long x,long long n)///(x+x^2...)%c
+{ long long ret=0;
+  if(n==1)return x%c;
+  if(n&1)
+  {
+    ret=mul(pow(x,n/2),sqr(x,n/2+1L)+x);
+    ret=(ret+x)%c;
+  }
+  else
+  {
+    ret=mul(pow(x,n/2),sqr(x,n/2)+1L);
+  }
+  return ret;
+}
+int main()
+{
+  while(cin>>x>>n>>c)
+  { 
+    cout<<pow(x,n)<<"\n";
+  }
+}
+
