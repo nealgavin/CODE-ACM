@@ -1,0 +1,155 @@
+Count The Pairs
+
+Time Limit: 20000/10000 MS (Java/Others)    Memory Limit: 65535/65535 K (Java/Others)
+Total Submission(s): 135    Accepted Submission(s): 66
+
+
+Problem Description
+
+
+  With the 60th anniversary celebration of Nanjing University of Science and Technology coming soon, the university sets n tourist spots to welcome guests. Of course, Redwood forests in our university and its Orychophragmus violaceus must be recommended as top ten tourist spots, probably the best of all. Some undirected roads are made to connect pairs of tourist spots. For example, from Redwood forests (suppose it’s a) to fountain plaza (suppose it’s b), there may exist an undirected road with its length c. By the way, there is m roads totally here. Accidently, these roads’ length is an integer, and all of them are different. Some of these spots can reach directly or indirectly to some other spots. For guests, they are travelling from tourist spot s to tourist spot t, they can achieve some value f. According to the statistics calculated and recorded by us in last years, We found a strange way to calculate the value f:
+  From s to t, there may exist lots of different paths, guests will try every one of them. One particular path is consisted of some undirected roads. When they are travelling in this path, they will try to remember the value of longest road in this path. In the end, guests will remember too many longest roads’ value, so he cannot catch them all. But, one thing which guests will keep it in mind is that the minimal number of all these longest values. And value f is exactly the same with the minimal number.
+  Tom200 will recommend pairs (s, t) (start spot, end spot points pair) to guests. P guests will come to visit our university, and every one of them has a requirement for value f, satisfying f>=t. Tom200 needs your help. For each requirement, how many pairs (s, t) you can offer?
+ 
+
+Input
+  Multiple cases, end with EOF.
+  First line:n m
+  n tourist spots ( 1<n<=10000), spots’ index starts from 0.
+  m undirected roads ( 1<m<=500000).
+
+  Next m lines, 3 integers, a b c
+  From tourist spot a to tourist spot b, its length is c. 0<a, b<n, c(0<c<1000000000), all c are different.
+
+  Next one line, 1 integer, p (0<p<=100000)
+  It means p guests coming.
+
+  Next p line, each line one integer, t(0<=t)
+  The value t you need to consider to satisfy f>=t.
+ 
+
+Output
+  For each guest's requirement value t, output the number of pairs satisfying f>=t.
+  Notice, (1,2), (2,1) are different pairs.
+ 
+
+Sample Input
+2 1
+0 1 2
+3
+1
+2
+3
+3 3
+0 1 2
+0 2 4
+1 2 5
+5
+0 
+2
+3
+4
+5
+ 
+
+Sample Output
+2
+2
+0
+6
+6
+4
+4
+0
+ 
+
+Source
+2013 ACM/ICPC Asia Regional Nanjing Online
+ 
+
+Recommend
+liuyiding
+ 
+思路：最小生成树上的边就是最短路上最大边的最小值。因此用个并查集记录就好了。
+
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#include<iostream>
+#include<map>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define LL __int64
+using namespace std;
+const int mm=9e5+9;
+const LL oo=1e18;
+class Edge
+{
+  public:int u,v;LL w;
+  bool operator<(const Edge&x)const
+  {
+    return w<x.w;
+  }
+}f[mm];
+int n,m,pos;
+LL dp[mm],ww[mm];
+int rt[mm];LL rank[mm];
+//map<LL,LL>mp;
+int find(int x)
+{
+  if(x!=rt[x])
+  {
+    rt[x]=find(rt[x]);
+  }
+  return rt[x];
+}
+void uni(int a,int b)
+{
+  a=find(a),b=find(b);
+  rt[a]=b;rank[b]+=rank[a];rank[a]=0;
+}
+int main()
+{
+  while(~scanf("%d%d",&n,&m))
+  { FOR(i,0,n)rt[i]=i,rank[i]=1;
+   // mp.clear();
+   // mp[-oo]=-1;mp[oo]=-1;
+    FOR(i,0,m-1)
+    {
+      scanf("%d%d%I64d",&f[i].u,&f[i].v,&f[i].w);
+    }
+    sort(f,f+m);
+    LL ans=0;
+    int u,v;
+    pos=1;
+    dp[0]=0;ww[0]=-2;
+    FOR(i,0,m-1)
+    {
+      u=f[i].u;v=f[i].v;
+      u=find(u);v=find(v);
+      if(u!=v)
+      {
+        ans=rank[u]*rank[v];
+        dp[pos]=ans;ww[pos++]=f[i].w;
+       // mp[ f[i].w ]=ans;
+       uni(u,v);
+      }
+    }
+    dp[pos]=0;ww[pos++]=oo;
+    int Q;
+    scanf("%d",&Q);
+    LL zzz;int kz;
+    for(int i=pos-2;i>=0;--i)
+      dp[i]+=dp[i+1];
+    FOR(i,1,Q)
+    {
+      scanf("%I64d",&zzz);
+
+      kz=lower_bound(ww,ww+pos,zzz)-ww;
+      if(ww[kz]<zzz)++kz;
+      printf("%I64d\n",dp[kz]*2);
+    }
+  }
+}
+
+
