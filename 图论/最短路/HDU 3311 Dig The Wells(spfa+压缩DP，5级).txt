@@ -1,0 +1,144 @@
+H - Dig The Wells
+Time Limit:2000MS     Memory Limit:32768KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+You may all know the famous story “Three monks”. Recently they find some places around their temples can been used to dig some wells. It will help them save a lot of time. But to dig the well or build the road to transport the water will cost money. They do not want to cost too much money. Now they want you to find a cheapest plan.
+ 
+Input
+There are several test cases.
+Each test case will starts with three numbers n , m, and p in one line, n stands for the number of monks and m stands for the number of places that can been used, p stands for the number of roads between these places. The places the monks stay is signed from 1 to n then the other m places are signed as n + 1 to n + m. (1 <= n <= 5, 0 <= m <= 1000, 0 <=p <= 5000)
+Then n + m numbers followed which stands for the value of digging a well in the ith place.
+Then p lines followed. Each line will contains three numbers a, b, and c. means build a road between a and b will cost c.
+ 
+Output
+For each case, output the minimum result you can get in one line.
+ 
+Sample Input
+3 1 3
+1 2 3 4
+1 4 2
+2 4 2
+3 4 4 
+4 1 4
+5 5 5 5 1
+1 5 1
+2 5 1
+3 5 1
+4 5 1
+ 
+Sample Output
+6
+5
+ 
+
+思路：斯坦纳树，先做全源最短路，然后用DP[包含的点集][根节点]。
+            dp[mak][u]=MIN(dp[k][u]+dp[mask^k][u],dp[mask][j]+dis[j][u]);
+///斯坦纳树
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define ll(x) (1<<x)
+using namespace std;
+const int msize=1009;
+const int oo=0x3f3f3f3f;
+class Edge
+{
+  public:int v,w,next;
+};
+class Short_Path
+{
+public:
+  int dis[msize][msize];
+  bool vis[msize];
+  int n,m,edge,head[msize];
+  Edge e[msize*msize];
+  void clear()
+  {
+    FOR(i,0,n+m)FOR(j,0,n+m)dis[i][j]=oo;
+    edge=0;clr(head,-1);
+  }
+  void add(int u,int v,int w)
+  {
+    e[edge].v=v;e[edge].w=w;e[edge].next=head[u];head[u]=edge++;
+  }
+  void SPFA()
+  {
+    int kn=n+m,u,v;
+    clr(vis,0);
+    FOR(t,0,kn)
+    {
+      dis[t][t]=0;
+      queue<int>Q;
+      Q.push(t);
+      while(!Q.empty())
+      {
+        u=Q.front();Q.pop();vis[u]=0;
+        for(int i=head[u];~i;i=e[i].next)
+        {
+          v=e[i].v;
+          if(dis[t][v]>dis[t][u]+e[i].w)
+          {
+            dis[t][v]=dis[t][u]+e[i].w;
+            if(!vis[v])
+            {
+              Q.push(v);vis[v]=1;
+            }
+          }
+        }
+      }
+    }
+  }
+  int dp[ll(7)][msize];///set contain , root
+  void DP()
+  { int kn=m+n;
+    FOR(i,0,m+n)
+    FOR(j,0,n)
+    dp[ll(j)][i]=dis[i][j];///i->j
+//    FOR(i,0,kn)FOR(j,0,kn)
+//    printf("e=%d %d %d\n",i,j,dis[i][j]);
+    int mask=ll(n+1)-1;
+    FOR(i,1,mask)
+    if(i&(i-1))///有子集
+    {
+      FOR(j,0,kn)
+      {
+        dp[i][j]=oo;
+        for(int k=i;k>0;k=(k-1)&i)
+          dp[i][j]=min(dp[i][j],dp[k][j]+dp[i^k][j]);
+
+      }
+      FOR(j,0,kn)
+      for(int k=0;k<=kn;++k)
+        dp[i][j]=min(dp[i][j],dp[i][k]+dis[k][j]);
+    }
+    printf("%d\n",dp[mask][0]);
+  }
+}sp;
+int main()
+{ int a,b,c,p;
+  while(~scanf("%d%d%d",&sp.n,&sp.m,&p))
+  {
+    sp.clear();
+    FOR(i,1,sp.n+sp.m)
+    {
+      scanf("%d",&a);
+      sp.add(0,i,a);sp.add(i,0,a);
+    }
+    FOR(i,1,p)
+    {
+      scanf("%d%d%d",&a,&b,&c);
+      sp.add(a,b,c);sp.add(b,a,c);
+    }
+    sp.SPFA();
+    sp.DP();
+  }
+}
+
+
+
