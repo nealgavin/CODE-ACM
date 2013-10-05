@@ -1,0 +1,112 @@
+
+D - Ball
+
+Time Limit:3000MS    Memory Limit:262144KB   64bit IO Format:%I64d & %I64u
+
+SubmitStatusPracticeCodeForces 12D
+
+
+
+Description
+
+
+N ladies attend the ball in the King's palace. Every lady can be described with three values: beauty, intellect and richness. King's Master of Ceremonies knows that ladies are very special creatures. If some lady understands that there is other lady at the ball which is more beautiful, smarter and more rich, she can jump out of the window. He knows values of all ladies and wants to find out how many probable self-murderers will be on the ball. Lets denote beauty of thei-th lady by Bi, her intellect byIi and her richness byRi. Theni-th lady is a probable self-murderer if there is somej-th lady that Bi?<?Bj,?Ii?<?Ij,?Ri?<?Rj. Find the number of probable self-murderers.
+
+
+Input
+
+
+The first line contains one integer N (1?≤?N?≤?500000). The second line containsN integer numbers Bi, separated by single spaces. The third and the fourth lines contain sequencesIi andRi in the same format. It is guaranteed that0?≤?Bi,?Ii,?Ri?≤?109.
+
+
+Output
+
+
+Output the answer to the problem.
+
+
+Sample Input
+
+<!-- .input, .output {border:1px solid #888888} .output {margin-bottom:1em; position:relative; top:-1px} .output pre, .input pre {background-color:#EFEFEF; line-height:1.25em; margin:0; padding:0.25em} .title {background-color:#FFFFFF; border-bottom:1px solid #888888; font-family:arial; font-weight:bold; padding:0.25em} -->
+
+Input
+3
+1 4 2
+4 3 2
+2 5 3
+
+
+ Output
+1
+思路：l[i]代表第i个人的信息。把l按三个关键字排序，假设三个关键字分别为x,y,z。x,z从小到大，y从大到小。
+
+因为已经先按x从小到大排了。   y从尾开始执行插入操作。     
+
+所以每次只需往集合里找到第一个y大于要插入的值比较z看看要插入的是否自杀，若会，则自杀人数加1.并不做插入操作。
+
+若不会自杀，则插入。并其去除集合中原先插入的会因为当前插入而自杀的人。
+
+y执行到0结果也就出来了。
+
+
+代码有注释，好理解。
+#include<iostream>
+#include<algorithm>
+#include<map>
+using namespace std;
+const int mm=501000;
+const int oo=1e9+2;
+class node
+{
+public:
+  int x,y,z;
+}l[mm];
+int n;
+bool cmp(node a,node b)///x从小到大，y从大到小，z小到大
+{
+  return a.x!=b.x? a.x<b.x:a.y!=b.y?a.y>b.y:a.z<b.z;
+}
+map<int,int>mp;
+map<int,int >::iterator it;
+int main()
+{
+  while(cin>>n)
+  {
+    for(int i=0;i<n;i++)cin>>l[i].x;
+    for(int i=0;i<n;i++)cin>>l[i].y;
+    for(int i=0;i<n;i++)cin>>l[i].z;
+    sort(l,l+n,cmp);
+
+    mp[-oo]=oo;mp[oo]=-oo;///标记左右边界
+    //cout<<mp[-oo]<<" "<<mp[oo];
+    int ans=0;
+    ///x是从小到大排
+    for(int i=n-1;i>=0;i--)
+    {
+      it=mp.upper_bound(l[i].y);///找到比l[i].y大的第一个数
+      if(it->second>l[i].z)ans++;///找到让l[i]自杀的人了
+      else if(mp[l[i].y]<l[i].z)
+      {
+        mp[l[i].y]=l[i].z;///更新值，插入不会自杀的人
+        ///去掉y,z都比l[i]小的集合中不会自杀的人
+        ///因为接下来会因这些人而自杀的人肯定会因为l[i]而自杀
+        for(it=--mp.lower_bound(l[i].y);it->second<l[i].z;)
+          mp.erase(it--);
+      }
+    }
+    cout<<ans<<"\n";
+  }
+}
+
+
+
+
+  
+
+ 
+
+ 
+
+ 
+
+ 

@@ -1,0 +1,58 @@
+#include<stdio.h>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+#define N 105
+struct stu
+{
+  char time[22];
+  int sort;
+  int solve;
+  int score;
+  int k;
+};
+stu learn[N];
+bool cmp(stu a,stu b)
+{
+  if(a.solve==b.solve)
+  {
+    return strcmp(a.time,b.time)<0;
+  }
+  return a.solve>b.solve;
+}
+bool cmpp(stu a,stu b)
+{
+  return a.sort<b.sort;
+}
+int main()
+{
+  //freopen("1.txt","r",stdin);
+  int n,i,j,z[5];
+  while(scanf("%d",&n)&&n>=0)
+  {
+    memset(z,0,sizeof(z));
+    for(i=0;i<=n+3;i++)
+    {
+      learn[i].k=0;
+    }
+    for(i=1;i<=n;i++)
+    {scanf("%d %s",&learn[i].solve,learn[i].time);
+     learn[i].sort=i;
+    }
+    sort(learn+1,learn+n+1,cmp);
+    for(i=1;i<=n;i++)
+    for(j=0;j<5;j++)
+    if(learn[i].solve==j+1)learn[i].k=++z[j];
+    for(i=1;i<=n;i++)
+    {
+      if(learn[i].solve==5)learn[i].score=100;
+      else if(learn[i].solve==0)learn[i].score=50;
+      else if(learn[i].k<=(z[learn[i].solve-1]/2))learn[i].score=55+learn[i].solve*10;
+      else learn[i].score=50+learn[i].solve*10;
+    }
+    sort(learn+1,learn+n+1,cmpp);
+    for(i=1;i<=n;i++)
+    printf("%d\n",learn[i].score);
+    printf("\n");
+  }
+}

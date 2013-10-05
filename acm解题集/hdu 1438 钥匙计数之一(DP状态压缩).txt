@@ -1,0 +1,117 @@
+钥匙计数之一
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 1001    Accepted Submission(s): 406
+
+
+
+
+Problem Description
+
+一把锁匙有N个槽，槽深为1，2，3，4。每锁匙至少有3个不同的深度且至少有1对相连的槽其深度之差为3。求这样的锁匙的总数。
+
+
+
+ 
+
+Input
+
+本题无输入
+
+
+
+ 
+
+Output
+
+对N>=2且N<=31，输出满足要求的锁匙的总数。
+
+
+
+ 
+
+Sample Output
+
+N=2: 0
+N=3: 8
+N=4: 64
+N=5: 360
+..
+..
+..
+..
+..
+..
+..
+
+N=31: ...
+
+注：根据Pku Judge Online 1351 Number of Locks或 Xi'an 2002 改编,在那里N<=16
+
+
+ 
+
+Author
+
+ecjtu_zhousc
+
+
+
+ 
+
+Recommend
+
+lcy
+
+
+思路：本来是个推题，整不太清楚，就用状态压缩DP，只是这里的状态有点特殊，是指前n个槽所含有的不同深度。因为只有四的不同深度，所以状态数只有16个。
+
+dp[a][b][c][2];
+///第a个槽，前面槽的状态（包含几个不同的深度）b，最后一个槽的深度c，是否已经符合有相差为3要求
+
+ 
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=40;
+long long dp[mm][mm][mm][2];
+///第几个槽，前面槽的状态（包含几个不同的深度），最后一个槽的深度，是否已经符合要求
+int num[17];
+int main()
+{
+  memset(num,0,sizeof(num));
+  memset(dp,0,sizeof(dp));
+  for(int i=0;i<16;i++)
+    for(int j=0;j<4;j++)
+    if(i&(1<<j))num[i]++;///找不同的状态不同深度数。从而找出合法的至少有3个深度不同
+  for(int i=0;i<4;i++)///初始化1只有1,2,3,4四个状态。
+    dp[1][1<<i][i][0]=1;
+  for(int i=2;i<32;i++)///槽数
+    for(int j=0;j<16;j++)///不同深度状态
+    for(int k=0;k<4;k++)///前一个槽的最后一个深度
+  {
+    for(int l=0;l<4;l++)///当前槽的最后一个的深度
+    {
+      int cur=j|(1<<l);
+      dp[i][cur][l][1]+=dp[i-1][j][k][1];
+      if(k-l==3||k-l==-3)
+      {
+        dp[i][cur][l][1]+=dp[i-1][j][k][0];
+      }
+      else dp[i][cur][l][0]+=dp[i-1][j][k][0];
+    }
+  }
+  for(int i=2;i<32;i++)
+  { long long ans=0;
+    for(int j=0;j<16;j++)
+      if(num[j]>=3)///挑出符合条件的超过2个不同深度
+      for(int k=0;k<4;k++)
+      ans+=dp[i][j][k][1];
+      cout<<"N="<<i<<": "<<ans<<"\n";
+  }
+}
+
+
+
+
+  

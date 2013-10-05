@@ -1,0 +1,162 @@
+Relocation
+Time Limit: 1000MS	
+Memory Limit: 65536K
+Total Submissions: 1411	
+Accepted: 574
+Description
+Emma and Eric are moving to their new house they bought after returning from their honeymoon. Fortunately, they have a few friends helping them relocate. To move the furniture, they only have two compact cars, which complicates everything a bit. Since the furniture does not fit into the cars, Eric wants to put them on top of the cars. However, both cars only support a certain weight on their roof, so they will have to do several trips to transport everything. The schedule for the move is planed like this:
+At their old place, they will put furniture on both cars.
+Then, they will drive to their new place with the two cars and carry the furniture upstairs.
+Finally, everybody will return to their old place and the process continues until everything is moved to the new place.
+Note, that the group is always staying together so that they can have more fun and nobody feels lonely. Since the distance between the houses is quite large, Eric wants to make as few trips as possible.
+Given the weights wi of each individual piece of furniture and the capacities C1 and C2 of the two cars, how many trips to the new house does the party have to make to move all the furniture? If a car has capacity C, the sum of the weights of all the furniture it loads for one trip can be at most C.
+Input
+The first line contains the number of scenarios. Each scenario consists of one line containing three numbers n, C1 and C2. C1 and C2 are the capacities of the cars (1 ≤ Ci ≤ 100) andn is the number of pieces of furniture (1 ≤ n ≤ 10). The following line will contain n integers w1, …, wn, the weights of the furniture (1 ≤ wi ≤ 100). It is guaranteed that each piece of furniture can be loaded by at least one of the two cars.
+Output
+The output for every scenario begins with a line containing “Scenario #i:”, where i is the number of the scenario starting at 1. Then print a single line with the number of trips to the new house they have to make to move all the furniture. Terminate each scenario with a blank line.
+Sample Input
+2
+6 12 13
+3 9 13 3 10 11
+7 1 100
+1 2 33 50 50 67 98
+Sample Output
+Scenario #1:
+2
+
+Scenario #2:
+3
+Source
+思路；最早觉得贪心应该可以，就是每次都进行两次01背包，看需要多少次。理论上觉得可以，但提交OJ死循环了，不知道哪出问题。
+第二种，很正统的状态压缩。
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#define mov(x) (1<<x)
+using namespace std;
+const int mm=110;
+const int mx=1<<12;
+bool vis[mm];
+int f[mm],c1,c2,n;
+int tai[mx],pos;
+int dp[mx];
+bool judge(int x)
+{ int sum=0;
+  memset(vis,0,sizeof(vis));
+  vis[0]=1;
+  for(int i=0;i<n;++i)
+  if(x&(mov(i)))
+  {
+    sum+=f[i];
+    for(int j=c1-f[i];j>=0;--j)
+      if(vis[j])
+      vis[j+f[i]]=1;
+  }
+  for(int i=c1;i>=0;--i)
+    if(vis[i]&&sum-i<=c2)
+    return 1;
+  return 0;
+}
+int main()
+{
+  int cas;
+  scanf("%d",&cas);
+  for(int ii=1;ii<=cas;++ii)
+  { pos=0;
+    scanf("%d%d%d",&n,&c1,&c2);
+    for(int i=0;i<n;++i)
+      scanf("%d",&f[i]);
+    for(int i=1;i<mov(n);++i)
+      {if(judge(i))tai[pos++]=i;///能一次装的状态
+      dp[i]=mx;
+      }
+    dp[0]=0;
+    for(int i=0;i<mov(n);++i)
+      for(int j=0;j<pos;++j)
+      if(!(i&tai[j]))
+      dp[i|tai[j]]=min(dp[i|tai[j]],dp[i]+1);
+    printf("Scenario #%d:\n%d\n\n",ii,dp[mov(n)-1]);
+  }
+}
+
+死循环代码，但是效率很高
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<string>
+#include<map>
+#include<algorithm>
+using namespace std;
+const int mm=110;
+int dp[mm],w[15],nex[mm],ver[mm];
+bool vis[15],flag;
+int cas,n,c1,c2,z;
+void data()
+{ z=0;
+  memset(nex,-1,sizeof(nex));
+  memset(ver,-1,sizeof(ver));
+  memset(dp,0,sizeof(dp));
+  dp[0]=1;
+}
+int main()
+{ ///freopen("2.txt","r",stdin);
+  ///freopen("1.txt","w",stdout);
+  scanf("%d",&cas);
+   int num=0;
+     while(cas--)
+     {
+       scanf("%d%d%d",&n,&c1,&c2);
+       for(int i=1;i<=n;++i)
+        scanf("%d",&w[i]);
+        if(c1>c2)c1^=c2,c2^=c1,c1^=c2;///c1小，c2大
+       memset(vis,0,sizeof(vis));
+       int ans=0,zzz=0;
+       while(1)
+       { flag=0;
+         data();///初始化
+         for(int i=1;i<=n;++i)
+         {
+           if(!vis[i])
+           {
+             flag=1;
+             for(int j=c1-w[i];j>=0;--j)///背包
+              if(dp[j])
+              {dp[j+w[i]]=1,nex[j+w[i]]=j,ver[j+w[i]]=i;
+               z=z>j+w[i]?z:j+w[i];
+              }
+           }
+         }
+         for(int i=z;nex[i]>=0;i=nex[i])
+         {
+           vis[ver[i]]=1;
+         }
+          data();///初始化
+         for(int i=1;i<=n;++i)
+         {
+           if(!vis[i])
+           {
+             flag=1;
+             for(int j=c2-w[i];j>=0;--j)///背包
+              if(dp[j]&&!dp[j+w[i]])
+              {dp[j+w[i]]=1,nex[j+w[i]]=j,ver[j+w[i]]=i;
+               z=z>j+w[i]?z:j+w[i];
+              }
+           }
+         }
+         for(int i=z;nex[i]>=0;i=nex[i])
+         {
+           vis[ver[i]]=1;
+         }
+         if(flag)ans++;
+         else break;
+         ++zzz;
+         if(zzz>11)break;
+       }
+       printf("Scenario #%d:\n%d\n\n",++num,ans);
+     }
+}
+
+
+
+
+

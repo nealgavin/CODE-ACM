@@ -1,0 +1,24 @@
+#include <cstdlib>
+#include <iostream>
+#include <math.h>
+
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+   __int64 f[51];
+   int i;
+   f[0]=1;f[1]=2;
+   for(i=2;i<51;i++)
+   {
+     f[i]=f[i-1]+f[i-2];
+   }
+   while(scanf("%d",&i)!=EOF)
+   {
+        printf("%I64d\n",f[i-1]);                     
+   }
+
+   
+    //system("PAUSE");
+    return EXIT_SUCCESS;
+}

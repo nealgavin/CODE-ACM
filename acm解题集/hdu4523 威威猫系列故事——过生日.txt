@@ -1,0 +1,91 @@
+威威猫系列故事——过生日
+
+Time Limit: 500/200 MS (Java/Others)    Memory Limit: 65535/32768 K (Java/Others)
+Total Submission(s): 640    Accepted Submission(s): 160
+
+
+Problem Description
+　　2月29号是威威猫的生日，由于这个日子非常特殊，4年才一次，所以生日这天许多朋友都前往威威猫家祝贺他的生日。
+　　大家给威威猫买了一个非常大非常大的蛋糕，蛋糕的形状是一个有n条边的凸多边形，可是威威猫的审美观有一点奇怪，他只喜欢有m条边的蛋糕，所以他要伙伴们把这个蛋糕切p次，然后给他一个只有m条边的新蛋糕。这下大家急了，这不是坑爹吗，审美观崎岖作怪。
+　　假设蛋糕可看成一个平面含n条边的凸多边形，每一刀必须沿直线切下去，p刀之后能给威威猫切出一个m条边的蛋糕吗？
+
+ 
+
+Input
+多组测试数据，每组占一行，包含3个整数n, m, p（含义如上）。
+[Technical Specification]
+3 <= n <= 10^100
+0 < m <= 10^100
+0 <= p <= 10^100
+ 
+
+Output
+每组测试数据，如果能够切出威威猫喜欢的蛋糕，请输出"YES"，否则请输出"NO"；
+每组数据输出一行。
+ 
+
+Sample Input
+4 5 1
+ 
+
+Sample Output
+YES
+
+Hint
+
+Sample对应的示意图如下：
+
+
+思路：只要n+p>=m 就可以完成要求，前提是m要是多边形，也就是m要>=3
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=1110;
+char n[mm],m[mm],p[mm],f[mm];
+int main()
+{
+  while(scanf("%s%s%s",&n,&m,&p)!=EOF)
+  {
+    int ln=strlen(n);
+    int lm=strlen(m);
+    int lp=strlen(p);
+    if(lm==1&&m[0]<'3'){printf("NO\n");continue;}
+    int z=0,bit=0,pos=0;
+    while(ln&&lp)
+    {
+      z=n[--ln]-'0'+p[--lp]-'0'+bit;
+      bit=z/10;z%=10;
+      f[pos++]=z+'0';
+    }
+    while(ln)
+    {
+      z=n[--ln]-'0'+bit;
+      bit=z/10;z%=10;
+      f[pos++]=z+'0';
+    }
+    while(lp)
+    {
+      z=p[--lp]-'0'+bit;
+      bit=z/10;z%=10;
+      f[pos++]=z+'0';
+    }
+    while(bit)
+    {
+      f[pos++]=bit%10+'0';
+      bit/=10;
+    }
+    f[pos]='\0';
+    for(int i=0,j=pos-1;i<j;++i,--j)
+      f[i]^=f[j],f[j]^=f[i],f[i]^=f[j];
+    int lf=strlen(f);
+    if(lf>lm)printf("YES\n");
+    else if(lf==lm&&strcmp(f,m)>=0)printf("YES\n");
+    else printf("NO\n");
+    ///cout<<f<<endl;
+  }
+}
+
+
+

@@ -1,0 +1,66 @@
+Xor
+
+For given multisets A  and B , find minimum non-negative x  which A⊕x=B .
+Note that for A={a 1 ,a 2 ,…,a n } , A⊕x={a 1 ⊕x,a 2 ⊕x,…,a n ⊕x} . ⊕  stands for exclusive-or.
+Input
+
+The first line contains a integer n , which denotes the size of set A  (also for B ).
+The second line contains n  integers a 1 ,a 2 ,…,a n  , which denote the set A .
+The thrid line contains n  integers b 1 ,b 2 ,…,b n  , which denote the set B .
+(1≤n≤10 5  , n  is odd, 0≤a i ,b i <2 30  )
+Output
+
+The only integer denotes the minimum x . Print ?1  if no such x  exists.
+Sample input
+
+3
+0 1 3
+1 2 3
+Sample output
+
+2
+Source
+
+Contest #3 on acmdream.net by ftiasch
+
+思路：如果A^x=B 那么统计A，B集合中所有数各个位的1的个数和作比较，如果不等那么x的该位必须为1，因为0异或操作不改变任何结果
+
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int mm=100210;
+const int bit=31;
+int n;
+bool p[mm];
+int a[mm],b[mm],ca[bit],cb[bit];
+void calculate(int *c,int *cc)
+{
+  for(int i=0;i<n;i++)
+    for(int j=0;j<bit;j++)
+    cc[j]+=(c[i]>>j)&1;
+}
+int main()
+{
+  while(cin>>n)
+  { memset(ca,0,sizeof(ca));
+    memset(cb,0,sizeof(cb));
+    for(int i=0;i<n;i++)
+      cin>>a[i];
+    for(int i=0;i<n;i++)
+      cin>>b[i];
+      calculate(a,ca);calculate(b,cb);
+    int x=0;
+    for(int i=0;i<bit;i++)
+      if(ca[i]^cb[i])x|=1<<i;
+    bool yes=1;
+    for(int i=0;i<n;i++)
+      a[i]^=x;
+    sort(a,a+n);sort(b,b+n);
+    for(int i=0;i<n;i++)
+      if(a[i]^b[i])yes=0;
+    cout<<(yes?x:-1)<<"\n";
+  }
+}
+
+

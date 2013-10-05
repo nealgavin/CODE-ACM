@@ -1,0 +1,94 @@
+A + B Problem Too
+
+Time Limit: 3000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 8373    Accepted Submission(s): 6277
+
+
+
+
+Problem Description
+
+This problem is also a A + B problem,but it has a little difference,you should determine does (a+b) could be divided with 86.For example ,if (A+B)=98,you should output no for result.
+
+ 
+
+
+
+
+Input
+
+Each line will contain two integers A and B. Process to end of file.
+
+ 
+
+
+
+
+Output
+
+For each case, if(A+B)%86=0,output yes in one line,else output no in one line.
+
+ 
+
+
+
+
+Sample Input
+
+1 1
+8600 8600
+ 
+
+
+
+
+Sample Output
+
+no
+yes
+ 
+
+
+
+
+Source
+
+HDU 2007-6 Programming Contest 
+
+
+
+
+
+
+Recommend
+
+xhd
+
+
+Ë¼Â·£º(10*a+b)%c=((a%c)*10+b)%c;
+
+#include<iostream>
+using namespace std;
+const int mm=100010;
+char s[mm],ss[mm];
+int main()
+{ int ans,anss;
+  while(cin>>s>>ss)
+  {
+    ans=anss=0;
+    for(int i=0;s[i]!='\0';i++)
+    {
+      ans=(ans*10+s[i]-'0')%86;
+    }
+    for(int i=0;ss[i]!='\0';i++)
+      anss=(anss*10+ss[i]-'0')%86;
+    ans=(ans+anss)%86;
+    if(ans)cout<<"no\n";
+    else cout<<"yes\n";
+  }
+}
+
+
+
+
+

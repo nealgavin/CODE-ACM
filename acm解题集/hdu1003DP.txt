@@ -1,0 +1,45 @@
+#include<stdio.h>
+int f[100004],summax,star,end;
+void dp()
+{
+  int i,sum=0,flag=0,star_sum=1;star=end=1;summax=f[1];
+  for(i=1;i<=f[0];i++)
+  {
+   if(f[i]>0)flag=1;
+   sum+=f[i];
+   if(sum>summax)
+   {
+     summax=sum;end=i;star=star_sum;
+   }
+   if(sum<0)
+   {
+     sum=0;
+     star_sum=i+1;
+   }
+  }
+  if(flag==0)
+  for(i=2,summax=f[1];i<=f[0];i++)
+  {
+    if(f[i]>summax)
+    {
+      summax=f[i];star=end=i;
+    }
+  }
+}
+int main()
+{
+  int t,j,i;
+  scanf("%d",&t);
+  for(j=1;j<=t;j++)
+  {
+    scanf("%d",&f[0]);
+    for(i=1;i<=f[0];i++)
+    {
+      scanf("%d",&f[i]);
+    }
+    dp();
+    printf("Case %d:\n",j);
+    printf("%d %d %d\n",summax,star,end);
+    if(j!=t)printf("\n");
+  }
+}

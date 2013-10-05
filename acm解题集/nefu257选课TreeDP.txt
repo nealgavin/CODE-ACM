@@ -1,0 +1,42 @@
+#include<stdio.h>
+#include<cstring>
+#include<algorithm>
+#define N 303
+using namespace std;
+int w[N],f[N][N];//f计入第i个点取j个的最大值
+int head[N],ver[N],next[N];//ver[N]记录下属边
+int edge,n,m;
+void relationship(int u,int v)
+{
+  ver[edge]=v;next[edge]=head[u];head[u]=edge++;
+}
+void treeDP(int u)
+{
+  int i,k,j,v;
+  f[u][1]=w[u];//就只选自己的值
+  for(k=head[u];k>=0;k=next[k])
+  {
+    treeDP(v=ver[k]);//找出上司的下属点的值
+    for(i=m;i>=0;i--)//??必须从后面开始标记
+    for(j=1;j<i;j++)//背包问题
+    f[u][i]=max(f[u][i],f[u][i-j]+f[v][j]);
+  }
+}
+int main()
+{
+  //freopen("1.txt","r",stdin);
+  int i,pre;
+  while(scanf("%d%d",&n,&m)!=EOF)
+  {
+    edge=0;w[0]=0;++m;
+    memset(f,0,sizeof(f));
+    memset(head,-1,sizeof(head));
+    for(i=1;i<=n;i++)
+    {
+      scanf("%d%d",&pre,&w[i]);
+      relationship(pre,i);
+    }
+    treeDP(0);
+    printf("%d\n",f[0][m]);
+  }
+}

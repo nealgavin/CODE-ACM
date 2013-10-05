@@ -1,0 +1,161 @@
+Doing Homework
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 3371    Accepted Submission(s): 1308
+
+
+
+Problem Description
+
+Ignatius has just come back school from the 30th ACM/ICPC. Now he has a lot of homework to do. Every teacher gives him a deadline of handing in the homework. If Ignatius hands in the homework after the deadline, the teacher will reduce his score of the final test, 1 day for 1 point. And as you know, doing homework always takes a long time. So Ignatius wants you to help him to arrange the order of doing homework to minimize the reduced score.
+
+ 
+
+
+Input
+
+The input contains several test cases. The first line of the input is a single integer T which is the number of test cases. T test cases follow.
+Each test case start with a positive integer N(1<=N<=15) which indicate the number of homework. Then N lines follow. Each line contains a string S(the subject's name, each string will at most has 100 characters) and two integers D(the deadline of the subject), C(how many days will it take Ignatius to finish this subject's homework). 
+
+Note: All the subject names are given in the alphabet increasing order. So you may process the problem much easier.
+
+
+ 
+
+
+Output
+
+For each test case, you should output the smallest total reduced score, then give out the order of the subjects, one subject in a line. If there are more than one orders, you should output the alphabet smallest one.
+
+
+ 
+
+
+Sample Input
+
+2
+3
+Computer 3 3
+English 20 1
+Math 3 2
+3
+Computer 3 3
+English 6 3
+Math 6 3
+ 
+
+
+Sample Output
+
+2
+Computer
+Math
+English
+3
+Computer
+English
+Math
+
+Hint
+In the second test case, both Computer->English->Math and Computer->Math->English leads to reduce 3 points, but the 
+word "English" appears earlier than the word "Math", so we choose the first order. That is so-called alphabet order.
+ 
+ 
+
+
+Author
+
+Ignatius.L
+
+
+思路：
+这题有作业数的规定，有每一样作业的截止时间要求，有写每一样作业所需花费的时间，作业要按期完成，否则每超一天扣一分，问怎样才能让他扣分最少。
+
+原先我想和其他dp一样找状态转移方程，但感觉状态要表示出来很困难。由于题目说作业数最多是15，因此若我们采用一个2的15次方的数来表示，每一个数为0则表示尚未完成此项作业，为1则表示已完成此项作业，这样这个状态就很好表示了。
+
+在这里设置一个结构体，里面要包含一个记录前驱的pre,然后自然的有最小的扣分代价，此外，由于是否在规定时间内完成了这道题目是由当前时间，截止时间和你花费时间共同决定的，那你就必须判断当前时间与截止时间的差距是多少，因此外设一个表示当前时间。
+
+以dp[i]来表示完成了i这个二进制数中所有为1的位置的对应的作业的状态
+
+至于递推条件：（1）对当前状态i进行枚举他所为0的部分，j，若（i&j==0）则说明j这样作业尚未被完成。（2）然后将其添加，变成s=i|j,在更新dp[s]。在此我们要设一个标记数组，因为我们并不知道之前s是否已经被更新。
+
+#include<iostream>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+const int mm=1<<16;
+class node
+{public:
+  char name[133];
+  int s;
+  int cost;
+}num[30];
+class DP
+{
+  public:
+  int min_cost;
+  int _tim;
+  int pre;
+}dp[mm];
+int ans[30];
+bool vis[mm];
+int main()
+{
+  int cas;
+  while(cin>>cas)
+  {int n;
+    while(cas--)
+    { memset(vis,0,sizeof(vis));
+      cin>>n;
+      for(int i=0;i<n;i++)
+      {
+        cin>>num[i].name>>num[i].s>>num[i].cost;
+      }
+      int m=1<<n;
+      dp[0].min_cost=0;dp[0].pre=-1;dp[0]._tim=0;//初态
+      for(int i=0;i<m;i++)
+      {
+        for(int j=0;j<n;j++)
+        {
+          int s=1<<j;
+          int tem,cost;
+          if((s&i)==0)//挑出未完成j的状态
+          {
+            tem=s|i;
+            cost=dp[i]._tim+num[j].cost-num[j].s;
+            if(cost<0)cost=0;
+            cost+=dp[i].min_cost;
+            if(vis[tem])//更新值
+            {
+              if(dp[tem].min_cost>cost)
+              {
+                dp[tem].min_cost=cost;
+                dp[tem].pre=j;//记录它的指向工作
+                dp[tem]._tim=dp[i]._tim+num[j].cost;
+              }
+            }
+            else
+            {
+              dp[tem].min_cost=cost;
+              dp[tem].pre=j;
+              dp[tem]._tim=dp[i]._tim+num[j].cost;
+              vis[tem]=1;
+            }
+          }
+        }
+      }
+      cout<<dp[m-1].min_cost<<"\n";
+      int kk=m-1;
+      for(int i=0;i<n;i++)
+      {
+        ans[i]=dp[kk].pre;//回推
+        kk=kk^(1<<dp[kk].pre);
+      }
+      for(int i=n-1;i>=0;i--)
+      cout<<num[ans[i]].name<<"\n";
+  }
+ }
+}
+
+
+
+

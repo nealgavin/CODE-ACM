@@ -1,0 +1,34 @@
+#include<stdio.h>
+#include<algorithm>
+#include<cstring>
+#define N 104
+int energy[N][N],f[N][N],NN,M;
+int DP(int n,int m)
+{
+  int i,j;
+  if(f[n][m]>=0)return f[n][m];
+  f[n][m]=0;
+  for(i=0;i<=energy[n][m];i++)
+  for(j=0;j<=energy[n][m]-i;j++)
+  if(n+i<=NN&&m+j<=M)
+  f[n][m]=(f[n][m]+DP(n+i,m+j))%10000;
+  return f[n][m];
+}
+int main()
+{
+  //freopen("1.txt","r",stdin);
+  int i,j,m,n,T;
+  scanf("%d",&T);
+  while(T--)
+  {
+    scanf("%d%d",&n,&m);
+    NN=n;M=m;
+    for(i=1;i<=n;i++)
+    for(j=1;j<=m;j++)
+    scanf("%d",&energy[i][j]);
+    memset(f,-1,sizeof(f));
+    f[n][m]=1;
+    printf("%d\n",DP(1,1));
+  }
+
+}

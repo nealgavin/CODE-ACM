@@ -1,0 +1,134 @@
+Complete the Sequence
+
+Time Limit: 3000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 161    Accepted Submission(s): 93
+
+
+
+
+Problem Description
+
+You probably know those quizzes in Sunday magazines: given the sequence 1, 2, 3, 4, 5, what is the next number? Sometimes it is very easy to answer, sometimes it could be pretty hard. Because these "sequence problems" are very popular, ACM wants to implement them into the "Free Time" section of their new WAP portal. 
+ACM programmers have noticed that some of the quizzes can be solved by describing the sequence by polynomials. For example, the sequence 1, 2, 3, 4, 5 can be easily understood as a trivial polynomial. The next number is 6. But even more complex sequences, like 1, 2, 4, 7, 11, can be described by a polynomial. In this case, 1/2.n^2-1/2.n+1 can be used. Note that even if the members of the sequence are integers, polynomial coefficients may be any real numbers. 
+
+Polynomial is an expression in the following form: 
+
+
+P(n) = aD.n^D+aD-1.n^D-1+...+a1.n+a0 
+
+
+. If aD <> 0, the number D is called a degree of the polynomial. Note that constant function P(n) = C can be considered as polynomial of degree 0, and the zero function P(n) = 0 is usually defined to have degree -1.
+
+
+ 
+
+
+
+
+Input
+
+There is a single positive integer T on the first line of input. It stands for the number of test cases to follow. Each test case consists of two lines. First line of each test case contains two integer numbers S and C separated by a single space, 1 <= S < 100, 1 <= C < 100, (S+C) <= 100. The first number, S, stands for the length of the given sequence, the second number, C is the amount of numbers you are to find to complete the sequence. 
+
+The second line of each test case contains S integer numbers X1, X2, ... XS separated by a space. These numbers form the given sequence. The sequence can always be described by a polynomial P(n) such that for every i, Xi = P(i). Among these polynomials, we can find the polynomial Pmin with the lowest possible degree. This polynomial should be used for completing the sequence.
+
+
+ 
+
+
+
+
+Output
+
+For every test case, your program must print a single line containing C integer numbers, separated by a space. These numbers are the values completing the sequence according to the polynomial of the lowest possible degree. In other words, you are to print values Pmin(S+1), Pmin(S+2), .... Pmin(S+C). 
+
+It is guaranteed that the results Pmin(S+i) will be non-negative and will fit into the standard integer type.
+
+
+ 
+
+
+
+
+Sample Input
+
+4
+6 3
+1 2 3 4 5 6
+8 2
+1 2 4 7 11 16 22 29
+10 2
+1 1 1 1 1 1 1 1 1 2
+1 10
+3
+ 
+
+
+
+
+Sample Output
+
+7 8 9
+37 46
+11 56
+3 3 3 3 3 3 3 3 3 3
+ 
+
+
+
+
+Source
+
+Central Europe 2000 
+
+
+
+
+
+
+Recommend
+
+JGShining
+
+
+思路：一个数列的前若干项，要求推测后面的项。我们很容易想到拉格朗日插值法，但是精度就变成了一个大问题。
+
+除了插值法，求解这种数列问题有更好的差分方法，过程中完全不涉及浮点数操作。比如说，对于1 2 4 7 11 16 22 29这个数列，我们对于每一项做其和前一项的差，也就是2-1=1, 4-2=2, 7-4=3, ....这样，我们得到一个1阶差分：1, 2, 3, 4, 5, 6, 7。我们再求得2阶差分是：1, 1, 1, 1, 1, 1。这时，规律已经有些明显了。
+
+也就是说，对于任意一个存在合理多项式通项的数列，用差分的方法是可以的。
+
+因此，只要求得这个n项数列的n-1阶差分，然后倒推回去就可以了。接下来就很简单了。
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=110;
+int f[mm][mm];
+int main()
+{
+  int cas;
+  while(cin>>cas)
+  {
+    while(cas--)
+    {
+      int m,n;
+      cin>>m>>n;
+      for(int i=0;i<m;i++)cin>>f[0][i];
+      for(int i=1;i<m;i++)
+        for(int j=0;j+i<m;j++)
+        f[i][j]=f[i-1][j+1]-f[i-1][j];
+      for(int i=1;i<=n;i++)///需要计算n个数,对于m+n个数来说这是初始的m阶
+        f[m-1][i]=f[m-1][0];
+      for(int i=m-2;i>=0;i--)///阶数
+      for(int j=0;j<n;j++)
+        f[i][m-i+j]=f[i+1][m-i+j-1]+f[i][m-i+j-1];
+        cout<<f[0][m];
+      for(int i=1;i<n;i++)
+        cout<<" "<<f[0][m+i];
+      cout<<"\n";
+    }
+  }
+}
+
+
+
+

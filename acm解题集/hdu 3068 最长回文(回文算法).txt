@@ -1,0 +1,83 @@
+最长回文
+
+Time Limit: 4000/2000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 4331    Accepted Submission(s): 1438
+
+
+Problem Description
+给出一个只由小写英文字符a,b,c...y,z组成的字符串S,求S中最长回文串的长度.
+回文就是正反读都是一样的字符串,如aba, abba等
+ 
+
+Input
+输入有多组case,不超过120组,每组输入为一行小写英文字符a,b,c...y,z组成的字符串S
+两组case之间由空行隔开(该空行不用处理)
+字符串长度len <= 110000
+ 
+
+Output
+每一行一个整数x,对应一组case,表示该组case的字符串中所包含的最长回文长度.
+ 
+
+Sample Input
+aaaa
+
+abab
+ 
+
+Sample Output
+4
+3
+ 
+
+Source
+2009 Multi-University Training Contest 16 - Host by NIT
+ 
+
+Recommend
+lcy
+
+
+思路：Manacher算法
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=4e6+9;
+char s[mm],ss[mm];
+int p[mm];
+void creat(char*s,char*ss)
+{
+  int len=strlen(ss);
+  s[0]='$';s[1]='#';
+  for(int i=0;i<len;++i)
+    s[i+i+2]=ss[i],s[i+i+3]='#';
+  s[len+len+2]='\0';
+  //cout<<s<<endl;
+}
+void getp()
+{ ///memset(p,0,sizeof(p));
+  int len=strlen(s);
+  int mx=0,id;
+  for(int i=1;i<len;++i)
+  {
+    if(mx>i)
+      p[i]=min(p[id+id-i],mx-i);
+    else p[i]=1;
+    while(s[i+p[i]]==s[i-p[i]]){++p[i];}
+    if(i+p[i]>mx)mx=i+p[i],id=i;
+  }
+}
+int main()
+{
+  while(scanf("%s",ss)!=EOF)
+  {
+    creat(s,ss);
+    getp();
+    int len=strlen(s),ans=0;
+    for(int i=1;i<len;++i)
+      if(p[i]>ans)ans=p[i];
+    printf("%d\n",ans-1);
+  }
+}
+

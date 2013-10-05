@@ -1,0 +1,109 @@
+
+2013暑期多校联合训练——80+高校，300+队伍，10000元奖金，敬请期待~
+Card
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 889    Accepted Submission(s): 517
+
+
+Problem Description
+Bearchild is playing a card game with himself. But first of all, he needs to shuffle the cards. His strategy is very simple: After putting all the cards into a single stack,
+he takes out some cards in the middle, from the L-th to the R-th when counting from top to bottom, inclusive, and puts them on the top. He repeats this action again 
+and again for N times, and then he regards his cards as shuffled.
+
+Given L,R and N, and the initial card stack, can you tell us what will the card stack be like after getting shuffled?
+ 
+
+Input
+First line contains an integer T(1 <= T <= 1000), which is the test cases.
+For each test case, first line contains 52 numbers(all numbers are distinct and between 1 and 52), which is the card number of the stack, from top to bottom. 
+Then comes three numbers, they are N, L and R as described. (0<=N<=109, 1<=L<=R<=52)
+ 
+
+Output
+For each test case, output "Case #X:", X is the test number, followed by 52 numbers, which is the card number from the top to bottom.Note that you should output one and only 
+one blank before every number.
+ 
+
+Sample Input
+1
+13 2 10 50 1 28 37 32 30 46 19 47 33 41 24 52 27 42 49 18 9 48 23 35 31 8 7 12 6 5 3 22 43 36 51 40 26 4 44 
+17 39 38 15 14 25 16 29 20 21 45 11 34
+902908328 38 50
+ 
+
+Sample Output
+Case #1: 26 4 44 17 39 38 15 14 25 16 29 20 21 45 13 2 10 50 1 28 37 32 30 46 19 47 33 41 24 52 27 42 49 18 
+9 48 23 35 31 8 7 12 6 5 3 22 43 36 51 40 11 34
+ 
+
+Author
+elfness@UESTC_Oblivion
+ 
+
+Source
+2012 Multi-University Training Contest 6
+ 
+
+Recommend
+zhuyuanchen520
+
+
+思路：通过初结果到最终结果的变换中，r右边的牌顺序不变。然后左边牌则按照顺序插，所以只需要找到切牌后的第一张牌就完事了。
+           而第一张牌的转移方程为 第一张牌+l%(r-1)为下一次的。
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=110;
+int pai[mm];
+int pos;
+int xun[12345];
+void getxun(int s,int r)
+{ int len=s-1;
+  while(s!=1)
+  {xun[++pos]=s;
+   s=(s+len)%r;
+   if(s==0)s=r;
+  }
+  xun[++pos]=1;
+}
+int main()
+{
+  int cas;
+  int num,l,r;
+  while(~scanf("%d",&cas))
+  {
+    for(int ca=1;ca<=cas;++ca)
+    {
+      printf("Case #%d:",ca);
+      for(int i=1;i<=52;++i)
+        scanf("%d",&pai[i]);
+      scanf("%d%d%d",&num,&l,&r);
+      if(l==1)
+      {
+        for(int i=1;i<=52;++i)
+          printf(" %d",pai[i]);
+        printf("\n");
+        continue;
+      }
+      pos=0;
+      getxun(l,r);
+      num%=pos;
+      if(num==0)num=pos;
+      int kai=xun[num];
+      for(int i=kai;i<=r;++i)
+        printf(" %d",pai[i]);
+      for(int i=1;i<kai;++i)
+        printf(" %d",pai[i]);
+      for(int i=r+1;i<=52;++i)
+        printf(" %d",pai[i]);
+      printf("\n");
+    }
+  }
+  return 0;
+}
+
+
+

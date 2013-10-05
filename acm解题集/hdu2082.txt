@@ -1,0 +1,31 @@
+#include<iostream>
+#include<cstring>
+using namespace std;
+int f[55],cun[55],word[27];
+int main()
+{
+  int cas;
+  int i,j,k;
+  cin>>cas;
+  while(cas--)
+  {
+    for(i=1;i<27;i++)
+    cin>>word[i];
+    word[0]=0;
+    for(i=0;i<51;i++)
+    cun[i]=0;
+    cun[0]=1;
+    for(i=1;i<27;i++)
+    {
+      for(j=0;j<51;j++)
+      for(k=0;k<=word[i]&&k*i+j<51;k++)
+      f[i*k+j]+=cun[j];
+      for(j=0;j<51;j++)
+      cun[j]=f[j],f[j]=0;
+    }
+    int ans=0;
+    for(i=1;i<51;i++)
+    ans+=cun[i];
+    cout<<ans<<endl;
+  }
+}

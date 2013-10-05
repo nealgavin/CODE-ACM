@@ -1,0 +1,146 @@
+Man Down
+ Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+ Total Submission(s): 1171    Accepted Submission(s): 400
+ 
+
+
+Problem Description
+ 
+The Game “Man Down 100 floors” is an famous and interesting game.You can enjoy the game from
+ http://hi.baidu.com/abcdxyzk/blog/item/16398781b4f2a5d1bd3e1eed.html
+ 
+
+
+We take a simplified version of this game. We have only two kinds of planks. One kind of the planks contains food and the other one contains nails. And if the man falls on the plank which contains food his energy will increase but if he falls on the plank which contains nails his energy will decrease. The man can only fall down vertically .We assume that the energy he can increase is unlimited and no borders exist on the left and the right.
+ 
+First the man has total energy 100 and stands on the topmost plank of all. Then he can choose to go left or right to fall down. If he falls down from the position (Xi,Yi),he will fall onto the nearest plank which satisfies (xl <= xi <= xr)(xl is the leftmost position of the plank and xr is the rightmost).If no planks satisfies that, the man will fall onto the floor and he finishes his mission. But if the man’s energy is below or equal to 0 , he will die and the game is Over.
+ 
+Now give you the height and position of all planks. And ask you whether the man can falls onto the floor successfully. If he can, try to calculate the maximum energy he can own when he is on the floor.(Assuming that the floor is infinite and its height is 0,and all the planks are located at different height).
+ 
+
+Input
+ 
+There are multiple test cases.
+ 
+For each test case, The first line contains one integer N (2 <= N <= 100,000) representing the number of planks.
+ 
+Then following N lines representing N planks, each line contain 4 integers (h,xl,xr,value)(h > 0, 0 < xl < xr < 100,000, -1000 <= value <= 1000), h represents the plank’s height, xl is the leftmost position of the plank and xr is the rightmost position. Value represents the energy the man will increase by( if value > 0) or decrease by( if value < 0) when he falls onto this plank.
+ 
+
+
+Output
+ 
+If the man can falls onto the floor successfully just output the maximum energy he can own when he is on the floor. But if the man can not fall down onto the floor anyway ,just output “-1”(not including the quote)
+ 
+
+
+Sample Input
+ 
+4
+10 5 10 10
+5 3 6 -100
+4 7 11 20
+2 2 1000 10 
+
+
+Sample Output
+ 
+140 
+
+
+Source
+ 
+2009 Multi-University Training Contest 12 - Host by FZU
+ 
+
+
+Recommend
+ 
+gaojie
+ 
+ 
+ 
+一个木板，看成一个线段。找出最大的能力剩余。我的想法是从底部开始倒跳回去，将最后一块板看成是最大的覆盖所有区域的初始板能量为初值100；
+ 
+energy[f]=max(energy[l],energy[r])+val(f);就是板的最左与最右跳下缩剩余的最大能量，一直跳到最高的板即是答案。
+
+
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#define N 100300
+using namespace std;
+class node
+{
+  public:
+  int l,r,cover,val;
+}root[N<<2];
+class A
+{
+  public:
+  int h,l,r,val;
+}q[N];
+bool cmp(A a,A b)
+{
+  return a.h<b.h;
+}
+void build(int t,int l,int r)
+{
+  root[t].l=l;root[t].r=r;
+  if(root[t].l==root[t].r){root[t].cover=0;root[t].val=0;return;}
+  build(t<<1,l,(l+r)/2);build(t<<1|1,(l+r)/2+1,r);
+}
+void update(int t,int l,int r,int val)
+{
+  if(root[t].l==l&&root[t].r==r){root[t].cover=1;root[t].val=val;}
+  else
+  {
+    if(root[t].cover)
+    {
+      root[t<<1].cover=1;root[t<<1|1].cover=1;
+      root[t<<1].val=root[t].val;root[t<<1|1].val=root[t].val;
+      root[t].cover=0;root[t].val=0;
+    }
+    if(root[t<<1].r>=r)update(t<<1,l,r,val);
+    else if(root[t<<1|1].l<=l)
+    {
+      update(t<<1|1,l,r,val);
+    }
+    else
+    {update(t<<1,l,root[t<<1].r,val);
+     update(t<<1|1,root[t<<1|1].l,r,val);
+    }
+  }
+}
+int query(int t,int pos)
+{
+  if(root[t].cover)
+  {
+    return root[t].val;
+  }
+  if(root[t<<1].r>=pos)
+  query(t<<1,pos);
+  else query(t<<1|1,pos);
+}
+int main()
+{
+  int m;
+  while(cin>>m)
+  {
+    for(int i=0;i<m;i++)
+    scanf("%d%d%d%d",&q[i].h,&q[i].l,&q[i].r,&q[i].val);
+      sort(q,q+m,cmp);
+      build(1,1,N);
+      root[1].cover=1;root[1].val=100;
+      int x;
+      for(int i=0;i<m;i++)
+      {
+        x=max(query(1,q[i].l),query(1,q[i].r));
+        update(1,q[i].l,q[i].r,q[i].val+x);
+      }
+      x=max(query(1,q[m-1].l),query(1,q[m-1].r));
+      if(x<0)x=-1;
+      cout<<x<<"\n";
+  }
+}

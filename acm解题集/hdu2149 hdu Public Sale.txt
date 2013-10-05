@@ -1,0 +1,51 @@
+#include<cstdio>
+#include<cstring>
+#define N 1111
+int sg[N],s[N],m,n;
+bool h[N];
+void ssgg()
+{
+  int i,j;
+  sg[0]=0;
+  for(i=1;i<N;i++)
+  { memset(h,0,sizeof(h));
+    for(j=1;j<=n;j++)
+    {
+      if(i-j>=0)
+      {
+        h[sg[i-j]]=1;
+      }
+    }
+    for(j=0;j<N;j++)
+    {
+      if(h[j]==0)
+      {
+        sg[i]=j;
+        break;
+      }
+    }
+  }
+}
+int main()
+{
+  int i;
+  while(scanf("%d%d",&m,&n)!=EOF)
+  {
+    ssgg();
+    if(n>=m)
+    {for(i=m;i<=n;i++)
+    {
+      printf("%d",i);
+      if(i!=n)
+      printf(" ");
+      else
+      printf("\n");
+    }}
+    else if(sg[m])
+    {
+      printf("%d\n",sg[m]);
+    }
+    else printf("none\n");
+  }
+  return 0;
+}

@@ -1,0 +1,40 @@
+#include<cstdio>
+
+int main()
+
+{
+  int sum,a,b[103],i,j;
+
+  while(scanf("%d",&a)&&a)
+
+  {
+
+    sum=0;
+
+    for(i=0;i<a;i++)
+
+    {
+
+      scanf("%d",&b[i]);
+
+      sum^=b[i];
+
+    }
+
+    int ans=0;
+
+    for(i=0;i<a;i++)
+
+    {
+
+      if(b[i]>(sum^b[i]))ans++;
+
+    }
+
+    printf("%d\n",ans);
+
+  }
+
+  return 0;
+
+}

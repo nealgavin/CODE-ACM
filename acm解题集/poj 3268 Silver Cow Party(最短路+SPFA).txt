@@ -1,0 +1,122 @@
+Silver Cow Party
+Time Limit: 2000MS	
+Memory Limit: 65536K
+Total Submissions: 9514	
+Accepted: 4263
+Description
+One cow from each of N farms (1 ≤ N ≤ 1000) conveniently numbered 1..N is going to attend the big cow party to be held at farm #X (1 ≤ X ≤ N). A total of M (1 ≤ M ≤ 100,000) unidirectional (one-way roads connects pairs of farms; road i requires Ti (1 ≤ Ti ≤ 100) units of time to traverse.
+Each cow must walk to the party and, when the party is over, return to her farm. Each cow is lazy and thus picks an optimal route with the shortest time. A cow's return route might be different from her original route to the party since roads are one-way.
+Of all the cows, what is the longest amount of time a cow must spend walking to the party and back?
+Input
+Line 1: Three space-separated integers, respectively: N, M, and X 
+Lines 2..M+1: Line i+1 describes road i with three space-separated integers: Ai, Bi, and Ti. The described road runs from farm Ai to farm Bi, requiring Ti time units to traverse.
+Output
+Line 1: One integer: the maximum of time any one cow must walk.
+Sample Input
+4 8 2
+1 2 4
+1 3 2
+1 4 7
+2 1 1
+2 3 5
+3 1 2
+3 4 4
+4 2 3
+Sample Output
+10
+Hint
+Cow 4 proceeds directly to the party (3 units) and returns via farms 1 and 3 (7 units), for a total of 10 time units.
+Source
+USACO 2007 February Silver
+
+思路：所有出边算次最短路，然后在改成入边算次最短路，加和最大就是答案。我用SPFA
+
+失误：不知道为什么用vector 数组传不进来，郁闷。
+
+#include<iostream>
+#include<cstring>
+#include<vector>
+#include<queue>
+using namespace std;
+const int nn=1010;
+const int mm=100009;
+const int oo=1e9;
+class node
+{
+  public:int v,c;
+  node*nex;
+  node(){nex=NULL;}
+}*edge[nn],*redge[nn];
+
+bool vis[nn];
+int dis[nn],cost[nn];
+int n,m,t;
+queue<int>q;
+void spfa(node*e[])
+{
+   for(int i=0;i<=n;i++)
+    dis[i]=oo;
+   memset(vis,0,sizeof(vis));
+   int z;node*ptr;
+   dis[t]=0;
+   q.push(t);vis[t]=1;
+   while(!q.empty())
+   {
+     z=q.front();q.pop();vis[z]=0;
+     ptr=e[z];
+     while(ptr!=NULL)
+     {
+       if(dis[ptr->v]>dis[z]+ptr->c)
+       {
+         dis[ptr->v]=dis[z]+ptr->c;
+         if(!vis[ptr->v])
+         {
+           q.push(ptr->v);vis[ptr->v]=1;
+         }
+       }
+       ptr=ptr->nex;
+     }
+     /*for(int i=0;i<e[z].size();i++)
+     {
+       if(dis[e[i].v]>dis[z]+e[i].c)
+       {
+         dis[e[i].v]=dis[z]+e[i].c;
+         if(!vis[e[i].v])
+          q.push(e[i].v),vis[e[i].v]=1;
+       }
+     }*/
+   }
+}
+int main()
+{
+  while(cin>>n>>m>>t)
+  {
+    memset(edge,0,sizeof(edge));
+    memset(redge,0,sizeof(redge));
+    memset(cost,0,sizeof(cost));
+    int a,b,c;node*z;
+    for(int i=0;i<m;i++)
+    {
+      cin>>a>>b>>c;
+      z=new node();z->v=b;z->c=c;
+      z->nex=edge[a];edge[a]=z;
+      z=new node();z->v=a;z->c=c;
+      z->nex=redge[b];redge[b]=z;
+    }
+    spfa(edge);
+    for(int i=1;i<=n;i++)
+    {
+      cost[i]=dis[i];
+    }
+    spfa(redge);int ans=0;
+    for(int i=1;i<=n;i++)
+    { if(dis[i]==oo||cost[i]==oo)continue;
+      cost[i]+=dis[i];if(cost[i]>ans)ans=cost[i];
+    }
+    cout<<ans<<"\n";
+  }
+}
+
+
+
+

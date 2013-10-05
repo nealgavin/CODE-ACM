@@ -1,0 +1,49 @@
+#include<stdio.h>
+#include<string.h>
+#include<algorithm>
+#define N 1004
+using namespace std;
+struct stu
+{
+  int score;
+  char name[23];
+};
+stu student[N];
+bool cmp(stu a,stu b)
+{
+  if(a.score==b.score)return strcmp(a.name,b.name)<0;
+  return a.score>b.score;
+}
+int main()
+{
+  //freopen("2.txt","r",stdin);
+  int m,n,G,i,j,kaoti[11],workout,tinumber,ok,sum;char name[23];
+  while(scanf("%d%d%d",&n,&m,&G)&&n)//n考生数，M考题数，G分数线
+  {
+    ok=0;
+    for(i=1;i<=m;i++)
+    scanf("%d",&kaoti[i]);//每题得分
+    for(i=1;i<=n;i++)
+    {
+      sum=0;
+      student[i].score=0;
+      scanf("%s",name);
+      scanf("%d",&workout);
+      for(j=1;j<=workout;j++)
+      {
+        scanf("%d",&tinumber);
+        sum+=kaoti[tinumber];
+      }
+      if(sum>=G)
+      {
+        student[++ok].score=sum;
+        strcpy(student[ok].name,name);
+      }
+    }
+    sort(student+1,student+ok+1,cmp);
+    printf("%d\n",ok);
+    if(ok>0)
+    for(i=1;i<=ok;i++)
+    printf("%s %d\n",student[i].name,student[i].score);
+  }
+}

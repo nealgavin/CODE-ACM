@@ -1,0 +1,23 @@
+#include <cstdlib>
+#include <iostream>
+#include <math.h>
+
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+
+    int n,i,a,b;__int64 d[57];
+    d[1]=d[2]=1;
+    for(i=3;i<=56;i++)
+    d[i]=d[i-1]+d[i-2];
+    scanf("%d",&n);
+    for(i=0;i<n;i++)
+    {
+               scanf("%d%d",&a,&b);
+               printf("%I64d\n",d[b-a+1]);
+               
+    }
+    //system("PAUSE");
+    return EXIT_SUCCESS;
+}

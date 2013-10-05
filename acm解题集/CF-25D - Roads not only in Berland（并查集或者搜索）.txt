@@ -1,0 +1,72 @@
+D - Roads not only in Berland
+Time Limit:2000MS Memory Limit:262144KB 64bit IO Format:%I64d & %I64u
+Submit Status Practice CodeForces 25D
+Description
+Berland Government decided to improve relations with neighboring countries. First of all, it was decided to build new roads so that from each city of Berland and neighboring countries it became possible to reach all the others. There are n cities in Berland and neighboring countries in total and exactly n?-?1 two-way roads. Because of the recent financial crisis, the Berland Government is strongly pressed for money, so to build a new road it has to close some of the existing ones. Every day it is possible to close one existing road and immediately build a new one. Your task is to determine how many days would be needed to rebuild roads so that from each city it became possible to reach all the others, and to draw a plan of closure of old roads and building of new ones.
+Input
+The first line contains integer n (2?≤?n?≤?1000) — amount of cities in Berland and neighboring countries. Next n?-?1 lines contain the description of roads. Each road is described by two space-separated integers ai, bi (1?≤?ai,?bi?≤?n,?ai?≠?bi) — pair of cities, which the road connects. It can't be more than one road between a pair of cities. No road connects the city with itself.
+Output
+Output the answer, number t — what is the least amount of days needed to rebuild roads so that from each city it became possible to reach all the others. Then output t lines — the plan of closure of old roads and building of new ones. Each line should describe one day in the format i j u v — it means that road between cities i and j became closed and a new road between cities u and v is built. Cities are numbered from 1. If the answer is not unique, output any.
+Sample Input
+Input
+2
+1 2
+Output
+0
+Input
+7
+1 2
+2 3
+3 1
+4 5
+5 6
+6 7
+Output
+1
+3 1 3 7
+
+思路1：最早的思路是搜索，每次递归传递当前的点，和它的父节点，而后它的子节点不能为父节点，这样搜到已经搜过的点就说明有环，那就去点这条边，搜下没搜过的点，吧边连过去，这样就OK了。
+思路2：用并查集，每次找读入两个点的根，如果根一样则说明有环，记录这条边，如果根不一样就合并，因为当前两点是相连的。
+             然后遍历一遍，有机个集合，就需要改几条边，每次从环里删条边就连接两集合。
+失误：不知道怎么回事，用搜索老是乱整内存，意外终止，调不清楚，vector使用的时候也出很大问题，为什么it!=mp[u].end();它不终止而报错
+           耽误了好长时间调试，最后才用并查集搞定了。
+#include <stdio.h>
+#include <vector>
+using namespace std;
+
+int f[1005];
+int find(int x)
+{
+  return f[x]==x?f[x]:f[x]=find(f[x]);
+}
+void he(int x, int y)
+ {
+   f[find(x)]=find(y);
+ }
+
+int main(void) 
+{
+	int n, i;
+	scanf("%d", &n);
+	for(i=1;i<=n;i++)
+		f[i] = i;
+	vector<pair<int, int> > p;
+	vector<int> q;
+	for(i=1;i<n;i++)
+    {
+		int x, y;
+		scanf("%d%d", &x, &y);
+		if(find(x)==find(y)) 
+		p.push_back(make_pair(x, y));///有环记录这条边，待会删去
+		else he(x, y);
+    }
+	for(i=1;i<=n;i++)///找有几个不同集合，就需要改几调边
+		if(find(i)==i) q.push_back(i);
+	printf("%d\n", q.size()-1);
+	for(i=1;i<(int)q.size();i++)///去个环，合并两个集合
+		printf("%d %d %d %d\n", p[i-1].first, p[i-1].second, q[i-1], q[i]);
+	return 0;
+}
+
+
+

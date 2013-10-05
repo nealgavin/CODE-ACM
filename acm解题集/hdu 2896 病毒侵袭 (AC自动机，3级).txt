@@ -1,0 +1,182 @@
+病毒侵袭
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 7454    Accepted Submission(s): 1961
+
+
+
+Problem Description
+
+当太阳的光辉逐渐被月亮遮蔽，世界失去了光明，大地迎来最黑暗的时刻。。。。在这样的时刻，人们却异常兴奋——我们能在有生之年看到500年一遇的世界奇观，那是多么幸福的事儿啊~~
+但网路上总有那么些网站，开始借着民众的好奇心，打着介绍日食的旗号，大肆传播病毒。小t不幸成为受害者之一。小t如此生气，他决定要把世界上所有带病毒的网站都找出来。当然，谁都知道这是不可能的。小t却执意要完成这不能的任务，他说：“子子孙孙无穷匮也！”（愚公后继有人了）。
+万事开头难，小t收集了好多病毒的特征码，又收集了一批诡异网站的源码，他想知道这些网站中哪些是有病毒的，又是带了怎样的病毒呢？顺便还想知道他到底收集了多少带病毒的网站。这时候他却不知道何从下手了。所以想请大家帮帮忙。小t又是个急性子哦，所以解决问题越快越好哦~~
+
+
+ 
+
+
+Input
+
+第一行，一个整数N（1<=N<=500），表示病毒特征码的个数。
+接下来N行，每行表示一个病毒特征码，特征码字符串长度在20—200之间。
+每个病毒都有一个编号，依此为1—N。
+不同编号的病毒特征码不会相同。
+在这之后一行，有一个整数M（1<=M<=1000），表示网站数。
+接下来M行，每行表示一个网站源码，源码字符串长度在7000—10000之间。
+每个网站都有一个编号，依此为1—M。
+以上字符串中字符都是ASCII码可见字符（不包括回车）。
+
+
+ 
+
+
+Output
+
+依次按如下格式输出按网站编号从小到大输出，带病毒的网站编号和包含病毒编号，每行一个含毒网站信息。
+web 网站编号: 病毒编号 病毒编号 …
+冒号后有一个空格，病毒编号按从小到大排列，两个病毒编号之间用一个空格隔开，如果一个网站包含病毒，病毒数不会超过3个。
+最后一行输出统计信息，如下格式
+total: 带病毒网站数
+冒号后有一个空格。
+
+
+ 
+
+
+Sample Input
+
+3
+aaa
+bbb
+ccc
+2
+aaabbbccc
+bbaacc
+
+
+ 
+
+
+Sample Output
+
+web 1: 1 2 3
+total: 1
+
+
+ 
+
+
+Source
+
+ 2009 Multi-University Training Contest 10 - Host by NIT  
+
+ 
+
+
+Recommend
+
+gaojie
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<queue>
+#include<algorithm>
+using namespace std;
+const int ch_size=127;
+int n,m;
+bool vis[505];
+class node
+{
+  public:int val;
+  node*next[127];
+  node*fail;
+  node(){memset(next,NULL,sizeof(next));fail=NULL;val=0;}
+}*root;
+void insert(node*root,char*s,int id)
+{ node*tmp=root;int z;
+  for(int i=0;s[i];++i)
+  { z=s[i];
+    if(tmp->next[z]==NULL)
+      tmp->next[z]=new node();
+    tmp=tmp->next[z];
+  }
+  tmp->val=id;
+}
+
+void get_fail(node*root)
+{
+  node*tmp,*ret,*p;
+  queue<node*>Q;
+  Q.push(root);
+  while(!Q.empty())
+  {
+    tmp=Q.front();Q.pop();
+    for(int i=0;i<ch_size;++i)
+    {
+      if(tmp->next[i]==NULL)continue;
+      p=tmp->fail;
+      while(p!=NULL&&p->next[i]==NULL)p=p->fail;
+      if(p==NULL)tmp->next[i]->fail=root;
+      else tmp->next[i]->fail=p->next[i];
+      Q.push(tmp->next[i]);
+    }
+  }
+}
+bool query(node*root,char*s,int id)
+{ bool flag=0;
+ memset(vis,0,sizeof(vis));
+  int z;node*tmp=root,*ret;
+  for(int i=0;s[i];++i)
+  {
+    z=s[i];
+    while(tmp!=root&&tmp->next[z]==NULL)tmp=tmp->fail;
+    tmp=tmp->next[z];
+    if(tmp==NULL)tmp=root;
+    ret=tmp;
+    while(ret!=root&&ret!=NULL)
+    {
+      if(ret->val>0){vis[ret->val]=1;flag=1;}ret=ret->fail;
+    }
+  }
+  if(flag)
+  {printf("web %d:",id);
+   for(int i=1;i<=n;++i)
+    if(vis[i])
+    {printf(" %d",i);flag=1;}
+   printf("\n");
+  }
+  return flag;
+}
+void mefree(node*tmp)
+{
+  for(int i=0;i<ch_size;++i)
+  {
+    if(tmp->next[i]!=NULL)
+      mefree(tmp->next[i]);
+  }
+  delete tmp;
+}
+char s[11000];
+int main()
+{
+  while(~scanf("%d",&n))
+  { root=new node();
+    for(int i=0;i<n;++i)
+    {
+      scanf("%s",s);
+      insert(root,s,i+1);
+    }
+    scanf("%d",&m);
+    int total=0;
+    get_fail(root);
+    for(int i=0;i<m;++i)
+    {
+      scanf("%s",s);
+      if(query(root,s,i+1))
+        ++total;
+    }
+    printf("total: %d\n",total);
+    mefree(root);
+  }
+  return 0;
+}

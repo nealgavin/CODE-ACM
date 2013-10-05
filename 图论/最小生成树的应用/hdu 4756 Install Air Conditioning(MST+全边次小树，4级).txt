@@ -1,0 +1,157 @@
+Install Air Conditioning
+
+Time Limit: 4000/2000 MS (Java/Others)    Memory Limit: 65535/65535 K (Java/Others)
+Total Submission(s): 174    Accepted Submission(s): 23
+
+
+Problem Description
+
+
+  NJUST carries on the tradition of HaJunGong. NJUST, who keeps up the ”people-oriented, harmonious development” of the educational philosophy and develops the ”unity, dedication, truth-seeking, innovation” school motto, has now become an engineering-based, multidisciplinary university.
+
+  As we all know, Nanjing is one of the four hottest cities in China. Students in NJUST find it hard to fall asleep during hot summer every year. They will never, however, suffer from that hot this year, which makes them really excited. NJUST’s 60th birthday is approaching, in the meantime, 50 million is spent to install air conditioning among students dormitories. Due to NJUST’s long history, the old circuits are not capable to carry heavy load, so it is necessary to set new high-load wires. To reduce cost, every wire between two dormitory is considered a segment. Now, known about all the location of dormitories and a power plant, and the cost of high-load wire per meter, Tom200 wants to know in advance, under the premise of all dormitories being able to supply electricity, the minimum cost be spent on high-load wires. And this is the minimum strategy. But Tom200 is informed that there are so many wires between two specific dormitories that we cannot set a new high-load wire between these two, otherwise it may have potential risks. The problem is that Tom200 doesn’t know exactly which two dormitories until the setting process is started. So according to the minimum strategy described above, how much cost at most you'll spend?
+ 
+
+Input
+  The first line of the input contains a single integer T(T ≤ 100), the number of test cases.
+  For each case, the first line contains two integers n(3 ≤ n ≤ 1000), k(1 ≤ k ≤ 100). n represents n-1 dormitories and one power plant, k represents the cost of high-load wire per meter. n lines followed contains two integers x, y(0 ≤ x, y ≤ 10000000), representing the location of dormitory or power plant. Assume no two locations are the same, and no three locations are on a straight line. The first one is always the location of the power plant.
+ 
+
+Output
+  For each case, output the cost, correct to two decimal places.
+ 
+
+Sample Input
+2
+
+4 2
+0 0
+1 1
+2 0
+3 1
+
+4 3
+0 0
+1 1
+1 0
+0 1
+ 
+
+Sample Output
+9.66
+9.00
+ 
+
+Source
+2013 ACM/ICPC Asia Regional Nanjing Online
+ 
+
+Recommend
+liuyiding
+ 
+思路：先用prim求出最小树，并记录最小树的所有边，标记。
+          然后，枚举所有最小树边的最小替代边，最后的答案就是MAX（MST-最小树边+最小替代边）
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<vector>
+#include<cmath>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=1000+9;
+const double oo=1e30;
+double g[mm][mm];
+vector<int>ge[mm];
+class Point
+{
+  public:double x,y;
+}f[mm];
+double dis[mm],ci[mm][mm],mark[mm];
+int fa[mm];
+int cas;
+bool vis[mm],isMST[mm][mm];
+int N,K;
+double DFS(int u,int rt)///
+{ //puts("++");
+  double _min=mark[u];
+  for(int i=0;i<ge[u].size();++i)
+  {
+    int v=ge[u][i];
+    if(v==rt)continue;
+    _min=min(_min,DFS(v,u));
+  }
+  if(rt!=-1)
+  {
+    ci[rt][u]=ci[u][rt]=min(_min,ci[rt][u]);
+  }
+  return _min;
+}
+double get_Dis(int i,int j)
+{
+  return sqrt((f[i].x-f[j].x)*(f[i].x-f[j].x)+(f[i].y-f[j].y)*(f[i].y-f[j].y));
+}
+int main()
+{
+  while(~scanf("%d",&cas))
+  {
+    while(cas--)
+    {
+      scanf("%d%d",&N,&K);
+      FOR(i,1,N)
+      {
+        scanf("%lf%lf",&f[i].x,&f[i].y);
+      }
+      FOR(i,1,N)FOR(j,i+1,N)
+      g[i][j]=g[j][i]=get_Dis(i,j);
+      ///prim
+      FOR(i,0,N)dis[i]=oo;
+      clr(vis,0);
+      vis[1]=1; dis[1]=0;fa[1]=1;
+      FOR(i,2,N)dis[i]=g[1][i],fa[i]=1;
+      int best;double MAX,MST=0;
+
+      FOR(i,2,N)
+      {
+        best=-1;MAX=oo;
+        FOR(j,1,N)
+        if(!vis[j]&&MAX>dis[j])
+          best=j,MAX=dis[j];
+         // if(best==-1)break;
+        vis[best]=1;MST+=MAX;
+        FOR(j,1,N)
+        {
+          if(!vis[j]&&g[best][j]<dis[j])
+            dis[j]=g[best][j],fa[j]=best;
+        }
+      }
+      /*****************/
+      FOR(i,1,N)FOR(j,1,N)
+      isMST[i][j]=0,ci[i][j]=oo;
+      FOR(i,2,N)isMST[i][ fa[i] ]=isMST[ fa[i] ][i]=1;
+      FOR(i,1,N)ge[i].clear();
+      FOR(i,2,N)ge[ fa[i] ].push_back(i),ge[i].push_back(fa[i]);
+      FOR(i,1,N)
+      {
+        FOR(j,1,N)
+        if(i!=j&&!isMST[i][j])
+        {
+         mark[j]=g[i][j];
+        }
+        else mark[j]=oo;
+        DFS(i,-1);
+      }
+      double ans=MST;
+      FOR(i,1,N)
+      if(fa[i]!=1)///发电与宿舍之间一定能连
+      {
+        ans=max(ans,MST-g[ fa[i] ][i]+ci[ fa[i] ][i]);
+        //cout<<g[ fa[i] ][i]<<" "<<ci[ fa[i] ][i]<<" "<<fa[i]<<" "<<i<<endl;
+      }
+      cout<<ans*K<<endl;
+      printf("%.2lf\n",ans*K);
+    }
+  }
+}
+

@@ -1,0 +1,83 @@
+Trip
+
+Time Limit 1000ms
+
+Memory Limit 65536K
+
+description
+
+　　Xiao wang has a new car, so he wants to have a trip from his home to hefei, however, there is no road from his house directly to Hefei, so he has to go through a number of cities to get to hefei, his car takes one unit of time driving a unit distance at first, but his car will be slow after every city that he pass, so he will take one more unit of time to take a unit of distance after every city (that is, if he has passed k cities, then he needs k units of time to take a unit of distance, we think his home is the first city), can you tell him how to spend the least time to reach Hefei?
+							
+input
+
+　　The first line contains two numbers n and m (0 < n ≤ 200, 0 < m < n×(n-1)/2 ), n is the number of city, 1 is xiaowang's home, n is hefei, m is the number of road, bi-directional edge, then the following m line contains 3 numbers x, y, z, means there is a road from x to y, the distance is z.(You can make sure that there is always a path exist between his home ande hefei).
+							
+output
+
+　　The least time xiao wang must use from his home to hefei.
+							
+sample_input
+
+5 6
+1 2 1
+1 4 5
+2 3 2
+3 5 1
+4 5 1
+2 4 2
+							
+sample_output
+
+7
+							
+hint
+
+
+								
+							
+source
+
+
+思路：dp[x][y]从起始点能经过y个城市到达x城市的最优值
+g[a][b]为城市a到城市b的距离
+dp[x][y]=min(dp[k][y-1]+y*g[k][y])
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+#include<cstdio>
+using namespace std;
+const int mm=210;
+const long long oo=1e18;
+long long g[mm][mm];
+long long dp[mm][mm];
+int n,m;
+int main()
+{ int a,b,c;
+  while(cin>>n>>m)
+  { memset(g,-1,sizeof(g));
+      for(int i=0;i<=n;++i)
+      for(int j=0;j<=n;++j)
+      dp[i][j]=oo;
+    for(int i=0;i<m;++i)
+    {scanf("%d%d%d",&a,&b,&c);
+     g[a][b]=g[b][a]=c;
+    }
+    dp[1][0]=0;
+    for(int i=1;i<=n;++i)
+    {
+      for(int j=1;j<=n;++j)
+      {
+        for(long long k=1;k<=n;++k)
+          if(g[i][j]!=-1)
+        dp[j][k]=min(dp[j][k],dp[i][k-1]+k*g[i][j]);
+      }
+    }
+    long long ans=oo;
+    for(int i=1;i<=n;++i)
+      ans=min(ans,dp[n][i]);
+      cout<<ans<<"\n";
+  }
+}
+
+
+

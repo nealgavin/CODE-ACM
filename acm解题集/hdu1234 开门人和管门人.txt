@@ -1,0 +1,39 @@
+#include<stdio.h>
+#include<string.h>
+#include<algorithm>
+struct jl
+{
+  char name[100];
+  char star[14];
+  char end[14];
+};jl kl[2000];
+bool cmp(jl a,jl b)
+{
+  return strcmp(a.star,b.star)<0;//小于是从小到大排
+}
+bool cmpn(jl a,jl b)
+{
+  return strcmp(a.end,b.end)>0;
+}
+int main()
+{
+  char kai[100],guan[100];
+  int n,m,i,j;
+  scanf("%d",&n);
+  for(i=1;i<=n;i++)
+  {
+    scanf("%d",&m);
+    for(j=1;j<=m;j++)
+    {
+      scanf("%s",kl[j].name);
+      scanf("%s",kl[j].star);
+      scanf("%s",kl[j].end);
+    }
+      std::sort(kl+1,kl+m+1,cmp);
+      strcpy(kai,kl[1].name);
+      std::sort(kl+1,kl+m+1,cmpn);
+      strcpy(guan,kl[1].name);
+      printf("%s ",kai);
+      printf("%s\n",guan);
+  }
+}

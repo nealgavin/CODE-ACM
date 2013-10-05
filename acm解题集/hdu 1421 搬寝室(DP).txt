@@ -1,0 +1,73 @@
+搬寝室
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 10915    Accepted Submission(s): 3661
+
+
+Problem Description
+搬寝室是很累的,xhd深有体会.时间追述2006年7月9号,那天xhd迫于无奈要从27号楼搬到3号楼,因为10号要封楼了.看着寝室里的n件物品,xhd开始发呆,因为n是一个小于2000的整数,实在是太多了,于是xhd决定随便搬2*k件过去就行了.但还是会很累,因为2*k也不小是一个不大于n的整数.幸运的是xhd根据多年的搬东西的经验发现每搬一次的疲劳度是和左右手的物品的重量差的平方成正比(这里补充一句,xhd每次搬两件东西,左手一件右手一件).例如xhd左手拿重量为3的物品,右手拿重量为6的物品,则他搬完这次的疲劳度为(6-3)^2 = 9.现在可怜的xhd希望知道搬完这2*k件物品后的最佳状态是怎样的(也就是最低的疲劳度),请告诉他吧.
+ 
+
+Input
+每组输入数据有两行,第一行有两个数n,k(2<=2*k<=n<2000).第二行有n个整数分别表示n件物品的重量(重量是一个小于2^15的正整数).
+ 
+
+Output
+对应每组输入数据,输出数据只有一个表示他的最少的疲劳度,每个一行.
+ 
+
+Sample Input
+2 1
+1 3
+ 
+
+Sample Output
+4
+ 
+
+Author
+xhd
+
+思路：先排序，很明显，是和离其最近的方差和最小。
+            f[a][b],前a件物品拿b次的最少疲劳度。
+           f[a][b]=min(f[a-1][b],f[a-2][b-1]+(s[a]-s[a-1])^2);
+
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int mm=3010;
+const int oo=1e9;
+long long f[mm][mm];
+int n,k;
+int s[mm];
+long long fan(int x,int y)
+{
+  long long z=(x-y)*(x-y);
+  return z;
+}
+int main()
+{
+  while(cin>>n>>k)
+  {
+    for(int i=0;i<n;i++)cin>>s[i];
+    sort(s,s+n);
+    for(int i=0;i<=n;i++)
+      for(int j=0;j<=k;j++)
+      f[i][j]=oo;
+    for(int i=0;i<=n;i++)
+      f[i][0]=0;
+    for(int i=2;i<=n;i++)
+    {
+      for(int j=1;j<=i&&j<=k;j++)
+      {
+        f[i][j]=min(f[i-1][j],f[i-2][j-1]+fan(s[i-1],s[i-2]));
+      }
+    }
+
+    cout<<f[n][k]<<"\n";
+  }
+}
+
+
+

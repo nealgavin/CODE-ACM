@@ -1,0 +1,185 @@
+G - War
+Time Limit:10000MS     Memory Limit:65536KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+Country X is under attack by enemies. Now the army of enemy has arrived at City Y. City Y consists of an N×M grid. All the paths in the grid are bidirectional, horizontal or vertical or diagonal. The upper-left corner is (0, 0) and lower-right corner is (N, M). The army enters at (0, 0) and they must get to (N, M) in order to continue their attack to the capital of Country X. The figure below shows what does City Y looks like.
+
+
+Every blackened node represents a vertex. The number beside each edge is the amount of TNT needed to destroy that road. The army of Country X is unable to beat the enemy now. The only thing they can do is to prevent them from heading to their capital so that they can have more time to prepare for striking back. Of course they want to use the least amount of TNT to disconnect (0, 0) and (N, M). You are a talented programmer, please help them decide the least amount needed.
+ 
+Input
+There are multiple test cases.
+
+The first line of each test case contains two positive integers N and M, representing height and width of the grid.
+
+Then N+1 lines each containing M integers, giving you the amount needed of horizontal roads in row major order.
+
+Then N lines each containing M+1 integers, giving you the amount needed of vertical roads in row major order.
+
+Then 2N lines each containing 2M integers, giving you the amount needed of diagonal roads in row major order.
+
+There is a blank line after each input block. The sample input is corresponding to the figure above.
+
+Restriction:
+
+1 <= N, M <= 500
+
+1 <= amount <= 1,000,000
+ 
+Output
+One line for each test case the least amount of TNT needed to disconnect (0, 0) and (N, M).
+ 
+Sample Input
+2 3
+1 9 4
+1 8 7
+6 2 3
+7 5 4 8
+6 2 8 7
+10 4 1 7 5 3
+5 4 10 2 1 9
+6 3 2 9 5 3
+8 9 6 3 10 10
+ 
+Sample Output
+18
+ 
+
+思路：一眼望去，赤裸裸的无向图最小割，正反边都加相同流量就行。MLE+TLE
+          平面最小割可化为最短路，以整块面积为点，共边为边。加个起点和终点就好了。
+         内存开的很紧有MLE了，改了下数组，因为用的是SPFA 又TLE了，换成地杰斯特拉才过的。 
+         
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define LL long long
+using namespace std;
+const int mm=1e6+9;
+const LL oo=1e16;
+class Edge
+{
+ public:int v,next;LL w;
+};
+class Dot
+{
+  public:LL dis;int v;
+  Dot(){}
+  Dot(int _v,LL _d)
+  {
+    v=_v;dis=_d;
+  }
+  bool operator<(const Dot&x)const
+  {
+    return dis>x.dis;
+  }
+};
+class ShortPath
+{
+ public:
+ int head[mm],edge;Edge e[mm*4];
+ void clear()
+ {
+   clr(head,-1);edge=0;
+ }
+ void add(int u,int v,LL w)
+ {
+  e[edge].v=v;e[edge].w=w;e[edge].next=head[u];head[u]=edge++;
+ }
+ bool vis[mm];int id[mm];LL dis[mm];
+ priority_queue<Dot>Q;
+ LL dijstra(int s,int t,int n)
+ {
+   int u,v;Dot uu;
+   FOR(i,0,n)dis[i]=oo,vis[i]=0;
+   Q.push(Dot(s,0));dis[s]=0;
+   while(!Q.empty())
+   {
+    uu=Q.top();Q.pop();u=uu.v;
+    if(vis[u])continue;vis[u]=1;
+    for(int i=head[u];~i;i=e[i].next)
+    { v=e[i].v;
+      if(!vis[v]&&dis[v]>dis[u]+e[i].w)
+      {
+        dis[v]=dis[u]+e[i].w;
+        Q.push(Dot(v,dis[v]));
+      }
+    }
+   }
+   return dis[t];
+ }
+}sf;
+int main()
+{
+ int n,m;int a,b,c;
+ //freopen("data.in","r",stdin);
+ while(~scanf("%d%d",&n,&m))
+ {
+   sf.clear();
+   int sss=n*m*4,ttt=n*m*4+1;
+   FOR(i,0,n)FOR(j,0,m-1)
+   {
+     scanf("%d",&c);
+     if(i==0)
+     { a=ttt;b=i*m*4+j*4+1;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+     else if(i==n)
+     {
+       a=(i-1)*m*4+j*4+3; b=sss;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+     else
+     {
+       a=i*m*4+j*4+1;b=(i-1)*m*4+j*4+3;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+   }
+   FOR(i,0,n-1)FOR(j,0,m)
+   { scanf("%d",&c);
+     if(j==0)
+     {
+       a=sss;b=i*m*4+j*4;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+     else if(j==m)
+     {
+       a=i*m*4+(j-1)*4+2;
+       b=ttt;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+     else
+     {
+       a=i*m*4+(j-1)*4+2;b=i*m*4+j*4;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+   }
+   FOR(i,0,n-1)FOR(k,0,1)FOR(j,0,m-1)FOR(l,0,1)
+   { scanf("%d",&c);
+     if(k==0)
+     {
+       a=i*m*4+j*4+l;b=i*m*4+j*4+l+1;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+     else
+     {
+       a=i*m*4+j*4+(4-l)%4;
+       b=i*m*4+j*4+3-l;
+       sf.add(a,b,c);sf.add(b,a,c);
+     }
+   }
+//   for(int i=0;i<sf.edge;i+=2)
+//   {
+//     printf("e=%d %d %I64d\n",sf.e[i].u,sf.e[i].v,sf.e[i].w);
+//   }
+   printf("%I64d\n",sf.dijstra(sss,ttt,n*m*4+1));
+ }
+}
+
+
+

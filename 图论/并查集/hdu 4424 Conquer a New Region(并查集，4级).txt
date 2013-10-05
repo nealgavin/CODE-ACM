@@ -1,0 +1,99 @@
+E - Conquer a New Region
+Time Limit:4000MS     Memory Limit:32768KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+HDU 4424
+Description
+The wheel of the history rolling forward, our king conquered a new region in a distant continent.
+There are N towns (numbered from 1 to N) in this region connected by several roads. It's confirmed that there is exact one route between any two towns. Traffic is important while controlled colonies are far away from the local country. We define the capacity C(i, j) of a road indicating it is allowed to transport at most C(i, j) goods between town i and town j if there is a road between them. And for a route between i and j, we define a value S(i, j) indicating the maximum traffic capacity between i and j which is equal to the minimum capacity of the roads on the route. 
+Our king wants to select a center town to restore his war-resources in which the total traffic capacities from the center to the other N - 1 towns is maximized. Now, you, the best programmer in the kingdom, should help our king to select this center.
+ 
+Input
+There are multiple test cases.
+The first line of each case contains an integer N. (1 <= N <= 200,000)
+The next N - 1 lines each contains three integers a, b, c indicating there is a road between town a and town b whose capacity is c. (1 <= a, b <= N, 1 <= c <= 100,000)
+ 
+Output
+For each test case, output an integer indicating the total traffic capacity of the chosen center town.
+ 
+Sample Input
+4
+1 2 2
+2 4 1
+2 3 1
+4
+1 2 1
+2 4 1
+2 3 1
+ 
+Sample Output
+4
+3
+ 
+
+思路：并查集，把边从大到小排，先放大的边，如果该边连接两个集合，那就判断哪个集合合并比较优，被合并的集合都通过新加边，最小的就是新加边。
+
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<algorithm>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define LL long long
+using namespace std;
+const int mm=2e5+9;
+int rt[mm],rank[mm];
+LL sum[mm];
+class Edge
+{
+  public:int a,b,c;
+  bool operator<(const Edge&x)const
+  {
+    return c>x.c;
+  }
+}e[mm];
+void init(int n)
+{
+  FOR(i,0,n)rt[i]=i,rank[i]=1,sum[i]=0;
+}
+int find(int x)
+{
+  if(x^rt[x])
+    rt[x]=find(rt[x]);
+  return rt[x];
+}
+void uni(int a,int b,LL x)
+{
+  a=find(a);b=find(b);
+  LL ta,tb;
+  ta=sum[a]+x*rank[b];
+  tb=sum[b]+x*rank[a];
+  if(ta>tb)
+    rt[b]=a,rank[a]+=rank[b],sum[a]+=rank[b]*x;
+  else rt[a]=b,rank[b]+=rank[a],sum[b]+=rank[a]*x;
+}
+int main()
+{
+  int n,a,b,c;
+  while(~scanf("%d",&n))
+  { init(n);
+    FOR(i,2,n)
+    {
+      scanf("%d%d%d",&a,&b,&c);
+      e[i].a=a;e[i].b=b;e[i].c=c;
+    }
+    sort(e+2,e+1+n);
+    FOR(i,2,n)
+    { 
+      uni(e[i].a,e[i].b,(LL)e[i].c);
+    }
+    printf("%I64d\n",sum[find(1)]);
+  }
+}
+
+
+

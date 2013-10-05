@@ -1,0 +1,90 @@
+D - Savior
+Time Limit:4000MS     Memory Limit:262144KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+CodeForces 60D
+Description
+Misha decided to help Pasha and Akim be friends again. He had a cunning plan — to destroy all the laughy mushrooms. He knows that the laughy mushrooms can easily burst when they laugh. Mushrooms grow on the lawns. There are a[t] mushrooms on the t-th lawn.
+Misha knows that the lawns where the mushrooms grow have a unique ability. A lawn (say, i) can transfer laugh to other lawn (say, j) if there exists an integer (say, b) such, that some permutation of numbers a[i],?a[j] and b is a beautiful triple (i?≠?j). A beautiful triple is such three pairwise coprime numbers x,?y,?z, which satisfy the following condition: x2?+?y2?=?z2.
+Misha wants to know on which minimal number of lawns he should laugh for all the laughy mushrooms to burst.
+Input
+The first line contains one integer n (1?≤?n?≤?106) which is the number of lawns. The next line contains n integers ai which are the number of mushrooms on the i-lawn (1?≤?ai?≤?107). All the numbers are different.
+Output
+Print a single number — the minimal number of lawns on which Misha should laugh for all the mushrooms to burst.
+Sample Input
+Input
+1
+2
+Output
+1
+Input
+2
+1 2
+Output
+2
+Input
+2
+3 5
+Output
+1
+
+思路：所有勾股数都可以表示为x^2-y^2,,2*x*y,,,x^2+y^2  枚举所有勾股数，然后把能合并的合并，最后查看有几个不同的集合就是答案。
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=1e7+9;
+int root[mm],f[mm],n,num;
+int look(int x)
+{
+  if(x^root[x])
+    root[x]=look(root[x]);
+  return root[x];
+}
+void uni(int a,int b)
+{
+  a=look(a);b=look(b);
+  if(root[a]!=0&&root[b]!=0&&a!=b)
+  {
+    root[a]=b;++num;
+  }
+}
+int gcd(int a,int b)
+{ int z;
+  while(a)
+  {
+    z=a;a=b%a;b=z;
+  }
+  return b;
+}
+int main()
+{ long long x,y,z;
+  while(scanf("%d",&n)!=EOF)
+    { memset(root,0,sizeof(root));
+      for(int i=0;i<n;++i)
+        {scanf("%d",&f[i]);root[f[i]]=f[i];}
+        num=0;
+      for(long long i=1;i<mm;i++)
+      {
+        for(long long j=i+1;2*i*j<mm;j+=2)
+        {
+          x=j*j-i*i;y=2*i*j;z=i*i+j*j;
+          if(x>mm||y>mm)break;
+          if(gcd(i,j)!=1)continue;
+            uni(x,y);
+          if(z<mm)
+            uni(x,z);
+          if(z<mm)
+            uni(y,z);
+        }
+      }
+      printf("%d\n",n-num);
+    }
+}
+
+

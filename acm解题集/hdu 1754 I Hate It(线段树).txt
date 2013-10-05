@@ -1,0 +1,117 @@
+I Hate It
+Time Limit: 9000/3000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 17029    Accepted Submission(s): 6553
+
+
+Problem Description
+很多学校流行一种比较的习惯。老师们很喜欢询问，从某某到某某当中，分数最高的是多少。
+这让很多学生很反感。
+
+不管你喜不喜欢，现在需要你做的是，就是按照老师的要求，写一个程序，模拟老师的询问。当然，老师有时候需要更新某位同学的成绩。
+ 
+
+Input
+本题目包含多组测试，请处理到文件结束。
+在每个测试的第一行，有两个正整数 N 和 M ( 0<N<=200000,0<M<5000 )，分别代表学生的数目和操作的数目。
+学生ID编号分别从1编到N。
+第二行包含N个整数，代表这N个学生的初始成绩，其中第i个数代表ID为i的学生的成绩。
+接下来有M行。每一行有一个字符 C (只取'Q'或'U') ，和两个正整数A，B。
+当C为'Q'的时候，表示这是一条询问操作，它询问ID从A到B(包括A,B)的学生当中，成绩最高的是多少。
+当C为'U'的时候，表示这是一条更新操作，要求把ID为A的学生的成绩更改为B。
+
+ 
+
+Output
+对于每一次询问操作，在一行里面输出最高成绩。
+ 
+
+Sample Input
+5 6
+1 2 3 4 5
+Q 1 5
+U 3 6
+Q 3 4
+Q 4 5
+U 2 9
+Q 1 5
+ 
+
+Sample Output
+5
+6
+5
+9
+
+HintHuge input,the C function scanf() will work better than cin 
+ 
+
+Author
+linle
+ 
+
+Source
+2007省赛集训队练习赛（6）_linle专场 
+ 
+
+Recommend
+lcy
+
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+#define N 200006
+using namespace std;
+class node
+{
+  public:
+  int l,r,m;
+}root[4*N];
+int shu[N];
+void build(int t,int l,int r)
+{
+  root[t].l=l;root[t].r=r;
+  if(l==r)root[t].m=shu[l];
+  else
+  {
+    build(t<<1,l,(l+r)/2);build(t<<1|1,(l+r)/2+1,r);
+    root[t].m=max(root[t<<1].m,root[t<<1|1].m);
+  }
+}
+void update(int t,int id,int date)
+{
+  if(root[t].l==root[t].r&&root[t].l==id)
+  {
+    root[t].m=date;return;
+  }
+  if(root[t<<1].r>=id)update(t<<1,id,date);
+  else update(t<<1|1,id,date);
+  root[t].m=max(root[t<<1].m,root[t<<1|1].m);
+}
+int query(int t,int l,int r)
+{  int s;
+  if(root[t].l==l&&root[t].r==r)return root[t].m;
+  if(root[t<<1].r>=r)s=query(t<<1,l,r);
+  else if(root[t<<1|1].l<=l)s=query(t<<1|1,l,r);
+  else s=max(query(t<<1,l,root[t<<1].r),query(t<<1|1,root[t<<1|1].l,r));
+  return s;
+}
+int main()
+{
+  int n,m;
+  char s;
+  int a,b;
+  while(scanf("%d%d",&n,&m)!=EOF)
+  {
+    for(int i=1;i<=n;i++)
+    scanf("%d",&shu[i]);
+    build(1,1,n);
+    while(m--)
+    {
+      cin>>s;
+      scanf("%d%d",&a,&b);
+      if(s=='Q')printf("%d\n",query(1,a,b));
+      else update(1,a,b);
+    }
+  }
+}

@@ -1,0 +1,86 @@
+吉哥系列故事——临时工计划
+
+Time Limit : 3000/1000ms (Java/Other)   Memory Limit : 65535/32768K (Java/Other)
+Total Submission(s) : 24   Accepted Submission(s) : 5
+Font: Times New Roman | Verdana | Georgia
+Font Size: ← →
+Problem Description
+　　俗话说一分钱难倒英雄汉，高中几年下来，吉哥已经深深明白了这个道理，因此，新年开始存储一年的个人资金已经成了习惯，不过自从大学之后他不好意思再向大人要压岁钱了，只能把唯一的希望放到自己身上。可是由于时间段的特殊性和自己能力的因素，只能找到些零零碎碎的工作，吉哥想知道怎么安排自己的假期才能获得最多的工资。
+　　已知吉哥一共有m天的假期，每天的编号从1到m，一共有n份可以做的工作，每份工作都知道起始时间s，终止时间e和对应的工资c，每份工作的起始和终止时间以天为单位(即天数编号)，每份工作必须从起始时间做到终止时间才能得到总工资c，且不能存在时间重叠的工作。比如，第1天起始第2天结束的工作不能和第2天起始，第4天结束的工作一起被选定，因为第2天吉哥只能在一个地方工作。
+　　现在，吉哥想知道怎么安排才能在假期的m天内获得最大的工资数（第m+1天吉哥必须返回学校，m天以后起始或终止的工作是不能完成的）。
+Input
+第一行是数据的组数T；每组数据的第一行是2个正整数：假期时间m和可做的工作数n；接下来n行分别有3个正整数描述对应的n个工作的起始时间s，终止时间e，总工资c。
+
+[Technical Specification]
+1<=T<=1000
+9<m<=100
+0<n<=1000
+s<=100, e<=100, s<=e
+c<=10000
+Output
+对于每组数据，输出吉哥可获得的最高工资数。
+Sample Input
+1
+10 5
+1 5 100
+3 10 10
+5 10 100
+1 4 2
+6 12 266
+Sample Output
+102
+Source
+2013腾讯编程马拉松初赛第〇场（3月20日）
+
+思路：先排序，然后按照枚举每个工作的结束点，进行DP，dp[x]表示工作到x天的最优值。
+dp[x]=max(dp[x],dp[s],f[i].c+小于i开始时间的第一个值)（f[i].l<=s<=f[i].r）
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int mm=1e4+9;
+int dp[mm];
+class node
+{
+  public:int l,r,c;
+}f[mm];
+int cas,m,n;
+bool cmp(node a,node b)
+{ if(a.r^b.r)
+  return a.r<b.r;
+  return a.l<b.l;
+}
+int main()
+{
+   scanf("%d",&cas);
+
+    while(cas--)
+    {
+      scanf("%d%d",&m,&n);
+      for(int i=0;i<n;i++)
+        scanf("%d%d%d",&f[i].l,&f[i].r,&f[i].c);
+      sort(f,f+n,cmp);
+      memset(dp,0,sizeof(dp));
+      int z=0,num;
+      for(int i=0;i<n;i++)
+      { z=f[i].r;num=0;
+       if(z>m)break;
+        num+=f[i].c;
+        for(int j=f[i].l-1;j>=0;--j)
+          if(dp[j])
+        {num+=dp[j];break;}
+        if(dp[z]<num)dp[z]=num;
+        for(int j=f[i].l;j<=f[i].r;j++)
+          if(dp[j]>dp[z])dp[z]=dp[j];
+      }
+      int ans=0;
+      for(int i=0;i<=m;i++)
+        if(dp[i]>ans)ans=dp[i];
+      cout<<ans<<"\n";
+    }
+
+}
+
+

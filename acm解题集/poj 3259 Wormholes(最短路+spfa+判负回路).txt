@@ -1,0 +1,118 @@
+Wormholes
+Time Limit: 2000MS	
+Memory Limit: 65536K
+Total Submissions: 22566	
+Accepted: 8056
+Description
+While exploring his many farms, Farmer John has discovered a number of amazing wormholes. A wormhole is very peculiar because it is a one-way path that delivers you to its destination at a time that is BEFORE you entered the wormhole! Each of FJ's farms comprises N (1 ≤ N ≤ 500) fields conveniently numbered 1..N, M (1 ≤ M ≤ 2500) paths, and W (1 ≤ W ≤ 200) wormholes.
+As FJ is an avid time-traveling fan, he wants to do the following: start at some field, travel through some paths and wormholes, and return to the starting field a time before his initial departure. Perhaps he will be able to meet himself :) .
+To help FJ find out whether this is possible or not, he will supply you with complete maps to F (1 ≤ F ≤ 5) of his farms. No paths will take longer than 10,000 seconds to travel and no wormhole can bring FJ back in time by more than 10,000 seconds.
+Input
+Line 1: A single integer, F. F farm descriptions follow. 
+Line 1 of each farm: Three space-separated integers respectively: N, M, and W 
+Lines 2..M+1 of each farm: Three space-separated numbers (S, E, T) that describe, respectively: a bidirectional path between S and E that requires T seconds to traverse. Two fields might be connected by more than one path. 
+Lines M+2..M+W+1 of each farm: Three space-separated numbers (S, E, T) that describe, respectively: A one way path from S to E that also moves the traveler back T seconds.
+Output
+Lines 1..F: For each farm, output "YES" if FJ can achieve his goal, otherwise output "NO" (do not include the quotes).
+Sample Input
+2
+3 3 1
+1 2 2
+1 3 4
+2 3 1
+3 1 3
+3 2 1
+1 2 3
+2 3 4
+3 1 8
+Sample Output
+NO
+YES
+Hint
+For farm 1, FJ cannot travel back in time. 
+For farm 2, FJ could travel back in time by the cycle 1->2->3->1, arriving back at his starting location 1 second before he leaves. He could start from anywhere on the cycle to accomplish this.
+Source
+USACO 2006 December Gold
+
+思路：本题就是判断是否有出现负权回路。用SPFA，看是否有顶点入队数超过顶点数，有则说明有负权回路。
+
+#include<iostream>
+#include<cstring>
+#include<vector>
+#include<queue>
+using namespace std;
+const int nn=510;
+const int mm=3100;
+const int oo=1e9;
+class node
+{
+  public:int v,c;
+};
+vector<node >e[nn];
+int n,m,w,dis[nn],id[nn];
+bool vis[nn];
+queue<int>q;
+bool spfa(int x)
+{
+  memset(id,0,sizeof(id));
+  memset(vis,0,sizeof(vis));
+  for(int i=0;i<n;i++)
+    dis[i]=oo;
+  dis[x]=0;vis[x]=1;++id[x];
+  q.push(x);int z;
+  while(!q.empty())
+  {
+    z=q.front();q.pop();vis[z]=0;
+    for(int i=0;i<e[z].size();i++)
+    {
+      if(dis[e[z][i].v]>dis[z]+e[z][i].c)
+      {
+        dis[e[z][i].v]=dis[z]+e[z][i].c;
+        if(!vis[e[z][i].v])
+        {
+          vis[e[z][i].v]=1;++id[e[z][i].v];
+          q.push(e[z][i].v);
+          if(id[e[z][i].v]>n)
+            return 1;
+        }
+      }
+    }
+  }
+  return 0;
+}
+int main()
+{
+  int cas;
+  while(cin>>cas)
+  {
+    while(cas--)
+    { memset(e,0,sizeof(e));
+      cin>>n>>m>>w;
+      int a,b,c;node z;
+      for(int i=0;i<m;i++)
+      {
+        cin>>a>>b>>c;a--;b--;
+        z.v=a;z.c=c;
+        e[b].push_back(z);z.v=b;
+        e[a].push_back(z);
+      }
+      for(int i=0;i<w;i++)
+      {
+        cin>>a>>b>>c;a--;b--;
+        z.v=b;z.c=-c;
+        e[a].push_back(z);
+      }
+      bool flag=0;
+      for(int i=0;i<n;i++)
+        if(spfa(i))
+           {
+             flag=1;break;
+           }
+        if(flag)cout<<"YES\n";
+        else cout<<"NO\n";
+    }
+  }
+}
+
+
+

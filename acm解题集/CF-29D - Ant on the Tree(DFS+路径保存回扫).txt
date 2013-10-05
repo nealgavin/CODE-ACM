@@ -1,0 +1,110 @@
+D - Ant on the Tree
+Time Limit:2000MS Memory Limit:262144KB 64bit IO Format:%I64d & %I64u
+Submit Status
+Description
+Connected undirected graph without cycles is called a tree. Trees is a class of graphs which is interesting not only for people, but for ants too.
+An ant stands at the root of some tree. He sees that there are n vertexes in the tree, and they are connected by n?-?1 edges so that there is a path between any pair of vertexes. A leaf is a distinct from root vertex, which is connected with exactly one other vertex.
+The ant wants to visit every vertex in the tree and return to the root, passing every edge twice. In addition, he wants to visit the leaves in a specific order. You are to find some possible route of the ant.
+Input
+The first line contains integer n (3?≤?n?≤?300) — amount of vertexes in the tree. Next n?-?1 lines describe edges. Each edge is described with two integers — indexes of vertexes which it connects. Each edge can be passed in any direction. Vertexes are numbered starting from 1. The root of the tree has number 1. The last line contains k integers, where k is amount of leaves in the tree. These numbers describe the order in which the leaves should be visited. It is guaranteed that each leaf appears in this order exactly once.
+Output
+If the required route doesn't exist, output -1. Otherwise, output 2n?-?1 numbers, describing the route. Every time the ant comes to a vertex, output it's index.
+Sample Input
+Input
+3
+1 2
+2 3
+3
+Output
+1 2 3 2 1 
+Input
+6
+1 2
+1 3
+2 4
+4 5
+4 6
+5 6 3
+Output
+1 2 4 5 4 6 4 2 1 3 1 
+Input
+6
+1 2
+1 3
+2 4
+4 5
+4 6
+5 3 6
+Output
+-1
+
+思路：先DFS一遍存路径，然后，在去找按叶子节点遍历的路径。
+
+#include<iostream>
+#include<cstdio>
+#include<iomanip>
+#include<cstring>
+#include<map>
+#include<vector>
+using namespace std;
+const int mm=310;
+int f[mm],ff[mm],q[mm];
+vector<int>g[mm],p;
+int n;
+void dfs(int u,int fa)
+{
+  f[u]=fa;///存路径
+  for(int i=0;i<g[u].size();i++)
+    if(g[u][i]^fa)
+    dfs(g[u][i],u);
+}
+void add(int u,int v)///增加从u到v的路径
+{ memset(ff,0,sizeof(ff));
+  memset(q,0,sizeof(q));
+  int k=0;
+  while(v>0){ff[v]=k;q[k++]=v;v=f[v];}///从v开始回找记录
+  while(u>0)///有解
+  {
+    if(ff[u]>0)///从u开始到v有路径
+    {
+      for(int i=ff[u]-1;i>=0;i--)p.push_back(q[i]);
+      break;
+    }
+    ///如果当前u到v没路径，继续下走
+    u=f[u];
+    p.push_back(u);
+  }
+}
+int main()
+{
+  while(cin>>n)
+  { int a,b;
+     p.clear();
+    for(int i=0;i<mm;i++)g[i].clear();
+    for(int i=0;i<n-1;i++)
+    {
+      cin>>a>>b;g[a].push_back(b);g[b].push_back(a);
+    }
+      dfs(1,-1);///遍历一遍，存遍历路径
+      //cout<<"yes";
+      int u=1,v;
+      for(int i=2;i<=n;i++)
+        if(g[i].size()==1)
+        { int z;cin>>z;
+          add(u,z);u=z;
+        }
+        ///cout<<'U'<<u<<endl;
+        add(u,1);
+        n=n+n-1;
+        if(p.size()!=n)cout<<"-1\n";
+        else
+        {
+          cout<<1;
+          for(int i=0;i<p.size()-1;i++)
+            cout<<" "<<p[i];
+          cout<<"\n";
+       }
+  }
+}
+
+

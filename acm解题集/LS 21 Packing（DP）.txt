@@ -1,0 +1,73 @@
+Packing
+The cost of set {(a1,b1),(a2,b2),…,(an,bn)} is defined as
+
+max{ai}×max{bi}
+Partition set {(a1,b1),(a2,b2),…,(an,bn)} into several non-empty subsets to minimize the sum of the cost of subsets.
+
+Input
+The first line contains an integer n.
+
+n lines follow. Each of them contains two integer ai,bi.
+
+(1≤n≤1000,1≤ai,bi≤1000)
+
+Ouptut
+Single integer denotes the minimum value.
+
+Sample input
+3 
+1 1
+1 3
+3 1
+Sample output
+6
+Note
+Partition {{(1,1),(1,3)},{(3,1)}} gives the cost of 1×3+3×1=6.
+
+思路：用数组maxn[x][y]表示x到y中最大的b;a就直接排序就行了
+          dp[x]表示排序后的前x组的最优值。dp[x]=min(dp[x],maxn[j][i]*a[i]){j<=i}a[i]是排完序以后的。
+
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+const int mm=1010;
+const int oo=1e9;
+class node
+{
+  public:int a,b;
+}f[mm];
+int dp[mm],maxn[mm][mm];
+int n;
+bool cmp(node a,node b)
+{ if(a.a^b.a)
+  return a.a<b.a;
+  return a.b<b.b;
+}
+int main()
+{
+  while(cin>>n)
+  {
+    for(int i=1;i<=n;i++)
+      cin>>f[i].a>>f[i].b;
+    sort(f+1,f+n+1,cmp);///以a排序
+    memset(maxn,0,sizeof(maxn));
+    for(int i=1;i<=n;i++)///找最大的b
+    { maxn[i][i]=f[i].b;
+      for(int j=i+1;j<=n;j++)
+      maxn[i][j]=maxn[i][j-1]>f[j].b?maxn[i][j-1]:f[j].b;
+    }
+    dp[0]=0;
+    for(int i=1;i<=n;i++)
+    { dp[i]=oo;int z;
+      for(int j=1;j<=i;j++)
+      { z=maxn[i-j+1][i]*f[i].a+dp[i-j];
+        if(dp[i]>z)dp[i]=z;
+      }
+    }
+    cout<<dp[n]<<"\n";
+  }
+}
+
+
+

@@ -1,0 +1,103 @@
+Big Number
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 65536/32768 K (Java/Others)
+Total Submission(s): 3256    Accepted Submission(s): 2219
+
+
+
+Problem Description
+
+As we know, Big Number is always troublesome. But it's really important in our ACM. And today, your task is to write a program to calculate A mod B.
+
+To make the problem easier, I promise that B will be smaller than 100000.
+
+Is it too hard? No, I work it out in 10 minutes, and my program contains less than 25 lines.
+
+
+ 
+
+
+Input
+
+The input contains several test cases. Each test case consists of two positive integers A and B. The length of A will not exceed 1000, and B will be smaller than 100000. Process to the end of file.
+
+
+ 
+
+
+Output
+
+For each test case, you have to ouput the result of A mod B.
+
+
+ 
+
+
+Sample Input
+
+2 3
+12 7
+152455856554521 3250
+ 
+
+
+Sample Output
+
+2
+5
+1521
+ 
+
+
+Author
+
+Ignatius.L
+
+ 
+
+
+Source
+
+杭电ACM省赛集训队选拔赛之热身赛 
+
+
+
+
+Recommend
+
+Eddy
+
+
+思路：一个数模上另一个数等于10进制数展开的模相加的模。
+
+        如 532 mod 7 =（500%7+30%7+2%7)%7;
+
+       当然还有a*b mod c=(a mod c+b mod c)mod c;
+
+       如35 mod 3=((5%3)*(7%3))%3
+
+知道这些这题就很容易了。
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=100020;
+char s[mm];
+int ss;
+int main()
+{
+  while(cin>>s>>ss)
+  {
+    int len=strlen(s);
+    int ans=0;
+    for(int i=0;i<len;i++)
+    {
+      ans=ans*10+s[i]-'0';
+      ans%=ss;
+    }
+    cout<<ans<<"\n";
+  }
+}
+
+
+
+

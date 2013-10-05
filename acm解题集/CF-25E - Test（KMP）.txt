@@ -1,0 +1,112 @@
+E - Test
+Time Limit:2000MS Memory Limit:262144KB 64bit IO Format:%I64d & %I64u
+Submit Status Practice CodeForces 25E
+Description
+Sometimes it is hard to prepare tests for programming problems. Now Bob is preparing tests to new problem about strings — input data to his problem is one string. Bob has 3 wrong solutions to this problem. The first gives the wrong answer if the input data contains the substring s1, the second enters an infinite loop if the input data contains the substring s2, and the third requires too much memory if the input data contains the substring s3. Bob wants these solutions to fail single test. What is the minimal length of test, which couldn't be passed by all three Bob's solutions?
+Input
+There are exactly 3 lines in the input data. The i-th line contains string si. All the strings are non-empty, consists of lowercase Latin letters, the length of each string doesn't exceed 105.
+Output
+Output one number — what is minimal length of the string, containing s1, s2 and s3 as substrings.
+Sample Input
+Input
+ab
+bc
+cd
+Output
+4
+Input
+abacaba
+abaaba
+x
+Output
+11
+
+思路:枚举6种排列方式，求出它这些字符串的最大重合数，总的减去最大重合数就是答案。
+      如三个串是a,b,c;
+  abc,acb,bac,bca,cab,cba 六种排列。找出最大重合。而这最大重合只能是末尾，所以用个KMP匹配两个串，返回主串结束时，模式串匹配的位置就是最大匹配数。
+   不过要注意一点，但中间串是前串的子串时，应该用前串与后串匹配。如abc排列，b是a的子串则a与匹配，否则，b与c匹配。
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=100040;
+int next[3][mm],l[3];
+char s[3][mm];
+void get(int x)///获得每个串的next
+{
+  int k=-1,j=0;
+  next[x][0]=-1;
+  while(j<l[x])
+  {
+    if(k==-1||s[x][k]==s[x][j])
+    {
+      ++k;++j;next[x][j]=k;
+    }
+    else k=next[x][k];
+  }
+}
+int kmp(int x,int y)
+{
+  int j=0,k=0;
+  while(j<l[y]&&k<l[x])
+  {
+    if(j==-1||s[x][k]==s[y][j])
+      {++j;++k;}
+    else j=next[y][j];
+  }
+  return j;///返回结尾的最大匹配数
+}
+int main()
+{
+  while(cin>>s[0]>>s[1]>>s[2])
+  {
+    l[0]=strlen(s[0]);
+    l[1]=strlen(s[1]);
+    l[2]=strlen(s[2]);
+    for(int i=0;i<3;i++)get(i);
+    int ans=-3333;
+    int z,zz=0;
+    ///手动枚举六种情况
+    ///012
+    z=kmp(0,1);
+    zz=z;
+    if(l[1]==z)zz+=kmp(0,2);
+    else zz+=kmp(1,2);
+    ans=ans>zz?ans:zz;
+    ///021
+    z=kmp(0,2);
+    zz=z;
+    if(l[2]==z)zz+=kmp(0,1);
+    else zz+=kmp(2,1);
+    ans=ans>zz?ans:zz;
+    ///102
+    z=kmp(1,0);
+    zz=z;
+    if(l[0]==z)
+      zz+=kmp(1,2);
+    else zz+=kmp(0,2);
+    ans=ans>zz?ans:zz;
+    ///120
+    z=kmp(1,2);
+    zz=z;
+    if(l[2]==z)zz+=kmp(1,0);
+    else zz+=kmp(2,0);
+    ans=ans>zz?ans:zz;
+    ///201
+    z=kmp(2,0);zz=z;
+    if(l[0]==z)zz+=kmp(2,1);
+    else zz+=kmp(0,1);
+    ans=ans>zz?ans:zz;;
+    ///210
+    z=kmp(2,1);zz=z;
+    if(l[1]==z)zz+=kmp(2,0);
+    else zz+=kmp(1,0);
+    ans=ans>zz?ans:zz;
+    ///这应该还可以编个函数调用枚举，但数据小就不整了
+    zz=l[0]+l[1]+l[2];
+    zz=zz-ans;
+    cout<<zz<<"\n";
+  }
+}
+
+

@@ -1,0 +1,56 @@
+﻿#include<iostream>
+#include<cstring>
+#include<cstdio>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define ll(x) (1<<x)
+using namespace std;
+const int mm=8;
+const int nn=103;
+const int oo=0x3f3f3f3f;
+int dp[2][nn][ll(mm)][mm];
+int one[ll(mm)],f[nn];
+int n,K;
+void init()
+{ clr(one,0);
+  FOR(i,0,ll(mm)-1)
+  FOR(j,0,mm-1)
+  if(i&ll(j))
+    ++one[i];
+}
+int main()
+{
+  while(~scanf("%d%d",&n,&K))
+  { if(n==0&&K==0)break;
+    int all=0,hh=0;
+    FOR(i,1,n)
+    {
+      scanf("%d",&f[i]);
+      f[i]-=25;
+      all|=ll(f[i]);hh=max(hh,f[i]);
+    }
+    ++hh;
+    clr(dp[0],0x3f);
+    dp[0][0][ll(f[1])][f[1]]=1;
+    dp[0][1][0][hh]=0;
+    int pre=0,cur=0;
+    FOR(i,2,n)
+    { cur=pre^1;
+      clr(dp[cur],0x3f);
+      FOR(j,0,K)FOR(k,0,all)
+      FOR(last,0,hh)
+      {
+        if(dp[pre][j][k][last]==oo)continue;
+        int &ret=dp[cur][j][k|ll(f[i])][ f[i] ];
+        ret=min(ret,dp[pre][j][k][last]+f[i]==last?0:1 );
+        dp[cur][j+1][k][last]=min(dp[cur][j][k][last],dp[pre][j][k][last]);
+      }
+      pre=cur;
+    }
+    int ans=oo;
+    FOR(i,0,K)FOR(j,0,all)FOR(k,0,hh)
+    ans=min(ans,dp[cur][i][j][k]+one[all^j]);
+    printf("%d\n",ans);
+  }
+  return 0;
+}

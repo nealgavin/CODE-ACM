@@ -1,0 +1,24 @@
+#include<stdio.h>
+#include<algorithm>
+#define MAX 0x7fffffff
+using namespace std;
+int main()
+{
+  //freopen("data.txt","r",stdin);
+  int n,sum,dist[10003],i,j,ans;
+  while(scanf("%d",&n)!=EOF)
+  {
+    for(i=1;i<=n;i++)
+    {
+      scanf("%d",&dist[i]);
+    }
+    sum=0;ans=0;
+    for(i=1;i<=n;i++)
+    {
+      if(sum<=0)sum=dist[i];
+      else sum+=dist[i];
+      ans=max(ans,sum);
+    }
+    printf("%d\n",ans);
+  }
+}

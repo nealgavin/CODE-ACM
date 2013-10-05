@@ -1,0 +1,179 @@
+Walk Through Squares
+
+Time Limit: 4000/2000 MS (Java/Others)    Memory Limit: 65535/65535 K (Java/Others)
+Total Submission(s): 234    Accepted Submission(s): 58
+
+
+Problem Description
+
+
+  On the beaming day of 60th anniversary of NJUST, as a military college which was Second Artillery Academy of Harbin Military Engineering Institute before, queue phalanx is a special landscape.
+  
+  Here is a M*N rectangle, and this one can be divided into M*N squares which are of the same size. As shown in the figure below:
+  01--02--03--04
+  || || || ||
+  05--06--07--08
+  || || || ||
+  09--10--11--12
+  Consequently, we have (M+1)*(N+1) nodes, which are all connected to their adjacent nodes. And actual queue phalanx will go along the edges.
+  The ID of the first node,the one in top-left corner,is 1. And the ID increases line by line first ,and then by column in turn ,as shown in the figure above.
+  For every node,there are two viable paths:
+  (1)go downward, indicated by 'D';
+  (2)go right, indicated by 'R';
+  The current mission is that, each queue phalanx has to walk from the left-top node No.1 to the right-bottom node whose id is (M+1)*(N+1).
+In order to make a more aesthetic marching, each queue phalanx has to conduct two necessary actions. Let's define the action:
+  An action is started from a node to go for a secified tpravel mode.
+  So, two actions must show up in the way from 1 to (M+1)*(N+1).
+
+  For example, as to a 3*2 rectangle, figure below:
+    01--02--03--04
+    || || || ||
+    05--06--07--08
+    || || || ||
+    09--10--11--12
+  Assume that the two actions are (1)RRD (2)DDR
+
+  As a result , there is only one way : RRDDR. Briefly, you can not find another sequence containing these two strings at the same time.
+  If given the N, M and two actions, can you calculate the total ways of walking from node No.1 to the right-bottom node ?
+ 
+
+Input
+  The first line contains a number T,(T is about 100, including 90 small test cases and 10 large ones) denoting the number of the test cases.
+  For each test cases,the first line contains two positive integers M and N(For large test cases,1<=M,N<=100, and for small ones 1<=M,N<=40). M denotes the row number and N denotes the column number.
+  The next two lines each contains a string which contains only 'R' and 'D'. The length of string will not exceed 100. We ensure there are no empty strings and the two strings are different.
+ 
+
+Output
+  For each test cases,print the answer MOD 1000000007 in one line.
+ 
+
+Sample Input
+2
+3 2
+RRD
+DDR
+3 2
+R
+D
+ 
+
+Sample Output
+1
+10
+ 
+
+Source
+2013 ACM/ICPC Asia Regional Nanjing Online
+ 
+
+Recommend
+liuyiding
+ 
+思路：AC自动机用上失败指针，预处理出转移态。然后DP[x][y][statu][con] x，y点statu 态，包含子串状态为con 的最优值。
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mod=1000000007;
+const int mm=109;
+const int msize=209;
+class AC_Machine
+{
+  public:
+    int ch[msize][2],val[msize],f[msize],sz;
+    void clear()
+    {
+      sz=1;clr(ch[0],0),val[0]=0;
+    }
+    int idx(char z)
+    {
+      if(z=='D')return 0;
+      if(z=='R')return 1;
+    }
+    void insert(char*s,int cc)
+    {
+      int u=0,v,c;
+      for(int i=0;s[i];++i)
+      {
+        c=idx(s[i]);
+        if(!ch[u][c])
+        {
+          clr(ch[sz],0);val[sz]=0;
+          ch[u][c]=sz++;
+        }
+        u=ch[u][c];
+      }
+      val[u]|=cc;
+    }
+    void getFail()
+    {
+      int u,v,r;
+      queue<int>Q;
+      FOR(i,0,1)
+      {
+        u=ch[0][i];
+        if(u){Q.push(u);f[u]=0; }
+      }
+      while(!Q.empty())
+      {
+        r=Q.front();Q.pop();
+        val[ r ]|=val[ f[r] ];
+        FOR(c,0,1)
+        {
+          u=ch[r][c];
+          if(!u){ ch[r][c]=ch[ f[r] ][c];continue; }
+          v=f[r];Q.push(u);
+          f[u]=ch[v][c];
+        }
+      }
+    }
+   int dp[mm][mm][msize][4];
+   void solve(int n,int m)
+   { int tmp,now,then;
+     clr(dp,0);
+     dp[0][0][ val[0] ][0]=1;
+     FOR(x,0,n)FOR(y,0,m)
+     FOR(k,0,sz-1)FOR(l,0,3)
+     {
+       if(x+1<=n)///down
+       {
+         then=ch[k][0];tmp=l|val[then];
+         dp[x+1][y][then][tmp]=(dp[x+1][y][then][tmp]+dp[x][y][k][l])%mod;
+       }
+       if(y+1<=m)
+       {
+         then=ch[k][1];tmp=l|val[then];
+         dp[x][y+1][then][tmp]=(dp[x][y+1][then][tmp]+dp[x][y][k][l])%mod;
+       }
+     }
+     int ans=0;
+     FOR(i,0,sz-1)//FOR(j,0,3)
+     {
+       ans=(ans+dp[n][m][i][3])%mod;
+     }
+     printf("%d\n",ans);
+   }
+};
+AC_Machine ac;
+char s[2][msize];
+int main()
+{
+  int cas;
+   scanf("%d",&cas);
+
+    while(cas--)
+    { int n,m;
+      scanf("%d%d",&m,&n);
+      ac.clear();
+      scanf("%s%s",s[0],s[1]);
+      ac.insert(s[0],1);
+      ac.insert(s[1],2);
+      ac.getFail();
+      ac.solve(n,m);
+    }
+
+}
+

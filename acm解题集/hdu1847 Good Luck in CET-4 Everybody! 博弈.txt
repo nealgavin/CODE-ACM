@@ -1,0 +1,35 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+int n,m,sg[1003],h[1003],s[14];
+void Sg()
+{
+  int i,j;
+  for(i=0;i<1003;i++)
+  {
+    memset(h,0,sizeof(h));
+    for(j=0;j<12;j++)
+    if(i-s[j]>=0)h[sg[i-s[j]]]=1;
+    for(j=0;j<1003;j++)
+    if(h[j]==0)
+    {
+      sg[i]=j;
+      break;
+    }
+  }
+}
+int main()
+{
+
+  for(int i=0;i<14;i++)
+  s[i]=1<<i;
+  while(scanf("%d",&n)!=EOF)
+  {
+    Sg();
+    if(sg[n])
+    printf("Kiki\n");
+    else
+    printf("Cici\n");
+  }
+}

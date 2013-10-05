@@ -1,0 +1,125 @@
+B - Tyndex.Brome
+Time Limit:2000MS     Memory Limit:262144KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+CodeForces 62B
+Description
+Tyndex is again well ahead of the rivals! The reaction to the release of Zoozle Chrome browser was the release of a new browser Tyndex.Brome!
+The popularity of the new browser is growing daily. And the secret is not even the Tyndex.Bar installed (the Tyndex.Bar automatically fills the glass with the finest 1664 cognac after you buy Tyndex.Bottles and insert in into a USB port). It is highly popular due to the well-thought interaction with the user.
+Let us take, for example, the system of automatic address correction. Have you entered codehorses instead of codeforces? The gloomy Zoozle Chrome will sadly say that the address does not exist. Tyndex.Brome at the same time will automatically find the closest address and sent you there. That's brilliant!
+How does this splendid function work? That's simple! For each potential address a function of the F error is calculated by the following rules:
+for every letter ci from the potential address c the closest position j of the letter ci in the address (s) entered by the user is found. The absolute difference |i?-?j| of these positions is added to F. So for every i (1?≤?i?≤?|c|) the position j is chosen such, that ci?=?sj, and |i?-?j| is minimal possible.
+if no such letter ci exists in the address entered by the user, then the length of the potential address |c| is added to F.
+After the values of the error function have been calculated for all the potential addresses the most suitable one is found.
+To understand the special features of the above described method better, it is recommended to realize the algorithm of calculating the Ffunction for an address given by the user and some set of potential addresses. Good luck!
+Input
+The first line contains two integers n and k (1?≤?n?≤?105,?1?≤?k?≤?105). They are the number of potential addresses and the length of the address entered by the user. The next line contains k lowercase Latin letters. They are the address entered by the user (s). Each next i-th (1?≤?i?≤?n) line contains a non-empty sequence of lowercase Latin letters. They are the potential address. It is guaranteed that the total length of all the lines does not exceed 2· 105.
+Output
+On each n line of the output file print a single number: the value of the error function when the current potential address is chosen.
+Please, do not use %lld specificator to read or write 64-bit integers in C++. It is preffered to use cout (also you may use %I64d).
+Sample Input
+Input
+2 10
+codeforces
+codeforces
+codehorses
+Output
+0
+12
+Input
+9 9
+vkontakte
+vcontacte
+vkontrakte
+vkollapse
+vkrokodile
+vtopke
+vkapuste
+vpechke
+vk
+vcodeforcese
+Output
+18
+14
+36
+47
+14
+29
+30
+0
+84
+
+思路：把字符串和id捆绑一起，然后进行SORT，二分查找，效率挺不错的。
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int mm=2e6+9;
+class node
+{
+  public:char s;int id;
+}f[mm];
+bool vis[777];
+long long sum;
+int n,m;
+char s[mm],ss[mm];
+bool cmp(node a,node b)
+{
+  if(a.s!=b.s)
+    return a.s<b.s;
+  else return a.id<b.id;
+}
+inline int aabs(int x)
+{
+  return x<0?-x:x;
+}
+int blook(char z,int num)
+{
+  int l=0,r=m-1,mid;
+  int ret=999999;
+  while(l<=r)
+  {
+    mid=(l+r)/2;
+    if(f[mid].s>z)r=mid-1;
+    else if(f[mid].s<z)l=mid+1;
+    else
+    { int zz=aabs(num-f[mid].id);
+      if(ret>zz)ret=zz;
+      if(f[mid].id>num)r=mid-1;
+      else l=mid+1;
+    }
+  }
+  return ret;
+}
+int main()
+{
+  while(scanf("%d%d",&n,&m)!=EOF)
+  { memset(vis,0,sizeof(vis));
+    scanf("%s",s);
+    for(int i=0;s[i];++i)
+     {
+       vis[s[i]]=1;
+       f[i].s=s[i];f[i].id=i;
+     }
+     sort(f,f+m,cmp);
+    for(int i=0;i<n;++i)
+    { sum=0;
+      scanf("%s",ss);
+      long long len=strlen(ss);
+      for(int j=0;ss[j];++j)
+      if(vis[ss[j]])
+        sum+=blook(ss[j],j);
+      else sum+=len;
+      cout<<sum<<"\n";
+    }
+  }
+}
+
+
+

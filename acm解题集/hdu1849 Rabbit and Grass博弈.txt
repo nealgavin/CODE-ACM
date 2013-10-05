@@ -1,0 +1,18 @@
+#include<cstdio>
+int main()
+{
+  int m,s;
+  while(scanf("%d",&m)&&m)
+  {
+    int ans=0;
+    for(int i=0;i<m;i++)
+    {
+      scanf("%d",&s);
+      ans^=s;
+    }
+    if(ans)
+    printf("Rabbit Win!\n");
+    else
+    printf("Grass Win!\n");
+  }
+}

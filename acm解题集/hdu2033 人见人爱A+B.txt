@@ -1,0 +1,18 @@
+#include<stdio.h>
+int main()
+{
+  __int64 a1,a2,a3,b1,b2,b3,i;int n;
+  scanf("%d",&n);
+  while(n--)
+  {
+    i=0;
+    scanf("%I64d%I64d%I64d",&a1,&a2,&a3);
+    scanf("%I64d%I64d%I64d",&b1,&b2,&b3);
+    if(a3+b3>59){a3+=b3-60;i=1;}
+    else a3+=b3;
+    if(a2+b2+i>59){a2+=b2-60+i;i=1;}
+    else a2+=b2+i;
+    a1+=b1+i;
+    printf("%I64d %I64d %I64d\n",a1,a2,a3);
+  }
+}

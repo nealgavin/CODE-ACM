@@ -1,0 +1,94 @@
+E - Pentagon
+Time Limit:10000MS     Memory Limit:262144KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+CodeForces 51E
+Description
+According to the last order issued by the president of Berland every city of the country must have its own Ministry Defense building (their own Pentagon). A megapolis Berbourg was not an exception. This city has n junctions, some pairs of which are connected by two-way roads. Overall there are m roads in the city, no more than one between each pair of junctions.
+At the moment choosing a location place for Pentagon in Berbourg is being discussed. It has been decided that Pentagon should cover the territory of five different junctions which are joined into a cycle by roads. In the order to build Pentagon a special wall will be built along the roads (with high-tension razor, high-voltage wire and other attributes). Thus, the number of possible ways of building Pentagon in the city is equal to the number of different cycles at lengths of 5, composed of junctions and roads.
+Your task is to prints the number of ways of building Pentagon in Berbourg. Only well-optimized solutions will be accepted. Please, test your code on the maximal testcase.
+Input
+The first line contains two integers n and m (1?≤?n?≤?700;0?≤?m?≤?n·(n?-?1)?/?2), where n represents the number of junctions and mis the number of roads in the city. Then follow m lines containing the road descriptions, one in each line. Every road is set by a number of integers ai,?bi (1?≤?ai,?bi?≤?n;ai?≠?bi), where ai and bi represent the numbers of junctions, connected by the road. The junctions are numbered from 1 to n. It is not guaranteed that from any junction one can get to any other one moving along the roads.
+Output
+Print the single number which represents the required number of ways. Please, do not use %lld specificator to read or write 64-bit integers in C++. It is preffered to use cout (also you may use %I64d).
+Sample Input
+Input
+5 5
+1 2
+2 3
+3 4
+4 5
+5 1
+Output
+1
+Input
+5 10
+1 2
+1 3
+1 4
+1 5
+2 3
+2 4
+2 5
+3 4
+3 5
+4 5
+Output
+12
+
+思路:先计算三步到达的边，然后在枚举到达环，其中去要去重，具体看代码。
+dp[a][b][c]代表从b到c需要a+1步
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=770;
+long long dp[7][mm][mm];
+bool vis[mm][mm];
+int n,m;
+int main()
+{
+  while(cin>>n>>m)
+  {
+    memset(dp,0,sizeof(dp));
+    memset(vis,0,sizeof(vis));
+    int a,b;
+    for(int i=0;i<m;++i)
+    {
+      cin>>a>>b;--a;--b;
+      dp[0][a][b]=1;
+      dp[0][b][a]=1;
+    }
+    for(int l=0;l<2;l++)
+    for(int i=0;i<n;i++)
+      for(int j=0;j<n;j++)
+        if(dp[l][i][j])
+          for(int k=0;k<n;k++)///算出走三边的，包括重走的
+          if(dp[0][j][k])
+          dp[l+1][i][k]+=dp[l][i][j];
+      long long ans=0;
+    for(int i=0;i<n;i++)
+    {
+      for(int j=i+1;j<n;j++)
+      {
+        for(int k=0;k<n;k++)
+        { if(dp[0][i][k]&&dp[0][j][k]&&dp[2][i][j])///能形成5边环的
+          {
+            ans+=dp[2][i][j]-dp[1][i][k]-dp[1][j][k];///就是去除3步走中计算包括i-k,j-k非法圈
+            if(dp[0][i][j])
+              ans-=dp[1][i][i]+dp[1][j][j]-3;///去除自身环
+          }
+        }
+      }
+    }
+    ///正确的环每个起点终点算一次重复5遍
+    cout<<ans/5<<endl;
+  }
+}
+
+
+
+

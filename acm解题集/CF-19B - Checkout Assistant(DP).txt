@@ -1,0 +1,89 @@
+B - Checkout Assistant
+
+Crawling in process...Crawling failedTime Limit:2000MS    Memory Limit:262144KB    64bit IO Format:%I64d & %I64u
+
+SubmitStatusPracticeCodeForces 19B
+
+
+
+Description
+
+
+Bob came to a cash & carry store, put n items into his trolley, and went to the checkout counter to pay. Each item is described by its price ci and time ti in seconds that a checkout assistant spends on this item. While the checkout assistant is occupied with some item, Bob can steal some other items from his trolley. To steal one item Bob needs exactly 1 second. What is the minimum amount of money that Bob will have to pay to the checkout assistant? Remember, please, that it is Bob, who determines the order of items for the checkout assistant.
+
+
+Input
+
+
+The first input line contains number n (1?≤?n?≤?2000). In each of the following n lines each item is described by a pair of numbers ti, ci (0?≤?ti?≤?2000,?1?≤?ci?≤?109). If ti is 0, Bob won't be able to steal anything, while the checkout assistant is occupied with item i.
+
+
+Output
+
+
+Output one number — answer to the problem: what is the minimum amount of money that Bob will have to pay.
+
+
+Sample Input
+
+.input, .output {border: 1px solid #888888;} .output {margin-bottom:1em;position:relative;top:-1px;} .output pre,.input pre {background-color:#EFEFEF;line-height:1.25em;margin:0;padding:0.25em;} .title {background-color:#FFFFFF;border-bottom: 1px solid #888888;font-family:arial;font-weight:bold;padding:0.25em;}
+
+Input
+4
+2 10
+0 20
+1 5
+1 3
+
+
+ Output
+8
+
+
+ Input
+3
+0 1
+0 10
+0 100
+
+
+ Output
+111
+思路：简单01背包，不过要注意优化，就是题目中有说偷的时间只要1秒，所以当时间大于n秒时，他可以都所以物品，因此只要更新到 n就可以得到正确答案了。
+
+
+仔细想想，记忆化搜索好像也行。
+#include<iostream>
+#include<algorithm>
+#include<cstring>
+#include<map>
+using namespace std;
+const long long oo=1e18;
+const int mm=2005;
+long long f[mm];
+int m,x;
+long long y,z;
+int main()
+{
+  while(cin>>m)
+  {
+    f[0]=0;
+    for(int i=1;i<mm;i++)
+      f[i]=oo;
+    for(int i=0;i<m;i++)
+    {cin>>x>>y;
+      int mid;
+      for(int j=m;j>=0;j--)
+      {
+        if(j+x+1<m)mid=j+x+1;///时间大于m时，他可以偷所有物品因此只需到m就行
+        else mid=m;
+        if(f[j]+y<f[mid])///更新值
+          f[mid]=f[j]+y;
+      }
+    }
+    cout<<f[m]<<"\n";
+  }
+}
+
+
+

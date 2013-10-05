@@ -1,0 +1,93 @@
+Spy
+
+Time Limit: 2000/1000 MS (Java/Others)    Memory Limit: 32768/32768 K (Java/Others)
+Total Submission(s): 285    Accepted Submission(s): 136
+
+
+Problem Description
+“Be subtle! Be subtle! And use your spies for every kind of business. ”
+— Sun Tzu
+“A spy with insufficient ability really sucks”
+— An anonymous general who lost the war
+You, a general, following Sun Tzu’s instruction, make heavy use of spies and agents to gain information secretly in order to win the war (and return home to get married, what a flag you set up). However, the so-called “secret message” brought back by your spy, is in fact encrypted, forcing yourself into making deep study of message encryption employed by your enemy.
+Finally you found how your enemy encrypts message. The original message, namely s, consists of lowercase Latin alphabets. Then the following steps would be taken:
+* Step 1: Let r = s
+* Step 2: Remove r’s suffix (may be empty) whose length is less than length of s and append s to r. More precisely, firstly donate r[1...n], s[1...m], then an integer i is chosen, satisfying i ≤ n, n - i < m, and we make our new r = r[1...i] + s[1...m]. This step might be taken for several times or not be taken at all.
+What your spy brought back is the encrypted message r, you should solve for the minimal possible length of s (which is enough for your tactical actions).
+ 
+
+Input
+There are several test cases.
+For each test case there is a single line containing only one string r (The length of r does not exceed 105). You may assume that the input contains no more than 2 × 106 characters.
+Input is terminated by EOF.
+ 
+
+Output
+For each test case, output one line “Case X: Y” where X is the test case number (starting from 1) and Y is the desired answer.
+ 
+
+Sample Input
+abc
+aab
+abcadabcabcad
+aaabbbaaaabbbaa
+abcababcd
+ 
+
+Sample Output
+Case 1: 3
+Case 2: 2
+Case 3: 5
+Case 4: 6
+Case 5: 4
+ 
+
+Source
+2012 Asia Chengdu Regional Contest
+ 
+
+Recommend
+liuyiding
+ 
+思路：每次正常kmp匹配，当能覆盖到的就不加，不能覆盖到的，就把那一段加到s中.
+#include<cstdio>
+#include<iostream>
+#include<cstring>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=1e5+9;
+char s[mm],t[mm];
+int f[mm];
+int main()
+{ int len,pos,last,cas=0;
+  while(~scanf("%s",s+1))
+  {
+    len=strlen(s+1);
+    pos=1;clr(t,0);
+    t[1]=s[1];
+    int j=0;last=0;
+    FOR(i,1,len)
+    {
+      while(j&&s[i]!=t[j+1])j=f[j];///正常匹配
+      if(s[i]==t[j+1])++j;
+      if(!j)///都没有可匹配的。就加上这一段
+      {
+        int p=f[pos];
+        FOR(k,last+1,i)
+        {
+          t[++pos]=s[k];
+          while(p&&t[pos]!=t[p+1])p=f[p];///找匹配
+          if(t[pos]==t[p+1])f[pos]=p+1;
+          else f[pos]=0;
+        }
+        j=pos;
+      }
+      if(j==pos)last=i;
+    }
+    printf("Case %d: %d\n", ++cas,len+pos-last);
+  }
+}
+
+
+

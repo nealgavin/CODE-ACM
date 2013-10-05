@@ -1,0 +1,135 @@
+ hdu 2686 Matrix(多线程DPor费用流，5级)
+分类： 图 2013-08-03 14:30 0人阅读 评论(0) 收藏 编辑 删除
+P - Matrix
+Time Limit:1000MS     Memory Limit:32768KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+Yifenfei very like play a number game in the n*n Matrix. A positive integer number is put in each area of the Matrix.
+Every time yifenfei should to do is that choose a detour which frome the top left point to the bottom right point and than back to the top left point with the maximal values of sum integers that area of Matrix yifenfei choose. But from the top to the bottom can only choose right and down, from the bottom to the top can only choose left and up. And yifenfei can not pass the same area of the Matrix except the start and end. 
+ 
+Input
+The input contains multiple test cases.
+Each case first line given the integer n (2<n<30) 
+Than n lines,each line include n positive integers.(<100)
+ 
+Output
+For each test case output the maximal values yifenfei can get.
+ 
+Sample Input
+2
+10 3
+5 10
+3
+10 3 3
+2 5 3
+6 7 10
+5
+1 2 3 4 5
+2 3 4 5 6
+3 4 5 6 7
+4 5 6 7 8
+5 6 7 8 9
+ 
+Sample Output
+28
+46
+80
+ 
+[html] view plaincopy
+/*  
+ 最大费用最大流，拆点，  
+ k1,k2 u->v u->v1 1 -cost  v2->v1 1 0  
+*/  
+#include<cstring>  
+#include<cstdio>  
+#include<queue>  
+#include<iostream>  
+#define FOR(i,a,b) for(int i=a;i<=b;++i)  
+#define clr(f,z) memset(f,z,sizeof(f))  
+using namespace std;  
+const int mm=1900+9;  
+const int oo=1e9;  
+int head[mm],work[mm],edge,src,dest,node,dis[mm];  
+bool vis[mm];  
+class Edge  
+{  
+  public:int v,next,cost,flow;  
+}e[mm*mm];  
+void data()  
+{  
+  clr(head,-1);edge=0;  
+}  
+void add(int u,int v,int _flow,int _cost)  
+{  
+  e[edge].v=v;e[edge].flow=_flow;e[edge].cost=_cost;e[edge].next=head[u];head[u]=edge++;  
+  e[edge].v=u;e[edge].flow=0;e[edge].cost=-_cost;e[edge].next=head[v];head[v]=edge++;  
+}  
+bool spfa()  
+{ int u,v;  
+  queue<int>Q;  
+  clr(vis,0);FOR(i,0,node)dis[i]=oo;  
+  Q.push(src);vis[src]=1;dis[src]=0;work[src]=work[dest]=-1;  
+  while(!Q.empty())  
+  {  
+    u=Q.front();Q.pop();vis[u]=0;  
+    for(int i=head[u];~i;i=e[i].next)  
+    {  
+      v=e[i].v;// printf("v=%d\n",v);  
+      if(e[i].flow&&(dis[v]>dis[u]+e[i].cost))  
+      {// if(v==dest)puts("zdfsa");//puts("P");  
+       // printf("des=%d %d %d\n",dis[v],dis[u],e[i].cost);  
+        dis[v]=dis[u]+e[i].cost;work[v]=i^1;///取反向边  
+        if(vis[v])continue;  
+        vis[v]=1;Q.push(v);  
+      }  
+    }  
+  }  
+  return work[dest]!=-1;  
+}  
+int max_spfa()  
+{  
+  int ret=0,num;  
+  while(spfa())  
+  {  num=oo;//puts("++");  
+    for(int i=work[dest];~i;i=work[e[i].v])  
+    {  
+      if(e[i^1].flow<num)num=e[i^1].flow;  
+    }  
+  
+    for(int i=work[dest];~i;i=work[e[i].v])  
+    {  
+      e[i^1].flow-=num;e[i].flow+=num;  
+    }  
+  
+    ret+=num*dis[dest];  
+  }  
+  return ret;  
+}  
+int main()  
+{  
+  int n,a;  
+  while(~scanf("%d",&n))  
+  { int ans=0;data();  
+    FOR(i,1,n)FOR(j,1,n)  
+    {  
+      scanf("%d",&a);  
+      if( (i==1&&j==1) ||(i==n&&j==n) )  
+      {  
+        ans+=a;add(i*n+j,i*n+j+n*n,2,-a);//可以有两条  
+      }  
+      else add(i*n+j,i*n+j+n*n,1,-a);  
+      if(i!=n)  
+        add(i*n+j+n*n,i*n+j+n,1,0);  
+      if(j!=n)add(i*n+j+n*n,i*n+j+1,1,0);  
+    }  
+    src=0;dest=n*n*2+n+n+3;node=dest+1;  
+    add(src,n+1,2,0);add(n*n*2+n,dest,2,0);  
+    int z=max_spfa();  
+    ans=-ans-z;  
+    printf("%d\n",ans);  
+  }  
+  return 0;  
+}  

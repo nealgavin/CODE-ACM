@@ -1,0 +1,59 @@
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#define N 10003
+using namespace std;
+int sg[N];
+int s[103],h[103];
+int main()
+{
+  int n,m,i,j;
+  //freopen("1.txt","w",stdout);
+  while(scanf("%d",&n)&&n)
+  {
+    for(i=0;i<n;i++)
+    scanf("%d",&s[i]);
+    sg[0]=0;
+    sort(s,s+n);
+    for(j=1;j<N;j++)
+    {
+      memset(h,0,sizeof(h));
+      for(i=0;i<n;i++)
+      {
+        if(j-s[i]>=0)
+        h[sg[j-s[i]]]=1;
+      }
+      for(i=0;i<102;i++)
+      {
+        if(h[i]==0)
+        {
+          sg[j]=i;
+          break;
+        }
+      }
+    } //过了
+    /*
+    for(j=1;j<N;j++)
+    for(i=0;i<n;i++)
+    {
+      if(j>=s[i]&&!sg[j-s[i]]){sg[j]=s[i];break;}
+      else sg[j]=0;
+    }*/  //动规没过,自己测数据都过，不知道OJ为何不过
+    int sum,k,mm;
+    scanf("%d",&mm);
+    for(i=0;i<mm;i++)
+    { sum=0;
+      scanf("%d",&m);
+     for(j=0;j<m;j++)
+     {
+       scanf("%d",&k);
+       sum^=sg[k];
+     }
+     if(sum)
+     printf("W");
+     else printf("L");
+    }
+    printf("\n");
+  }
+  return 0;
+}

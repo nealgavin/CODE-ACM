@@ -1,0 +1,130 @@
+E - Square Equation Roots
+Time Limit:5000MS     Memory Limit:262144KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+ 
+Practice
+ 
+CodeForces 50E
+Description
+A schoolboy Petya studies square equations. The equations that are included in the school curriculum, usually look simple:
+x2?+?2bx?+?c?=?0
+where b, c are natural numbers.
+Petya noticed that some equations have two real roots, some of them have only one root and some equations don't have real roots at all. Moreover it turned out that several different square equations can have a common root.
+Petya is interested in how many different real roots have all the equations of the type described above for all the possible pairs of numbers b and c such that 1?≤?b?≤?n, 1?≤?c?≤?m. Help Petya find that number.
+Input
+The single line contains two integers n and m. (1?≤?n,?m?≤?5000000).
+Output
+Print a single number which is the number of real roots of the described set of equations.
+Sample Input
+Input
+3 3
+Output
+12
+Input
+1 2
+Output
+1
+Hint
+In the second test from the statement the following equations are analysed:
+b?=?1, c?=?1: x2?+?2x?+?1?=?0; The root is x?=??-?1
+b?=?1, c?=?2: x2?+?2x?+?2?=?0; No roots
+Overall there's one root
+In the second test the following equations are analysed:
+b?=?1, c?=?1: x2?+?2x?+?1?=?0; The root is x?=??-?1
+b?=?1, c?=?2: x2?+?2x?+?2?=?0; No roots
+b?=?1, c?=?3: x2?+?2x?+?3?=?0; No roots
+b?=?2, c?=?1: x2?+?4x?+?1?=?0; The roots are 
+b?=?2, c?=?2: x2?+?4x?+?2?=?0; The roots are 
+b?=?2, c?=?3: x2?+?4x?+?3?=?0; The roots are x1?=??-?3,?x2?=??-?1
+b?=?3, c?=?1: x2?+?6x?+?1?=?0; The roots are 
+b?=?3, c?=?2: x2?+?6x?+?2?=?0; The roots are 
+b?=?3, c?=?3: x2?+?6x?+?3?=?0; The roots are  Overall there are 13 roots and as the root ?-?1 is repeated twice, that means there are 12 different roots.
+
+思路：1：先算出所有的根，包括重根，然后用数组存出现过的整数根，然后去重根。
+（我原先有想过这样去重的，一直觉得会超时TLE的，因为for一遍m就需要5*10^6，for里在枚举去重，那也需要sqrt(5*10^6)怎么可能不TLE呢？后来想想最坏复杂复杂度这样算有点不靠谱，但我觉得仍然这种方法应该超时，就没去试，悲剧的啊！要不比赛的时候就A了,才用了230MS啊）
+2：比赛的时候感觉上一种超时，所以找规律，而且也确实找到了，b每增加1重根数就多两个可是当c太小时，有的根就构造不出来，这种情况，当时我是想整左右边界来搞定，敲了会代码发现有点蒙，结果就放弃了。这种房方法31MS能过。
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=5010000;
+bool vis[mm];
+long long m,n,pos,num;
+int main()
+{
+
+  /*for(int i=0;i*i<mm;i++)
+  {
+    vis[i*i]=i;
+  }*/
+  while(cin>>m>>n)
+  { memset(vis,0,sizeof(vis));
+    long long sum=0,z;
+    for(pos=n;pos>=0;pos--)
+      if(vis[pos])
+      break;
+    for(long long i=1;i<=m;i++)
+    { z=i*i;
+      if(z<=n)///计算所有的根包括重复的根
+      {
+        sum+=z*2;
+      }
+      else
+      {
+        sum+=n*2;
+      }
+      for(long long j=i-1;j>=0;--j)///枚举去除重复的根
+      {
+        if(i*i-j*j>n)break;///当i*i-j*j>n时，n已经构造不出j了
+        if(vis[i-j])--sum;
+        else vis[i-j]=1;
+        if(vis[i+j])--sum;
+        else vis[i+j]=1;
+      }
+    }
+    cout<<sum<<"\n";
+  }
+}
+
+
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=5010000;
+long long m,n,pos,num;
+inline long long  ma(long long a,long long b)
+{
+  if(a<b)return b;return a;
+}
+int main()
+{
+  while(cin>>m>>n)
+  {
+    long long sum=0,z;
+    for(long long i=1;i<=m;i++)
+    { z=i*i;
+      if(z<=n)///计算所有的根不包括单重复的根
+      {
+        sum+=z*2-1;
+      }
+      else
+      {
+        sum+=n*2;
+      }
+    }
+    int _mi;
+    for(long long i=-m-m;i<0;++i)
+      {
+        _mi=ma(-m-m-i,n/i);
+        if(i&1)--_mi;
+        _mi=(-_mi)>>1;
+        --_mi;
+        if(_mi>0)sum-=_mi;
+      }
+    cout<<sum<<"\n";
+  }
+}
+
+
+

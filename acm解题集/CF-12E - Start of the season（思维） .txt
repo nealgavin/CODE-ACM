@@ -1,0 +1,123 @@
+E - Start of the season
+
+Crawling in process...Crawling failedTime Limit:2000MS    Memory Limit:262144KB    64bit IO Format:%I64d & %I64u
+
+SubmitStatusPracticeCodeForces 12E
+
+
+
+Description
+
+
+Before the start of the football season in Berland a strange magic ritual is held. The most experienced magicians have to find a magic matrix of the size n?×?n (n is even number). Gods will never allow to start the championship without it. Matrix should contain integers from 0 to n?-?1, main diagonal should contain only zeroes and matrix should be symmetric. Moreover, all numbers in each row should be different. Magicians are very tired of the thinking process, so they ask you to write a program to find such matrix.
+
+
+Input
+
+<p< p="">
+The first line contains one integer n (2?≤?n?≤?1000), n is even.
+
+
+Output
+
+<p< p="">
+Output n lines with n numbers each — the required matrix. Separate numbers with spaces. If there are several solutions, output any.
+
+
+Sample Input
+
+.input, .output {border: 1px solid #888888;} .output {margin-bottom:1em;position:relative;top:-1px;} .output pre,.input pre {background-color:#EFEFEF;line-height:1.25em;margin:0;padding:0.25em;} .title {background-color:#FFFFFF;border-bottom: 1px solid #888888;font-family:arial;font-weight:bold;padding:0.25em;}
+
+Input
+2
+
+
+ Output
+0 1
+1 0
+
+
+ Input
+4
+
+
+ Output
+0 1 3 2
+1 0 2 3
+3 2 0 1
+2 3 1 0
+ 
+
+思路：每次错1位可以保证每一行都不同。而对称怎么解决呢？先不管0
+
+   弄成n-1维其符合题目条件的就很容易做到了。看例子：
+
+输入为6
+
+则不管0 错1位构造为
+
+1 2 3 4 5
+2 3 4 5 1
+3 4 5 1 2
+4 5 1 2 3
+5 1 2 3 4
+符合题目中的意思吧。现在吧0放到对角线上，并且把对角线上的数加到两边仍然符合要求。到这答案就出来了。
+
+
+1 2 3 4 5 0     0 2 3 4 5 1
+2 3 4 5 1 0     2 0 4 5 1 3
+3 4 5 1 2 0     3 4 0 1 2 5
+4 5 1 2 3 0  -> 4 5 1 0 3 2
+5 1 2 3 4 0     5 1 2 3 0 4
+0 0 0 0 0 0     1 3 5 2 4 0
+1 2 3 4 5 0     0 2 3 4 5 1
+2 3 4 5 1 0     2 0 4 5 1 3
+3 4 5 1 2 0     3 4 0 1 2 5
+4 5 1 2 3 0  -> 4 5 1 0 3 2
+5 1 2 3 4 0     5 1 2 3 0 4
+0 0 0 0 0 0     1 3 5 2 4 01 2 3 4 5 0     0 2 3 4 5 1
+2 3 4 5 1 0     2 0 4 5 1 3
+3 4 5 1 2 0     3 4 0 1 2 5
+4 5 1 2 3 0  -> 4 5 1 0 3 2
+5 1 2 3 4 0     5 1 2 3 0 4
+0 0 0 0 0 0     1 3 5 2 4 01 2 3 4 5 0      0 2 3 4 5 1
+2 3 4 5 1 0      2 0 4 5 1 3
+3 4 5 1 2 0      3 4 0 1 2 5
+4 5 1 2 3 0  -> 4 5 1 0 3 2
+5 1 2 3 4 0      5 1 2 3 0 4
+0 0 0 0 0 0      1 3 5 2 4 0
+#include<iostream>
+#include<cstring>
+using namespace std;
+const int mm=1007;
+int map[mm][mm];
+int n;
+int main()
+{
+  while(cin>>n)
+  { n--;
+    memset(map,0,sizeof(map));
+    for(int i=0;i<n;i++)
+      for(int j=0;j<n;j++)
+      map[i][j]=(i+j)%n+1;
+     for(int i=0;i<n;i++)
+      map[i][n]=map[n][i]=map[i][i],map[i][i]=0;
+     for(int i=0;i<=n;i++)
+      {cout<<map[i][0];
+      for(int j=1;j<=n;j++)
+      {
+       cout<<" "<<map[i][j];
+      }
+       cout<<"\n";
+      }
+  }
+}
+
+
+  
+
+ 
+
+ 
+
+ 

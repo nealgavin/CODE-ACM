@@ -1,0 +1,98 @@
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int max_node=11000;
+const int sig_size=26;
+class AC_Machine
+{
+public:
+  int ch[max_node][sig_size];
+  int val[max_node],f[max_node],last[max_node];
+  int sz;
+  AC_Machine(){sz=1;clr(ch[0],0);}
+  int idx(char x){return x-'a';}
+  void insert(char*s,int v)
+  { int len=strlen(s);
+    int u=0;
+    FOR(i,0,len-1){
+      int c=idx(s[i]);
+      if(!ch[u][c]){
+       clr(ch[sz],0);
+       val[sz]=0;ch[u][c]=sz++;
+      }
+      u=ch[u][c];
+    }
+    val[u]=v;
+  }
+  void find(char*s)
+  {
+    int len=strlen(s);
+    int u=0;
+    FOR(i,0,len-1)
+    {
+      int c=idx(s[i]);
+      while(u&&!ch[u][c])u=f[u];
+      u=ch[u][c];
+      if(val[u])print(i,u);
+      else if(last[u])print(i,last[u]);
+    }
+  }
+  void print(int x,int u)
+  {
+    if(u){
+      printf("%d: %d\n",u,val[u]);
+      print(x,last[u]);
+    }
+  }
+  int getFail()
+  {
+    queue<int >Q;
+    f[0]=0;//fail pointer
+    FOR(c,0,sig_size-1)
+    {
+      int u=ch[0][c];
+      if(u){f[u]=0;Q.push(u);last[u]=0; }
+    }
+    while(!Q.empty())
+    {
+      int r=Q.front();Q.pop();
+      FOR(c,0,sig_size-1)
+      {
+        int u=ch[r][c];
+        if(!u)continue;//no such node
+        Q.push(u);
+        int v=f[r];//fa node fail pointer
+        while(v&&!ch[v][c])v=f[v];//find first exit fail node c
+        f[u]=ch[v][c];
+        last[u]=val[f[u]]?f[u]:last[f[u]];
+      }
+    }
+  }
+};
+AC_Machine ac;
+char s[max_node];
+int main()
+{
+  int cas;
+  while(~scanf("%d",&cas))
+  {
+    while(cas--)
+    {
+      scanf("%s",s);
+      ac.insert(s,1);
+    }
+    ac.getFail();
+    int n;
+    scanf("%d",&n);
+    while(n--)
+    {
+      scanf("%s",s);
+      ac.find(s);
+    }
+  }
+  return 0;
+}
