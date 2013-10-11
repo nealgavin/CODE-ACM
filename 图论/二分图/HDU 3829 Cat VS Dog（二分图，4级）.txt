@@ -1,0 +1,135 @@
+
+C - Cat VS Dog
+Time Limit:1000MS     Memory Limit:65536KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+The zoo have N cats and M dogs, today there are P children visiting the zoo, each child has a like-animal and a dislike-animal, if the child's like-animal is a cat, then his/hers dislike-animal must be a dog, and vice versa.
+Now the zoo administrator is removing some animals, if one child's like-animal is not removed and his/hers dislike-animal is removed, he/she will be happy. So the administrator wants to know which animals he should remove to make maximum number of happy children.
+ 
+Input
+The input file contains multiple test cases, for each case, the first line contains three integers N <= 100, M <= 100 and P <= 500.
+Next P lines, each line contains a child's like-animal and dislike-animal, C for cat and D for dog. (See sample for details)
+ 
+Output
+For each case, output a single integer: the maximum number of happy children.
+ 
+Sample Input
+1 1 2
+C1 D1
+D1 C1
+
+1 2 4
+C1 D1
+C1 D1
+C1 D2
+D2 C1
+ 
+Sample Output
+1
+3
+
+Hint
+Case 2: Remove D1 and D2, that makes child 1, 2, 3 happy. 
+ 
+思路：纯二分图，根据人来建图，凡是互斥的建边，建双向方便，但结果需除2
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=1550;
+class ppp
+{
+public:
+  int dog,cat;
+  bool flag;
+}f[mm];
+int N,M,P;
+char s[6];
+int head[mm],edge;
+class Edge
+{
+  public:int v,next;
+}e[mm*mm*2];
+void init()
+{
+  edge=0;clr(head,-1);
+}
+void add(int u,int v)
+{
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+int X[mm];bool T[mm];
+bool dfs(int u)
+{ int v;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(T[v])continue;
+    T[v]=1;
+    if(X[v]==-1||dfs(X[v]))
+    {
+      X[v]=u;return 1;
+    }
+  }
+  return 0;
+}
+void getans()
+{ int ret=0;
+  FOR(i,0,P)X[i]=-1;
+  FOR(i,1,P)
+  {
+    clr(T,0);
+    if(dfs(i))
+      ++ret;
+  }
+  printf("%d\n",P-ret/2);
+}
+int get(char*s)
+{
+  int z=0;
+  for(int i=1;s[i];++i)
+    z=z*10+s[i]-'0';
+    return z;
+}
+bool judge(int x,int y)
+{
+  bool flag=f[x].flag^f[y].flag;
+  if(!flag)return 0;
+  if(f[x].dog==f[y].dog||f[x].cat==f[y].cat)return 1;
+  return 0;
+}
+int main()
+{
+  while(~scanf("%d%d%d",&N,&M,&P))
+  { init();
+    FOR(i,1,P)
+    { bool dog;
+      int z;
+      scanf("%s",s);
+      z=get(s);
+      if(s[0]=='D')dog=1;
+      else dog=0;
+
+      f[i].flag=dog;
+      if(dog)f[i].dog=z;
+      else f[i].cat=z;
+      scanf("%s",s);
+      if(dog)f[i].cat=get(s);
+      else f[i].dog=get(s);
+    }
+    FOR(i,1,P)FOR(j,i+1,P)
+    if(i!=j&&judge(i,j))
+      {add(i,j),add(j,i);
+//       cout<<i<<" "<<j<<endl;
+      }
+    getans();
+  }
+}
+
+
+

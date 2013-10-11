@@ -1,0 +1,343 @@
+D - Treasure Hunting
+Time Limit:2000MS     Memory Limit:65536KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+Do you like treasure hunting? Today, with one of his friend, iSea is on a venture trip again. As most movie said, they find so many gold hiding in their trip.
+Now iSea’s clever friend has already got the map of the place they are going to hunt, simplify the map, there are three ground types:
+
+● '.' means blank ground, they can get through it
+● '#' means block, they can’t get through it
+● '*' means gold hiding under ground, also they can just get through it (but you won’t, right?)
+
+What makes iSea very delighted is the friend with him is extraordinary justice, he would not take away things which doesn’t belong to him, so all the treasure belong to iSea oneself! 
+But his friend has a request, he will set up a number of rally points on the map, namely 'A', 'B' ... 'Z', 'a', 'b' ... 'z' (in that order, but may be less than 52), they start in 'A', each time friend reaches to the next rally point in the shortest way, they have to meet here (i.e. iSea reaches there earlier than or same as his friend), then start together, but you can choose different paths. Initially, iSea’s speed is the same with his friend, but to grab treasures, he save one time unit among each part of road, he use the only one unit to get a treasure, after being picked, the treasure’s point change into blank ground.
+Under the premise of his friend’s rule, how much treasure iSea can get at most?
+
+ 
+Input
+There are several test cases in the input.
+
+Each test case begin with two integers R, C (2 ≤ R, C ≤ 100), indicating the row number and the column number.
+Then R strings follow, each string has C characters (must be ‘A’ ? ‘Z’ or ‘a’ ? ‘z’ or ‘.’ or ‘#’ or ‘*’), indicating the type in the coordinate.
+
+The input terminates by end of file marker.
+ 
+Output
+For each test case, output one integer, indicating maximum gold number iSea can get, if they can’t meet at one or more rally points, just output -1.
+
+ 
+Sample Input
+2 4
+A.B.
+***C
+2 4
+A#B.
+***C
+ 
+Sample Output
+1
+2
+ 
+思路：按题意顺序跑最短路，然后给每次的最短路起点标号，如果金子可以是该起点的最短路上就从该起点向金子连边。然后对这张图求最大匹配就是结果了。
+            
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<algorithm>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=58;
+const int oo=0x3f3f3f3f;
+const int dx[]={1,-1,0,0};
+const int dy[]={0,0,1,-1};
+class Edge
+{
+  public:int v,next;
+}e[55*20000];
+char g[110][110];
+int n,m,pos,num;
+int p[mm],gold[110*110],head[mm],edge,X[10009];
+bool T[10009];
+void init()
+{
+  edge=0;clr(head,-1);
+}
+void add(int u,int v)
+{ // printf("e-> %d %d\n",u,v);
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+bool dfs(int u)
+{
+  int v;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(T[v])continue;
+    T[v]=1;
+    if(X[v]==-1||dfs(X[v]))
+    {
+      X[v]=u;return 1;
+    }
+  }
+  return 0;
+}
+int dis[110][110*110];bool vis[110*110];
+void debug()
+{
+  FOR(i,0,n-1)FOR(j,0,m-1)
+  printf("%d%c",dis[i][j],j==m-1?'\n':' ');
+}
+queue<int>Q;
+void spfa(int s)
+{
+  clr(vis,0);
+  int tx,ty,x,y,tt,cur;
+  dis[s][ p[s] ]=0;
+  Q.push(p[s]);
+  while(!Q.empty())
+  {
+    tt=Q.front();Q.pop();
+    //y=Q.front();Q.pop();
+    x=tt/m;y=tt%m;
+    for(int i=0;i<4;++i)
+    {
+      tx=x+dx[i];ty=y+dy[i];
+      cur=tx*m+ty;
+      if(tx<0||tx>=n||ty<0||ty>=m)continue;
+      if(g[tx][ty]=='#')continue;
+      if(dis[s][cur]>dis[s][tt]+1)
+      {
+        dis[s][cur]=dis[s][tt]+1;
+        if(vis[cur])continue;
+        vis[cur]=1;
+        Q.push(cur);//Q.push(ty);
+      }
+    }
+  }
+//  if(flag){get_edge(s,t); return 1;}
+//  return 0;
+}
+void getans()
+{ clr(dis,0x3f);
+  for(int i=0;i<pos;++i)
+    spfa(i);
+  FOR(i,0,pos-2)
+  {
+    if(dis[i][p[i+1]]==oo)
+    {
+      puts("-1");return;
+    }
+  }
+  FOR(i,0,pos-2)
+  {
+    FOR(j,0,num-1)
+    {
+      if(dis[i][ p[i+1] ]==dis[i][ gold[j] ]+dis[i+1][ gold[j] ])
+      {
+        add(i,j);
+      }
+    }
+  }
+
+  clr(X,-1);int ret=0;
+  for(int i=0;i<pos-1;++i)
+  {
+    clr(T,0);
+    if(dfs(i))
+      ++ret;
+  }
+  printf("%d\n",ret);
+}
+int get_ID(char sss)
+{
+  if(sss>='A'&&sss<='Z')return sss-'A';
+  return sss-'a'+26;
+}
+int main()
+{
+  while(~scanf("%d%d",&n,&m))
+  { init();
+    for(int i=0;i<n;++i)
+      scanf("%s",g[i]);
+    pos=0;clr(p,-1);
+    FOR(i,0,n-1)FOR(j,0,m-1)
+    if(g[i][j]!='.'&&g[i][j]!='*'&&g[i][j]!='#')
+      p[get_ID(g[i][j])]=i*m+j,pos++;
+    bool flag=1;
+    FOR(i,0,pos-1)
+    if(p[i]==-1)
+    { flag=0;
+      puts("-1");break;
+    }
+    if(!flag)continue;
+    num=0;
+    FOR(i,0,n-1)FOR(j,0,m-1)
+    if(g[i][j]=='*')
+      gold[num++]=i*m+j;
+    getans();
+  }
+}
+
+死活MLE，求原因。
+
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<algorithm>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof f)
+using namespace std;
+const int mm=58;
+const int oo=0x3f3f3f3f;
+const int dx[]={1,-1,0,0};
+const int dy[]={0,0,1,-1};
+class Edge
+{
+  public:int v,next;
+}e[mm*20000];
+char g[110][110];
+int id[110][110];
+int n,m,pos;
+class _Point
+{
+  public:int x,y;
+  bool operator<(const _Point&t)const
+  {
+    return g[x][y]<g[t.x][t.y];
+  }
+}p[mm];
+int head[mm],edge,X[10009];bool T[10009];
+void init()
+{
+  edge=0;clr(head,-1);
+}
+void add(int u,int v)
+{ // printf("e-> %d %d\n",u,v);
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+bool dfs(int u)
+{
+  int v;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(T[v])continue;
+    T[v]=1;
+    if(X[v]==-1||dfs(X[v]))
+    {
+      X[v]=u;return 1;
+    }
+  }
+  return 0;
+}
+int dis[110][110];bool vis[110][110];
+bool nosub_one(int x,int y,int xx,int yy)
+{
+  if(g[x][y]=='Z'&&g[xx][yy]!='a')return 1;
+  if(g[x][y]+1!=g[xx][yy])return 1;
+  return 0;
+}
+void debug()
+{
+  FOR(i,0,n-1)FOR(j,0,m-1)
+  printf("%d%c",dis[i][j],j==m-1?'\n':' ');
+}
+void get_edge(int u,int t)
+{  //debug();
+  queue<int>Q;
+  int tx,ty,x,y;
+  tx=p[t].x;ty=p[t].y;
+  Q.push(tx);Q.push(ty);
+  while(!Q.empty())
+  { x=Q.front();Q.pop();
+    y=Q.front();Q.pop();
+    for(int i=0;i<4;++i)
+    {
+      tx=x+dx[i];ty=y+dy[i];
+      if(tx<0||tx>=n||ty<0||ty>=m)continue;
+      if(g[tx][ty]=='#')continue;
+      if(dis[tx][ty]+1!=dis[x][y])continue;
+      if(g[tx][ty]=='*')add(u,id[tx][ty]);
+      Q.push(tx);Q.push(ty);
+    }
+  }
+}
+bool spfa(int s,int t)
+{ bool flag=0;
+  if(nosub_one(p[s].x,p[s].y,p[t].x,p[t].y)){return 0;}
+  FOR(i,0,n)FOR(j,0,m)dis[i][j]=oo,vis[i][j]=0;
+  int tx,ty,x,y;
+  tx=p[s].x;ty=p[s].y;
+  //vis[tx][ty]=1;
+  dis[tx][ty]=0;
+  queue<int>Q;
+  Q.push(tx);Q.push(ty);
+  while(!Q.empty())
+  {
+    x=Q.front();Q.pop();
+    y=Q.front();Q.pop();
+    if(vis[x][y])continue;
+    vis[x][y]=1;
+    for(int i=0;i<4;++i)
+    {
+      tx=x+dx[i];ty=y+dy[i];
+      if(tx<0||tx>=n||ty<0||ty>=m)continue;
+      if(g[tx][ty]=='#')continue;
+      if(dis[tx][ty]>dis[x][y]+1)
+      {
+        dis[tx][ty]=dis[x][y]+1;
+        if(tx==p[t].x&&ty==p[t].y)
+        { flag=1; //puts("++");
+          //get_edge(s,t);
+          continue;
+          //return 1;
+        }
+        Q.push(tx);Q.push(ty);
+      }
+    }
+  }
+  if(flag){get_edge(s,t); return 1;}
+  return 0;
+}
+void getans()
+{
+  for(int i=0;i<pos-1;++i)
+    if(!spfa(i,i+1))
+     {
+       printf("-1\n");return;
+     }
+  clr(X,-1);int ret=0;
+  for(int i=0;i<pos-1;++i)
+  {
+    clr(T,0);
+    if(dfs(i))
+      ++ret;
+  }
+  printf("%d\n",ret);
+}
+int main()
+{
+  while(~scanf("%d%d",&n,&m))
+  { init();
+    for(int i=0;i<n;++i)
+      scanf("%s",g[i]);
+    pos=0;
+    FOR(i,0,n-1)FOR(j,0,m-1)
+    if(g[i][j]!='.'&&g[i][j]!='*'&&g[i][j]!='#')
+      p[pos].x=i,p[pos++].y=j;
+    if(pos==0){puts("-1");continue;}
+    int sz=0;clr(id,-1);
+    FOR(i,0,n-1)FOR(j,0,m-1)if(g[i][j]=='*')id[i][j]=sz++;
+    sort(p,p+pos);
+    getans();
+  }
+}
+
+
+
