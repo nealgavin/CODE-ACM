@@ -1,0 +1,94 @@
+F - Escape
+Time Limit:1000MS     Memory Limit:32768KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+2012 If this is the end of the world how to do? I do not know how. But now scientists have found that some stars, who can live, but some people do not fit to live some of the planet. Now scientists want your help, is to determine what all of people can live in these planets. 
+ 
+Input
+More set of test data, the beginning of each data is n (1 <= n <= 100000), m (1 <= m <= 10) n indicate there n people on the earth, m representatives m planet, planet and people labels are from 0. Here are n lines, each line represents a suitable living conditions of people, each row has m digits, the ith digits is 1, said that a person is fit to live in the ith-planet, or is 0 for this person is not suitable for living in the ith planet. 
+The last line has m digits, the ith digit ai indicates the ith planet can contain ai people most.. 
+0 <= ai <= 100000 
+ 
+Output
+Determine whether all people can live up to these stars 
+If you can output YES, otherwise output NO. 
+ 
+Sample Input
+ 1 1
+1
+1
+
+2 2
+1 0
+1 0
+1 1 
+ 
+Sample Output
+ YES
+NO 
+思路：多重KM，需要理解KM。建容量cap
+
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof f);
+using namespace std;
+const int mpeo=1e5+9;
+const int mxx=15;
+int num[mxx],cap[mxx];
+int X[mxx][mpeo];
+int g[mpeo][mxx];
+bool T[mxx];
+int n,m;
+bool dfs(int u)
+{
+  FOR(i,1,m)
+  if(!T[i]&&g[u][i])
+  { T[i]=1;
+    if(num[i]<cap[i])
+    {
+      X[i][++num[i]]=u;
+      return 1;
+    }
+    else
+    {
+      FOR(j,1,cap[i])
+      {
+        if(dfs(X[i][j]))
+        {
+          X[i][j]=u;return 1;
+        }
+      }
+    }
+  }
+  return 0;
+}
+bool getans()
+{
+  clr(X,-1);clr(num,0);
+  FOR(i,1,n)
+  {
+    clr(T,0);
+    if(!dfs(i))return 0;
+  }
+  return 1;
+}
+int main()
+{ int a;
+ while(~scanf("%d%d",&n,&m))
+ {
+   FOR(i,1,n)FOR(j,1,m)
+   {scanf("%d",&g[i][j]);
+   }
+   FOR(j,1,m)scanf("%d",&cap[j]);
+   if(getans())puts("YES");
+   else puts("NO");
+ }
+}
+
+
+

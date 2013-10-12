@@ -1,0 +1,196 @@
+
+
+E - Rain on your Parade
+Time Limit:3000MS     Memory Limit:165535KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+You’re giving a party in the garden of your villa by the sea. The party is a huge success, and everyone is here. It’s a warm, sunny evening, and a soothing wind sends fresh, salty air from the sea. The evening is progressing just as you had imagined. It could be the perfect end of a beautiful day. 
+But nothing ever is perfect. One of your guests works in weather forecasting. He suddenly yells, “I know that breeze! It means its going to rain heavily in just a few minutes!” Your guests all wear their best dresses and really would not like to get wet, hence they stand terrified when hearing the bad news. 
+You have prepared a few umbrellas which can protect a few of your guests. The umbrellas are small, and since your guests are all slightly snobbish, no guest will share an umbrella with other guests. The umbrellas are spread across your (gigantic) garden, just like your guests. To complicate matters even more, some of your guests can’t run as fast as the others. 
+Can you help your guests so that as many as possible find an umbrella before it starts to pour? 
+
+Given the positions and speeds of all your guests, the positions of the umbrellas, and the time until it starts to rain, find out how many of your guests can at most reach an umbrella. Two guests do not want to share an umbrella, however. 
+ 
+Input
+The input starts with a line containing a single integer, the number of test cases. 
+Each test case starts with a line containing the time t in minutes until it will start to rain (1 <=t <= 5). The next line contains the number of guests m (1 <= m <= 3000), followed by m lines containing x- and y-coordinates as well as the speed si in units per minute (1 <= s i<= 3000) of the guest as integers, separated by spaces. After the guests, a single line contains n (1 <= n <= 3000), the number of umbrellas, followed by n lines containing the integer coordinates of each umbrella, separated by a space. 
+The absolute value of all coordinates is less than 10000. 
+ 
+Output
+For each test case, write a line containing “Scenario #i:”, where i is the number of the test case starting at 1. Then, write a single line that contains the number of guests that can at most reach an umbrella before it starts to rain. Terminate every test case with a blank line. 
+ 
+Sample Input
+ 2
+1
+2
+1 0 3
+3 0 3
+2
+4 0
+6 0
+1
+2
+1 1 2
+3 3 2
+2
+2 2
+4 4 
+ 
+Sample Output
+ Scenario #1:
+2
+
+Scenario #2:
+2 
+ 
+
+思路：Km超时，需要多路增广的Km
+#include<cstdio>
+#include<cstring>
+#include<cmath>
+#include<iostream>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=3009;
+class Edge
+{
+  public:int v,next;
+}e[mm*mm*2];
+class _point
+{
+  public:int x,y,dis;
+  int fabs(int x)
+  {
+    if(x<0)return -x;
+    return x;
+  }
+  void out()
+  {
+    printf("qw=%d %d %d \n",x,y,dis);
+  }
+  bool ok(_point t)
+  {
+    int d=fabs(x-t.x)+fabs(y-t.y);
+    if(d<=dis)
+      return 1;
+    return 0;
+  }
+}p[mm];
+int head[mm],edge=0;
+int X[mm],Y[mm];bool T[mm];
+void init()
+{
+  clr(head,-1);edge=0;
+}
+void add(int u,int v)
+{
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+//queue<int>Q;
+int Q[mm],front,rear;
+int n,m;
+int dx[mm],dy[mm];
+bool bfs()///多路增广
+{ front=rear=0;
+  FOR(i,1,n)
+  if(Y[i]==-1)
+  {  Q[rear++]=i;
+    //Q.push(i);
+  }
+  FOR(i,0,n)dx[i]=0;
+  FOR(i,0,m)dy[i]=0;
+  bool flag=0;
+  int u,v;
+  while(front<rear)
+  {
+    u=Q[front++];//Q.front();Q.pop();
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(dy[v]==0)
+      {
+        dy[v]=dx[u]+1;
+        if(X[v]==-1)
+        {
+          flag=1;
+        }
+        else
+        {
+          dx[ X[v] ]=dy[v]+1;
+          Q[rear++]=X[v];
+          //Q.push(X[v]);
+        }
+      }
+    }
+  }
+  return flag;
+}
+bool dfs(int u)
+{
+  int v;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(dx[u]+1!=dy[v])continue;
+    dy[v]=0;
+    if(X[v]==-1||dfs(X[v]))
+    {
+      X[v]=u;
+      Y[u]=v;
+      return 1;
+    }
+  }
+  return 0;
+}
+void getans()
+{
+  //clr(X,-1);clr(Y,-1);
+  FOR(i,0,n)Y[i]=-1;
+  FOR(i,0,m)X[i]=-1;
+  int ret=0;
+  while(bfs())
+  { //puts("++++");
+    FOR(i,1,n)
+    {
+      //clr(T,0);
+      if(Y[i]==-1&&dfs(i))
+        ++ret;
+    }
+  }
+  printf("%d\n\n",ret);
+}
+int main()
+{
+  int cas,t;
+  while(~scanf("%d",&cas))
+  {
+    FOR(ca,1,cas)
+    { init();
+      scanf("%d%d",&t,&n);
+      FOR(i,1,n)
+      {
+        scanf("%d%d%d",&p[i].x,&p[i].y,&p[i].dis);
+        p[i].dis*=t;
+      }
+      scanf("%d",&m);
+      _point zt;
+      FOR(i,1,m)
+      {
+        scanf("%d%d",&zt.x,&zt.y);
+        FOR(j,1,n)
+        if(p[j].ok(zt))
+        {
+          add(j,i);
+        }
+      }
+      printf("Scenario #%d:\n",ca);
+      getans();
+    }
+  }
+}
+
