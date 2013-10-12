@@ -1,0 +1,164 @@
+A - Redundant Paths
+Time Limit:1000MS     Memory Limit:65536KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+In order to get from one of the F (1 <= F <= 5,000) grazing fields (which are numbered 1..F) to another field, Bessie and the rest of the herd are forced to cross near the Tree of Rotten Apples. The cows are now tired of often being forced to take a particular path and want to build some new paths so that they will always have a choice of at least two separate routes between any pair of fields. They currently have at least one route between each pair of fields and want to have at least two. Of course, they can only travel on Official Paths when they move from one field to another. 
+
+Given a descri_ption of the current set of R (F-1 <= R <= 10,000) paths that each connect exactly two different fields, determine the minimum number of new paths (each of which connects exactly two fields) that must be built so that there are at least two separate routes between any pair of fields. Routes are considered separate if they use none of the same paths, even if they visit the same intermediate field along the way. 
+
+There might already be more than one paths between the same pair of fields, and you may also build a new path that connects the same fields as some other path.
+Input
+Line 1: Two space-separated integers: F and R 
+
+Lines 2..R+1: Each line contains two space-separated integers which are the fields at the endpoints of some path.
+Output
+Line 1: A single integer that is the number of new paths that must be built.
+Sample Input
+7 7
+1 2
+2 3
+3 4
+2 5
+4 5
+5 6
+5 7
+Sample Output
+2
+Hint
+Explanation of the sample: 
+
+One visualization of the paths is: 
+1   2   3
+   +---+---+  
+       |   |
+       |   |
+ 6 +---+---+ 4
+      / 5
+     / 
+    / 
+ 7 +
+Building new paths from 1 to 6 and from 4 to 7 satisfies the conditions. 
+1   2   3
+   +---+---+  
+   :   |   |
+   :   |   |
+ 6 +---+---+ 4
+      / 5  :
+     /     :
+    /      :
+ 7 + - - - - 
+Check some of the routes: 
+1 – 2: 1 –> 2 and 1 –> 6 –> 5 –> 2 
+1 – 4: 1 –> 2 –> 3 –> 4 and 1 –> 6 –> 5 –> 4 
+3 – 7: 3 –> 4 –> 7 and 3 –> 2 –> 5 –> 7 
+Every pair of fields is, in fact, connected by two routes. 
+
+It's possible that adding some other path will also solve the problem (like one from 6 to 7). Adding two paths, however, is the minimum.
+思路：边双连通分量缩点，统计入度为1 的点数，答案就其+1除以2的值，当全部双连通时结果为0.
+          注意重边。
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof f)
+using namespace std;
+const int mp=5005;
+const int me=1e5+9;
+bool vis[mp][mp];
+class Edge
+{
+  public:int v,next;
+};
+class Graph
+{
+public:
+  int dfn[mp],e_to[mp],stak[mp];
+  int dfs_clock,bcc_no,top,edge;
+  int n,m,head[mp];
+  Edge e[me*2];
+  void clear()
+  {
+    edge=0;clr(head,-1);
+  }
+  void add(int u,int v)
+  {
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  int tarjan(int u,int fa)
+  {
+    int v,lowu,lowv;
+    dfn[u]=lowu=++dfs_clock;
+    stak[top++]=u;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(v==fa)continue;///访问过的树边
+      if(!dfn[v])
+      {
+        lowv=tarjan(v,u);
+        lowu=min(lowv,lowu);
+//        if(lowv>dfn[u])
+//        {
+//          brige++;
+//        }
+      }
+      else if(e_to[v]==-1&&dfn[v]<lowu)
+        lowu=dfn[v];
+    }
+    if(lowu==dfn[u])
+    {
+      ++bcc_no;
+      do{
+        v=stak[--top];
+        e_to[v]=bcc_no;
+      }while(v!=u);
+    }
+    return lowu;
+  }
+  int id[mp];
+  void find_bcc()
+  {
+    dfs_clock=top=bcc_no=0;
+    clr(e_to,-1);clr(dfn,0);
+    FOR(i,1,n)
+    if(!dfn[i])
+      tarjan(i,-1);
+      int u,v;
+    clr(id,0);
+    for(int i=0;i<edge;i+=2)
+    {
+      u=e[i].v;v=e[i^1].v;
+      u=e_to[u];v=e_to[v];
+      if(u==v)continue;
+      ++id[u];++id[v];
+    }
+    int ans=0;
+    for(int i=1;i<=bcc_no;++i)
+      if(id[i]==1)
+        ++ans;
+    if(ans!=1)ans=(ans+1)/2;
+    printf("%d\n",ans);
+  }
+}tc;
+int main()
+{
+  int n,m,a,b;
+  while(~scanf("%d%d",&n,&m))
+  {
+    FOR(i,0,n)FOR(j,0,n)vis[i][j]=0;
+    tc.clear();tc.n=n;tc.m=m;
+    FOR(i,1,m)
+    {
+      scanf("%d%d",&a,&b);
+      if(vis[a][b])continue;
+      vis[a][b]=vis[b][a]=1;
+      tc.add(a,b);tc.add(b,a);
+    }
+    tc.find_bcc();
+  }
+}
+
+
