@@ -1,0 +1,313 @@
+POJ 2942- Knights of the Round Table
+Time Limit:7000MS     Memory Limit:65536KB     64bit IO Format:%I64d & %I64u
+Submit
+ 
+Status
+Appoint description: 
+Description
+Being a knight is a very attractive career: searching for the Holy Grail, saving damsels in distress, and drinking with the other knights are fun things to do. Therefore, it is not very surprising that in recent years the kingdom of King Arthur has experienced an unprecedented increase in the number of knights. There are so many knights now, that it is very rare that every Knight of the Round Table can come at the same time to Camelot and sit around the round table; usually only a small group of the knights isthere, while the rest are busy doing heroic deeds around the country. 
+
+Knights can easily get over-excited during discussions-especially after a couple of drinks. After some unfortunate accidents, King Arthur asked the famous wizard Merlin to make sure that in the future no fights break out between the knights. After studying the problem carefully, Merlin realized that the fights can only be prevented if the knights are seated according to the following two rules:
+The knights should be seated such that two knights who hate each other should not be neighbors at the table. (Merlin has a list that says who hates whom.) The knights are sitting around a roundtable, thus every knight has exactly two neighbors.
+An odd number of knights should sit around the table. This ensures that if the knights cannot agree on something, then they can settle the issue by voting. (If the number of knights is even, then itcan happen that ``yes" and ``no" have the same number of votes, and the argument goes on.)
+Merlin will let the knights sit down only if these two rules are satisfied, otherwise he cancels the meeting. (If only one knight shows up, then the meeting is canceled as well, as one person cannot sit around a table.) Merlin realized that this means that there can be knights who cannot be part of any seating arrangements that respect these rules, and these knights will never be able to sit at the Round Table (one such case is if a knight hates every other knight, but there are many other possible reasons). If a knight cannot sit at the Round Table, then he cannot be a member of the Knights of the Round Table and must be expelled from the order. These knights have to be transferred to a less-prestigious order, such as the Knights of the Square Table, the Knights of the Octagonal Table, or the Knights of the Banana-Shaped Table. To help Merlin, you have to write a program that will determine the number of knights that must be expelled. 
+
+Input
+The input contains several blocks of test cases. Each case begins with a line containing two integers 1 ≤ n ≤ 1000 and 1 ≤ m ≤ 1000000 . The number n is the number of knights. The next m lines describe which knight hates which knight. Each of these m lines contains two integers k1 and k2 , which means that knight number k1 and knight number k2 hate each other (the numbers k1 and k2 are between 1 and n ). 
+
+The input is terminated by a block with n = m = 0 . 
+
+Output
+For each test case you have to output a single integer on a separate line: the number of knights that have to be expelled. 
+
+Sample Input
+5 5
+1 4
+1 5
+2 5
+3 4
+4 5
+0 0
+Sample Output
+2
+
+思路：双连通+二分图判断。
+AC->RE
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof f)
+using namespace std;
+const int mp=1009;
+class Edge
+{
+  public:int v,u,next;bool vis;
+};
+class Graph_Cut
+{
+public:
+  int dfn[mp],stak[mp],vis[mp];
+  /**这个vis 数组整个程序根本就没有使用它，但去掉它程序就RE了。不去就能AC*/
+  int dfs_clock,top;
+  bool mark[mp],can[mp];
+  Edge e[mp*mp*2];
+  int head[mp],edge;
+  int corlor[mp];
+  int n,m;
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v)
+  { e[edge].u=u;e[edge].vis=0;
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  bool two_graph(int u)
+  { int v;
+    bool ret=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(!mark[v])continue;
+      if(corlor[v]!=-1)
+      {
+        if(corlor[v]==corlor[u])return 0;
+      }
+      else {corlor[v]=3-corlor[u];ret=two_graph(v);if(!ret)return 0;}
+    }
+    return ret;
+  }
+  void get_cor(int u)
+  { clr(mark,0);
+    int z;
+    do{
+      z=stak[--top];
+      mark[ e[z].u ]=mark[ e[z].v ]=1;
+    }while(u^e[z].u);
+    clr(corlor,-1);
+    corlor[u]=1;
+    if(!two_graph(u))
+    {
+      FOR(i,1,n)
+      if(mark[i])
+      can[i]=1;
+    }
+  }
+  int ttt[mp],low[mp];
+//  void tarjan(int u)
+//  {
+//    int v;//,lowv,lowu;
+//    low[u]=dfn[u]=++dfs_clock;
+//    vis[u]=1;
+//    for(int i=head[u];~i;i=e[i].next)
+//    {
+//      v=e[i].v;
+//      if(e[i].vis)continue;
+//      e[i].vis=e[i^1].vis=1;
+//      //if(v==fa)continue;
+//      stak[top++]=i;
+//      if(!dfn[v])
+//      {
+//        tarjan(v);
+//        low[u]=min(low[u],low[v]);
+//        if(low[v]>=dfn[u])
+//        {
+//          get_cor(u);
+//        }
+//      }
+//      else if(vis[u]==1)
+//        low[u]=min(low[u],dfn[v]);
+//    }
+//    vis[u]=2;
+//    //return lowu;
+//  }
+void tarjan(int u)///得到双连通分量
+{
+  dfn[u]=low[u]=++dfs_clock;
+  int v=-1;ttt[u]=1;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(e[i].vis)continue;
+    e[i].vis=e[i^1].vis=1;///标记走过的边
+    stak[top++]=i;
+    if(!dfn[v])
+    { tarjan(v);
+      low[u]=min(low[u],low[v]);
+      if(low[v]>=dfn[u])
+      { get_cor(u);
+        //puts("");
+      }
+    }
+    else if(ttt[u]==1)
+    {
+      low[u]=min(low[u],dfn[v]);
+    }
+  }
+  ttt[u]=2;
+}
+  void find_bcc()
+  { clr(ttt,0);
+    clr(dfn,0);clr(can,0);
+    dfs_clock=top=0;
+    FOR(i,1,n)
+    if(!dfn[i])
+      tarjan(i);
+    int ans=n;
+    FOR(i,1,n)
+    if(can[i])--ans;
+    printf("%d\n",ans);
+  }
+}sp;
+int g[mp][mp];
+int main()
+{ int a,b;
+  int n,m;
+  while(~scanf("%d%d",&n,&m))
+  { if(n==0&&m==0)break;
+    sp.n=n;sp.m=m;
+    sp.clear();clr(g,0);
+    for(int i=0;i<m;++i)
+    {
+      scanf("%d%d",&a,&b);g[a][b]=g[b][a]=1;
+    }
+    for(int i=1;i<=n;++i)
+      for(int j=i+1;j<=n;++j)
+      if(!g[i][j])sp.add(i,j),sp.add(j,i)/**,printf("%d %d\n",i,j)*/;
+    sp.find_bcc();
+  }
+  return 0;
+}
+
+AC->WA
+如果我们使用这个vis数组，也就是吧原程序的ttt 改成vis,就会发现WA了。
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof f)
+using namespace std;
+const int mp=1009;
+class Edge
+{
+  public:int v,u,next;bool vis;
+};
+class Graph_Cut
+{
+public:
+  int dfn[mp],stak[mp]/*stak[mp*2]*/,vis[mp];
+  /**这样就WA了，但是vis换个地方就会RE，若把stak开两倍就能过。
+  差不多该知道问题了吧!
+  对就是出在stak上，stak 数组爆了，而vis和stak是连着的一块内存空间所以直接访问到vis的空间了。
+  不报RE，但如果没有这一块连续的空间，它就RE了，访问了非法内存，什么是非法内存，对于一个程序而言，只要
+  是当前程序申请的内存都是合法的，随便咋使用都行，都合法。
+  改变WA的局势就是给stak加足够内存就行了。O(∩_∩)O~
+  这种WA是不是很坑啊！
+  */
+  int dfs_clock,top;
+  bool mark[mp],can[mp];
+  Edge e[mp*mp*2];
+  int head[mp],edge;
+  int corlor[mp];
+  int n,m;
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v)
+  { e[edge].u=u;e[edge].vis=0;
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  bool two_graph(int u)
+  { int v;
+    bool ret=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(!mark[v])continue;
+      if(corlor[v]!=-1)
+      {
+        if(corlor[v]==corlor[u])return 0;
+      }
+      else {corlor[v]=3-corlor[u];ret=two_graph(v);if(!ret)return 0;}
+    }
+    return ret;
+  }
+  void get_cor(int u)
+  { clr(mark,0);
+    int z;
+    do{
+      z=stak[--top];
+      mark[ e[z].u ]=mark[ e[z].v ]=1;
+    }while(u^e[z].u);
+    clr(corlor,-1);
+    corlor[u]=1;
+    if(!two_graph(u))
+    {
+      FOR(i,1,n)
+      if(mark[i])
+      can[i]=1;
+    }
+  }
+  int tarjan(int u)
+  {
+    int v,lowv,lowu;
+    lowu=dfn[u]=++dfs_clock;
+    vis[u]=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(e[i].vis)continue;
+      e[i].vis=e[i^1].vis=1;
+      //if(v==fa)continue;
+      stak[top++]=i;
+      if(!dfn[v])
+      {
+        lowv=tarjan(v);
+        lowu=min(lowu,lowv);
+        if(lowv>=dfn[u])
+        {
+          get_cor(u);
+        }
+      }
+      else if(vis[u]==1)
+        lowu=min(lowu,dfn[v]);
+    }
+    vis[u]=2;
+    return lowu;
+  }
+  void find_bcc()
+  {
+    clr(dfn,0);clr(vis,0);clr(can,0);
+    dfs_clock=top=0;
+    FOR(i,1,n)
+    if(!dfn[i])
+      tarjan(i);
+    int ans=n;
+    FOR(i,1,n)
+    if(can[i])--ans;
+    printf("%d\n",ans);
+  }
+}sp;
+int g[mp][mp];
+int main()
+{ int a,b;
+  int n,m;
+  while(~scanf("%d%d",&n,&m))
+  { if(n==0&&m==0)break;
+    sp.n=n;sp.m=m;
+    sp.clear();clr(g,0);
+    for(int i=0;i<m;++i)
+    {
+      scanf("%d%d",&a,&b);g[a][b]=g[b][a]=1;
+    }
+    for(int i=1;i<=n;++i)
+      for(int j=i+1;j<=n;++j)
+      if(!g[i][j])sp.add(i,j),sp.add(j,i)/**,printf("%d %d\n",i,j)*/;
+    sp.find_bcc();
+  }
+  return 0;
+}
+
+

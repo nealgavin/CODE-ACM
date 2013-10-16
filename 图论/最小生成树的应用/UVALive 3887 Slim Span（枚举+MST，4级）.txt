@@ -1,0 +1,181 @@
+E - Slim Span
+Time Limit:3000MS     Memory Limit:0KB     64bit IO Format:%lld & %llu
+Submit
+ 
+Status
+Appoint description: 
+Description
+Download as PDF
+Given an undirected weighted graph G , you should find one of spanning trees specified as follows.
+The graph G is an ordered pair (V, E) , where V is a set of vertices {v1, v2,..., vn} and E is a set of undirected edges {e1, e2,..., em} . Each edge e $ \in$ E has its weight w(e) .
+A spanning tree T is a tree (a connected subgraph without cycles) which connects all the n vertices with n - 1 edges. The slimness of a spanning tree T is defined as the difference between the largest weight and the smallest weight among the n - 1 edges of T .
+\epsfbox{p3887a.eps}
+For example, a graph G in Figure 5(a) has four vertices {v1, v2, v3, v4} and five undirected edges {e1, e2, e3, e4, e5} . The weights of the edges are w(e1) = 3 , w(e2) = 5 , w(e3) = 6 , w(e4) = 6 , w(e5) = 7 as shown in Figure 5(b).
+=6in \epsfbox{p3887b.eps}
+There are several spanning trees for G . Four of them are depicted in Figure 6(a)a??(d). The spanning tree Ta in Figure 6(a) has three edges whose weights are 3, 6 and 7. The largest weight is 7 and the smallest weight is 3 so that the slimness of the tree Ta is 4. The slimnesses of spanning trees Tb , Tc and Td shown in Figure 6(b), (c) and (d) are 3, 2 and 1, respectively. You can easily see the slimness of any other spanning tree is greater than or equal to 1, thus the spanning tree Td in Figure 6(d) is one of the slimmest spanning trees whose slimness is 1.
+Your job is to write a program that computes the smallest slimness.
+Input
+The input consists of multiple datasets, followed by a line containing two zeros separated by a space. Each dataset has the following format.
+
+n m 
+a1 b1 w1 
+$ \vdots$ 
+am bm wm 
+
+Every input item in a dataset is a non-negative integer. Items in a line are separated by a space.
+
+n is the number of the vertices and m the number of the edges. You can assume 2$ \le$n$ \le$100 and 0$ \le$m$ \le$n(n - 1)/2 . ak and bk (k = 1,..., m)are positive integers less than or equal to n , which represent the two vertices vak and vbk connected by the k -th edge ek . wk is a positive integer less than or equal to 10000, which indicates the weight of ek . You can assume that the graph G = (V, E) is simple, that is, there are no self-loops (that connect the same vertex) nor parallel edges (that are two or more edges whose both ends are the same two vertices).
+Output
+For each dataset, if the graph has spanning trees, the smallest slimness among them should be printed. Otherwise, `-1' should be printed. An output should not contain extra characters.
+Sample Input
+4 5 
+1 2 3
+1 3 5
+1 4 6
+2 4 6
+3 4 7
+4 6 
+1 2 10 
+1 3 100 
+1 4 90 
+2 3 20 
+2 4 80 
+3 4 40 
+2 1 
+1 2 1
+3 0 
+3 1 
+1 2 1
+3 3 
+1 2 2
+2 3 5 
+1 3 6 
+5 10 
+1 2 110 
+1 3 120 
+1 4 130 
+1 5 120 
+2 3 110 
+2 4 120 
+2 5 130 
+3 4 120 
+3 5 110 
+4 5 120 
+5 10 
+1 2 9384 
+1 3 887 
+1 4 2778 
+1 5 6916 
+2 3 7794 
+2 4 8336 
+2 5 5387 
+3 4 493 
+3 5 6650 
+4 5 1422 
+5 8 
+1 2 1 
+2 3 100 
+3 4 100 
+4 5 100 
+1 5 50 
+2 5 50 
+3 5 50 
+4 1 150 
+0 0
+Sample Output
+1 
+20 
+0 
+-1 
+-1 
+1 
+0 
+1686 
+50
+
+Ë¼Â·£ºÃ¶¾Ù+MST
+
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<cmath>
+#include<queue>
+#include<algorithm>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mp=109;
+class Edge
+{
+public:
+  int u,v,next,w;
+  bool operator<(const Edge&x)const
+  {
+    return w<x.w;
+  }
+};
+class Tree
+{ public:
+  int n,m,slim;
+  int rt[mp];
+  Edge e[mp*mp*2];
+  void clear()
+  {
+    FOR(i,0,n)rt[i]=i;
+  }
+  int find(int x)
+  {
+    if(rt[x]^x)
+      rt[x]=find(rt[x]);
+    return rt[x];
+  }
+  int MST_tree(int s)
+  {
+    int num=0,u,v,t;
+    FOR(i,s,m-1)
+    { u=e[i].u;v=e[i].v;
+      u=find(u);v=find(v);
+      if(u==v)continue;
+      rt[u]=v;
+      ++num;
+      if(num==n-1){t=i;break;}
+    }
+    if(num!=n-1)return -1;
+    return e[t].w-e[s].w;
+  }
+  void getans()
+  {
+    sort(e,e+m);
+    clear();
+    slim=MST_tree(0);
+    if(slim==-1)
+    {
+      printf("-1\n");return;
+    }
+    FOR(i,1,m-1)
+    if(e[i].w==e[i-1].w)continue;
+    else
+    { clear();
+      int t=MST_tree(i);
+      if(t==-1){printf("%d\n",slim);return;}
+      if(t<slim)slim=t;
+    }
+    printf("%d\n",slim);
+  }
+}sp;
+int main()
+{
+  int n,m;
+  while(~scanf("%d%d",&n,&m))
+  { sp.n=n;sp.m=m;
+    if(n==0&&m==0)break;
+    FOR(i,0,m-1)
+    {
+      scanf("%d%d%d",&sp.e[i].u,&sp.e[i].v,&sp.e[i].w);
+
+    }sp.getans();
+  }
+}
+
+
+

@@ -1,0 +1,409 @@
+
+Network
+Time Limit: 5000MS	
+Memory Limit: 65536K
+Total Submissions: 6013	
+Accepted: 2091
+Description
+A network administrator manages a large network. The network consists of N computers and M links between pairs of computers. Any pair of computers are connected directly or indirectly by successive links, so data can be transformed between any two computers. The administrator finds that some links are vital to the network, because failure of any one of them can cause that data can't be transformed between some computers. He call such a link a bridge. He is planning to add some new links one by one to eliminate all bridges.
+You are to help the administrator by reporting the number of bridges in the network after each new link is added.
+Input
+The input consists of multiple test cases. Each test case starts with a line containing two integers N(1 ≤ N ≤ 100,000) and M(N - 1 ≤ M ≤ 200,000).
+Each of the following M lines contains two integers A and B ( 1≤ A ≠ B ≤ N), which indicates a link between computer A and B. Computers are numbered from 1 to N. It is guaranteed that any two computers are connected in the initial network.
+The next line contains a single integer Q ( 1 ≤ Q ≤ 1,000), which is the number of new links the administrator plans to add to the network one by one.
+The i-th line of the following Q lines contains two integer A and B (1 ≤ A ≠ B ≤ N), which is the i-th added new link connecting computer A and B.
+
+The last test case is followed by a line containing two zeros.
+Output
+For each test case, print a line containing the test case number( beginning with 1) and Q lines, the i-th of which contains a integer indicating the number of bridges in the network after the first i new links are added. Print a blank line after the output for each test case.
+Sample Input
+3 2
+1 2
+2 3
+2
+1 2
+1 3
+4 4
+1 2
+2 1
+2 3
+1 4
+2
+1 2
+3 4
+0 0
+Sample Output
+Case 1:
+1
+0
+
+Case 2:
+2
+0
+Source
+2008 Asia Hefei Regional Contest Online by USTC
+
+思路：双连通标记桥+LCA。好题啊。
+           LCA，可以直接使用双连通时的生成的那颗树，然后标记其中的桥就行了。直接找其到公共祖先的路径，删除路径上的桥，并且合并路径。
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mp=1e5+9;
+class Edge
+{
+  public:int v,next;
+};
+class Graph_Connect
+{
+public:
+  int dfs_clock,bridge_num;
+  int dfn[mp],bridge[mp],head[mp],edge,vis[mp],father[mp],low[mp];
+  int n;
+  Edge e[mp*4];
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v)
+  {
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  void tarjan(int u,int fa)
+  {
+    int v,lowu,lowv;
+    low[u]=dfn[u]=++dfs_clock;
+    vis[u]=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(v==fa)continue;
+      if(!dfn[v])
+      { father[v]=u;
+        tarjan(v,u);
+        if(low[v]>dfn[u])
+        {
+          bridge_num++;
+          bridge[v]=1;
+        }
+        low[u]=min(low[u],low[v]);
+      }
+      else if(vis[v]==1)///in stack
+        low[u]=min(low[u],dfn[v]);
+    }
+    vis[u]=2;
+    //return lowu;
+  }
+  void find_bcc()
+  { //clr(father,-1);//换成这个绝对TLE，原因不明
+    FOR(i,1,n)father[i]=-1;
+    /******************************
+    原因有可能出现访问根节点的祖先点，让father[root]=root 就行了。不会T
+    *****************************/
+    clr(dfn,0);dfs_clock=0;
+    clr(bridge,0);bridge_num=0;
+    tarjan(1,-1);///root
+  }
+  void LCA(int u,int v)///union
+  {
+    while(dfn[u]>dfn[v])
+    {
+      if(bridge[u])--bridge_num,bridge[u]=0;//union
+      int t=u;
+      u=father[u];
+      if(u!=-1)
+      father[t]=father[u];///union u,and its father
+    }
+    while(dfn[u]<dfn[v])
+    {
+      if(bridge[v])--bridge_num,bridge[v]=0;
+      int t=v;
+      v=father[v];
+      if(v!=-1)
+        father[t]=father[v];
+    }
+    while(u^v)
+    {
+      if(bridge[u])--bridge_num,bridge[u]=0;
+      if(bridge[v])--bridge_num,bridge[v]=0;
+      int tu=u,tv=v;
+      u=father[u];v=father[v];
+      if(u!=-1)father[tu]=father[u];
+      if(v!=-1)father[tv]=father[v];
+    }
+  }
+}sp;
+int main()
+{
+  int n,m,a,b,cas=0;
+  while(~scanf("%d%d",&n,&m))
+  { if(n==0&&m==0)break;
+    sp.n=n;
+    sp.clear();
+    FOR(i,1,m)
+    {
+      scanf("%d%d",&a,&b);
+      sp.add(a,b);sp.add(b,a);
+    }
+    sp.find_bcc();
+    int Q;
+    printf("Case %d:\n",++cas);
+    scanf("%d",&Q);
+    while(Q--)
+    {
+      scanf("%d%d",&a,&b);
+      if(sp.bridge_num)
+      sp.LCA(a,b);
+      printf("%d\n",sp.bridge_num);
+    }
+    puts("");
+  }
+}
+
+
+各种测试
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mp=1e5+9;
+class Edge
+{
+  public:int v,next;
+};
+class Graph_Connect
+{
+public:
+  int dfs_clock,bridge_num;
+  int dfn[mp],bridge[mp],head[mp],edge,vis[mp],father[mp],low[mp];
+  int n;
+  Edge e[mp*4];
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v)
+  {
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  void tarjan(int u,int fa)
+  {
+    int v,lowu,lowv;
+    low[u]=dfn[u]=++dfs_clock;
+    vis[u]=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(v==fa)continue;
+      if(!dfn[v])
+      { father[v]=u;
+        tarjan(v,u);
+        if(low[v]>dfn[u])
+        {
+          bridge_num++;
+          bridge[v]=1;
+        }
+        low[u]=min(low[u],low[v]);
+      }
+      else if(vis[v]==1)///in stack
+        low[u]=min(low[u],dfn[v]);
+    }
+    vis[u]=2;
+    //return lowu;
+  }
+  void find_bcc()
+  { //clr(father,-1);//换成这个决定TLE，原因不明
+    FOR(i,1,n)father[i]=-1;///测试，加底下注释一句就能过
+    //father[1]=1;///有可能会访问根节点的祖先点
+    clr(dfn,0);dfs_clock=0;
+    clr(bridge,0);bridge_num=0;
+    tarjan(1,-1);///root
+  }
+  void LCA(int u,int v)///union
+  { if(u==0||v==0)puts("++++");
+    while(dfn[u]>dfn[v])
+    {
+      if(bridge[u])--bridge_num,bridge[u]=0;//union
+      int t=u;
+      u=father[u];
+      if(u==0||v==0)puts("++++");
+      if(u!=-1)
+      father[t]=father[u];///union u,and its father
+    }
+    while(dfn[u]<dfn[v])
+    {
+      if(bridge[v])--bridge_num,bridge[v]=0;
+      int t=v;
+      v=father[v];
+      if(u==0||v==0)puts("++++");
+      if(v!=-1)
+        father[t]=father[v];
+    }
+    while(u^v)
+    {
+      if(bridge[u])--bridge_num,bridge[u]=0;
+      if(bridge[v])--bridge_num,bridge[v]=0;
+      int tu=u,tv=v;
+      u=father[u];v=father[v];
+      if(u==0||v==0)puts("++++");
+      if(u!=-1)father[tu]=father[u];
+      if(v!=-1)father[tv]=father[v];
+    }
+  }
+}sp;
+int main()
+{
+  int n,m,a,b,cas=0;
+  while(~scanf("%d%d",&n,&m))
+  { if(n==0&&m==0)break;
+    sp.n=n;
+    sp.clear();
+    FOR(i,1,m)
+    {
+      scanf("%d%d",&a,&b);
+            if(a==0||b==0)puts("++++");
+      sp.add(a,b);sp.add(b,a);
+    }
+    sp.find_bcc();
+    int Q;
+    printf("Case %d:\n",++cas);
+    scanf("%d",&Q);
+    while(Q--)
+    {
+      scanf("%d%d",&a,&b);
+      if(a==0||b==0)puts("++++");
+      if(sp.bridge_num)
+      sp.LCA(a,b);
+      printf("%d\n",sp.bridge_num);
+    }
+    puts("");
+  }
+}
+
+不优化测试
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mp=1e5+9;
+class Edge
+{
+  public:int v,next;
+};
+class Graph_Connect
+{
+public:
+  int dfs_clock,bridge_num;
+  int dfn[mp],bridge[mp],head[mp],edge,vis[mp],father[mp],low[mp];
+  int n;
+  Edge e[mp*4];
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v)
+  {
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  void tarjan(int u,int fa)
+  {
+    int v,lowu,lowv;
+    low[u]=dfn[u]=++dfs_clock;
+    vis[u]=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(v==fa)continue;
+      if(!dfn[v])
+      { father[v]=u;
+        tarjan(v,u);
+        if(low[v]>dfn[u])
+        {
+          bridge_num++;
+          bridge[v]=1;
+        }
+        low[u]=min(low[u],low[v]);
+      }
+      else if(vis[v]==1)///in stack
+        low[u]=min(low[u],dfn[v]);
+    }
+    vis[u]=2;
+    //return lowu;
+  }
+  void find_bcc()
+  { //clr(father,-1);//换成这个决定TLE，原因不明
+    FOR(i,1,n)father[i]=-1;
+    father[1]=1;
+    clr(dfn,0);dfs_clock=0;
+    clr(bridge,0);bridge_num=0;
+    tarjan(1,-1);///root
+  }
+  void LCA(int u,int v)///union
+  { if(u==0||v==0)puts("++++");
+    while(dfn[u]>dfn[v])
+    {
+      if(bridge[u])--bridge_num,bridge[u]=0;//union
+      int t=u;
+      u=father[u];
+      if(u==0||v==0)puts("++++");
+//      if(u!=-1)
+//      father[t]=father[u];///union u,and its father
+    }
+    while(dfn[u]<dfn[v])
+    {
+      if(bridge[v])--bridge_num,bridge[v]=0;
+      int t=v;
+      v=father[v];
+      if(u==0||v==0)puts("++++");
+//      if(v!=-1)
+//        father[t]=father[v];
+    }
+    while(u^v)
+    {
+      if(bridge[u])--bridge_num,bridge[u]=0;
+      if(bridge[v])--bridge_num,bridge[v]=0;
+      int tu=u,tv=v;
+      u=father[u];v=father[v];
+      if(u==0||v==0)puts("++++");
+      if(u!=-1)father[tu]=father[u];
+      if(v!=-1)father[tv]=father[v];
+    }
+  }
+}sp;
+int main()
+{
+  int n,m,a,b,cas=0;
+  while(~scanf("%d%d",&n,&m))
+  { if(n==0&&m==0)break;
+    sp.n=n;
+    sp.clear();
+    FOR(i,1,m)
+    {
+      scanf("%d%d",&a,&b);
+            if(a==0||b==0)puts("++++");
+      sp.add(a,b);sp.add(b,a);
+    }
+    sp.find_bcc();
+    int Q;
+    printf("Case %d:\n",++cas);
+    scanf("%d",&Q);
+    while(Q--)
+    {
+      scanf("%d%d",&a,&b);
+      if(a==0||b==0)puts("++++");
+      if(sp.bridge_num)
+      sp.LCA(a,b);
+      printf("%d\n",sp.bridge_num);
+    }
+    puts("");
+  }
+}
+
+
+
