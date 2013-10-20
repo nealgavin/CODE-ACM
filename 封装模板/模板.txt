@@ -1,0 +1,2596 @@
+（一）图论
+/**************************************************
+1.LCA在线
+**************************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define ll(x) (1<<x)
+using namespace std;
+const int nn=4e4+9;
+const int mm=4e4+9;
+class Edge
+{
+  public:int v,next,w;
+}e[mm];
+int head[nn],edge,dis[nn],to[nn],dfs_clock;
+int vis[nn],rmq[nn][30];
+int rt[nn],N,M,C,bit[nn];
+void data()
+{
+  clr(head,-1);edge=0;
+}
+void add(int u,int v,int w,int*h)
+{
+ e[edge].v=v;e[edge].w=w;e[edge].next=h[u];h[u]=edge++;
+}
+int find(int x)
+{
+  if(rt[x]^x)
+    rt[x]=find(rt[x]);
+  return rt[x];
+}
+void uni(int a,int b)
+{
+  a=find(a);b=find(b);
+  rt[a]=b;
+}
+void dfs(int u,int dep)//一遍欧拉路径
+{ int v;
+  to[dfs_clock]=u;//存欧拉路径
+  dis[u]=dep;
+  vis[u]=dfs_clock++;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(vis[v]==-1)
+    {
+      dfs(v,dep+e[i].w);
+      to[dfs_clock++]=u;
+    }
+  }
+}
+void ST(int N)
+{
+  bit[0]=-1;
+  FOR(i,1,N)bit[i]=(i&(i-1))==0?bit[i-1]+1:bit[i-1];
+  FOR(i,0,N)
+  rmq[i][0]=dis[ to[i] ];
+  FOR(i,1,bit[N])
+  for(int j=0;j+ll(i)-1<=N;++j)
+    rmq[j][i]=min(rmq[j][i-1],rmq[j+ll(i-1)][i-1]);
+}
+int RMQ(int l,int r)
+{
+  int t=bit[r-l+1];
+  r-=ll(t)-1;
+  return min(rmq[l][t],rmq[r][t]);
+}
+int main()
+{ int a,b,c;
+  while(~scanf("%d%d%d",&N,&M,&C))
+  {
+    data();clr(vis,-1);
+    FOR(i,0,N)rt[i]=i;
+    FOR(i,1,M)
+    {
+      scanf("%d%d%d",&a,&b,&c);
+      add(a,b,c,head);add(b,a,c,head);
+      uni(a,b);
+    }
+    FOR(i,1,N)///虚点 0 ，虚边得有值，不然查到0不一定是根点
+    if(rt[i]==i)
+    add(0,i,1,head),add(i,0,1,head);
+    dfs_clock=0;
+    dfs(0,0);
+    ST(dfs_clock-1);
+    FOR(i,1,C)
+    {
+      scanf("%d%d",&a,&b);
+      int ta=vis[a];
+      int tb=vis[b];
+      if(ta>tb)swap(ta,tb);
+      int ddd=RMQ(ta,tb);
+      if(ddd==0)printf("Not connected\n");
+      else printf("%d\n",dis[a]+dis[b]-2*ddd);
+    }
+  }
+}
+
+/****************************************************
+2.离线LCA
+****************************************************/
+#include<iostream>
+#include<cstdio>
+#include<cstring>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=902;
+class Edge
+{
+  public:int v,next;bool has;
+}e[mm*mm];
+int qh[mm],head[mm],edge,rt[mm],id[mm];
+bool vis[mm];
+int anc[mm],n,m,root;
+void data()
+{
+  clr(qh,-1);clr(head,-1);edge=0;
+}
+void add(int u,int v,int*h)
+{ e[edge].has=0;
+  e[edge].v=v;e[edge].next=h[u];h[u]=edge++;
+}
+int find(int x)
+{
+  if(x^rt[x])
+  {
+    rt[x]=find(rt[x]);
+  }
+  return rt[x];
+}
+void dfs(int u)
+{ int v;
+  rt[u]=u;vis[u]=1;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(!vis[v])
+    {
+      dfs(v);rt[v]=u;
+    }
+  }
+  for(int i=qh[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(vis[v]&&e[i].has==0)
+    { //printf("%d %d %d\n",u,v,find(v));
+      ++anc[find(v)];e[i].has=e[i^1].has=1;
+    }
+  }
+}
+void find_bcc()
+{
+  clr(vis,0);clr(anc,0);
+  dfs(root);
+}
+int main()
+{ int u,v;
+  while(~scanf("%d",&n))
+  { data();
+    clr(id,0);
+    FOR(i,1,n)
+    {
+      scanf("%d:(%d)",&u,&m);
+      FOR(j,1,m)
+      {
+        scanf("%d",&v);
+        id[v]++;
+        add(u,v,head);add(v,u,head);
+
+      }
+    }
+    FOR(i,1,n)
+    if(id[i]==0)root=i;
+    scanf("%d",&m);
+    FOR(i,1,m)
+    { while(1)
+      {
+        char z=getchar();
+        if(z=='(')break;
+      }
+      scanf("%d %d",&u,&v);
+      add(u,v,qh);add(v,u,qh);
+      while(1)
+      {
+        char z=getchar();
+        if(z==')')break;
+      }
+    }
+    find_bcc();
+    FOR(i,1,n)
+    if(anc[i])
+      printf("%d:%d\n",i,anc[i]);
+  }
+}
+
+/***********************************************
+3.最小树形图
+***********************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<cmath>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+typedef double type;
+using namespace std;
+const int nn=105;
+const int mm=1e4+9;
+const double oo=1e9;
+class Point
+{
+  public:double u,v;
+}p[nn];
+class Edge
+{
+public:
+  int u,v;
+  type w;
+}e[mm];
+int pre[nn],id[nn],vis[nn],n,m;
+type in[nn];
+type dis(Point a,Point b)
+{
+  return sqrt((a.u-b.u)*(a.u-b.u)+(a.v-b.v)*(a.v-b.v) );
+}
+type Direct_MST(int root,int V,int E)
+{
+  type ret=0;
+  while(1)
+  {
+    //找出每个的最小入边
+    FOR(i,0,V-1)in[i]=oo;
+    in[root]=0;
+    FOR(i,0,E-1)
+    {
+      int u=e[i].u,v=e[i].v;
+      if(e[i].w<in[v]&&u!=v){pre[v]=u;in[v]=e[i].w; }
+    }
+    FOR(i,0,V-1)
+    {
+      if(i==root)continue;
+      if(in[i]==oo)return -1;//还有无入度点
+    }
+    ///find cicle
+    clr(vis,-1);clr(id,-1);
+    int bcc_no=0;
+    FOR(i,0,V-1)
+    {
+      ret+=in[i];
+      int v=i;
+      while(vis[v]!=i&&id[v]==-1&&v!=root)
+      { vis[v]=i;//每次的标号都不同，所以不需要初始化
+        v=pre[v];
+      }
+      if(v!=root&&id[v]==-1)//缩点
+      {
+        for(int u=pre[v];u!=v;u=pre[u])
+          id[u]=bcc_no;
+        id[v]=bcc_no++;
+      }
+    }
+    if(bcc_no==0)break;//no cicle
+    FOR(i,0,V-1)
+    if(id[i]==-1)
+      id[i]=bcc_no++;
+    //create new graph
+    FOR(i,0,E-1)
+    {
+      int u=e[i].u,v=e[i].v;
+      e[i].u=id[u];
+      e[i].v=id[v];
+      if(id[u]^id[v])e[i].w-=in[v];
+    }
+    V=bcc_no;
+    root=id[root];
+  }
+  return ret;
+}
+int main()
+{
+  while(~scanf("%d%d",&n,&m))
+  {
+    FOR(i,0,n-1)scanf("%lf%lf",&p[i].u,&p[i].v);
+    FOR(i,0,m-1)
+    {
+      scanf("%d%d",&e[i].u,&e[i].v);
+      e[i].u--;e[i].v--;
+      if(e[i].u!=e[i].v)e[i].w=dis(p[ e[i].u ],p[ e[i].v ]);
+      else e[i].w=oo;//去自环
+    }
+    type ans=Direct_MST(0,n,m);
+    if(ans==-1)printf("poor snoopy\n");
+    else printf("%.2lf\n",ans);
+    //cout<<ans<<endl;
+  }
+  return 0;
+}
+/******************************************************************************************************
+4.次小树 N^2
+思路：先用prim求出最小树，并记录最小树的所有边，标记。
+          然后，枚举所有最小树边的最小替代边，最后的答案就是MAX（MST-最小树边+最小替代边）
+********************************************************************************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<vector>
+#include<cmath>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=1000+9;
+const double oo=1e30;
+double g[mm][mm];
+vector<int>ge[mm];
+class Point
+{
+  public:double x,y;
+}f[mm];
+double dis[mm],ci[mm][mm],mark[mm];
+int fa[mm];
+int cas;
+bool vis[mm],isMST[mm][mm];
+int N,K;
+double DFS(int u,int rt)///
+{ //puts("++");
+  double _min=mark[u];
+  for(int i=0;i<ge[u].size();++i)
+  {
+    int v=ge[u][i];
+    if(v==rt)continue;
+    _min=min(_min,DFS(v,u));
+  }
+  if(rt!=-1)
+  {
+    ci[rt][u]=ci[u][rt]=min(_min,ci[rt][u]);
+  }
+  return _min;
+}
+double get_Dis(int i,int j)
+{
+  return sqrt((f[i].x-f[j].x)*(f[i].x-f[j].x)+(f[i].y-f[j].y)*(f[i].y-f[j].y));
+}
+int main()
+{
+  while(~scanf("%d",&cas))
+  {
+    while(cas--)
+    {
+      scanf("%d%d",&N,&K);
+      FOR(i,1,N)
+      {
+        scanf("%lf%lf",&f[i].x,&f[i].y);
+      }
+      FOR(i,1,N)FOR(j,i+1,N)
+      g[i][j]=g[j][i]=get_Dis(i,j);
+      ///prim
+      FOR(i,0,N)dis[i]=oo;
+      clr(vis,0);
+      vis[1]=1; dis[1]=0;fa[1]=1;
+      FOR(i,2,N)dis[i]=g[1][i],fa[i]=1;
+      int best;double MAX,MST=0;
+
+      FOR(i,2,N)
+      {
+        best=-1;MAX=oo;
+        FOR(j,1,N)
+        if(!vis[j]&&MAX>dis[j])
+          best=j,MAX=dis[j];
+         // if(best==-1)break;
+        vis[best]=1;MST+=MAX;
+        FOR(j,1,N)
+        {
+          if(!vis[j]&&g[best][j]<dis[j])
+            dis[j]=g[best][j],fa[j]=best;
+        }
+      }
+      /*****************/
+      FOR(i,1,N)FOR(j,1,N)
+      isMST[i][j]=0,ci[i][j]=oo;
+      FOR(i,2,N)isMST[i][ fa[i] ]=isMST[ fa[i] ][i]=1;
+      FOR(i,1,N)ge[i].clear();
+      FOR(i,2,N)ge[ fa[i] ].push_back(i),ge[i].push_back(fa[i]);
+      FOR(i,1,N)
+      {
+        FOR(j,1,N)
+        if(i!=j&&!isMST[i][j])
+        {
+         mark[j]=g[i][j];
+        }
+        else mark[j]=oo;
+        DFS(i,-1);
+      }
+      double ans=MST;
+      FOR(i,1,N)
+      if(fa[i]!=1)///发电与宿舍之间一定能连
+      {
+        ans=max(ans,MST-g[ fa[i] ][i]+ci[ fa[i] ][i]);
+        //cout<<g[ fa[i] ][i]<<" "<<ci[ fa[i] ][i]<<" "<<fa[i]<<" "<<i<<endl;
+      }
+      cout<<ans*K<<endl;
+      printf("%.2lf\n",ans*K);
+    }
+  }
+}
+/*************************************
+次小树，找出树上两点的最大边
+*************************************/
+class Graph_tree
+{
+public:
+  int head[mp],edge;
+  Edge e[mp*mp*2];
+  int g[mp][mp];
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v,int w)
+  {
+    e[edge].v=v;e[edge].w=w;e[edge].next=head[u];head[u]=edge++;
+  }
+  int dis[mp],pre[mp],m,n;
+  int maxcost[mp][mp];
+  bool vis[mp];
+  int prim()
+  { int u,v;
+    FOR(i,0,n)dis[i]=oo,vis[i]=0,pre[i]=-1;
+    vis[1]=1;
+    for(int i=head[1];~i;i=e[i].next)
+    { v=e[i].v;
+      if(!vis[v]&&dis[v]>e[i].w)
+      {dis[v]=e[i].w;pre[v]=1;
+      }
+    }
+    int MST=0,MAX,best;dis[1]=0;
+    FOR(i,0,n)FOR(j,0,n)maxcost[i][j]=0;
+    FOR(i,2,n)
+    {
+      MAX=oo;best=-1;
+      FOR(j,1,n)
+      if(!vis[j]&&dis[j]<MAX)
+        MAX=dis[j],best=j;
+      MST+=MAX;vis[best]=1;
+      //for(int j=head[best];~j;j=e[j].next) WA
+      FOR(j,1,n)
+      {
+        v=j;
+        if(vis[v]&&v!=best)///树上最大边
+        {
+          if(maxcost[v][ pre[best] ]>dis[best])
+            maxcost[v][best]=maxcost[best][v]=maxcost[v][ pre[best] ];
+          else maxcost[v][best]=maxcost[best][v]=dis[best];
+//          printf("max %d %d %d\n",v,best,maxcost[v][best]);
+        }
+      }
+      for(int j=head[best];~j;j=e[j].next)
+      {
+        v=e[j].v;
+        if(!vis[v]&&dis[v]>e[j].w)
+          dis[v]=e[j].w,pre[v]=best;
+      }
+    }
+    return MST;
+  }
+  void getans()
+  { int u,v;
+    int _MST=oo,MST=prim();
+    FOR(i,1,n)
+    for(int j=head[i];~j;j=e[j].next)
+    {
+      v=e[j].v;
+      if(pre[v]==i||pre[i]==v){continue;}
+      _MST=min(_MST,MST+e[j].w-maxcost[v][i]);
+    }
+    printf("%d %d\n",MST,_MST);
+  }
+}sp;
+/*********************************
+ 树上查询LCA 两点间的最大最小边
+**********************************/
+class Graph_tree
+{
+public:
+  int head[mp],edge;
+  Edge e[me*2];
+  int n,MST;
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v,int w)
+  {
+    e[edge].w=w;e[edge].v=v;e[edge].u=u;e[edge].next=head[u];head[u]=edge++;
+  }
+  bool vis[mp];int dis[mp],pre[mp],dep[mp];
+  void prim()
+  {
+    priority_queue<Edge>Q;
+    FOR(i,0,n)vis[i]=0,dis[i]=oo,pre[i]=-1;
+    vis[1]=1;dep[1]=0;
+    int u,v;
+    for(int i=head[1];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      dis[v]=e[i].w;
+      Q.push(Edge(1,v,e[i].w));
+    }MST=0;
+    while(!Q.empty())
+    {
+      Edge ret=Q.top();Q.pop();
+      u=ret.v;
+      if(vis[u])continue;
+      pre[u]=ret.u;
+      dep[u]=dep[ret.u]+1;
+      vis[u]=1;
+      dis[u]=ret.w;MST+=ret.w;
+      for(int i=head[u];~i;i=e[i].next)
+      {
+        v=e[i].v;
+        if(!vis[v]&&dis[v]>e[i].w)
+        {
+          dis[v]=e[i].w;
+          Q.push(Edge(u,v,e[i].w));
+        }
+      }
+    }
+  }
+  int maxcost[mp][32],anc[mp][32];
+  void init_RMQ()
+  {
+    FOR(i,1,n)
+    {
+      anc[i][0]=pre[i];maxcost[i][0]=dis[i];
+      for(int j=1;ll(j)<=n;++j)anc[i][j]=-1;
+    }
+    for(int j=1;ll(j)<=n;++j)
+      FOR(i,1,n)
+      if(anc[i][j-1]!=-1)
+    {
+      int fa=anc[i][j-1];
+      anc[i][j]=anc[fa][j-1];
+      maxcost[i][j]=max(maxcost[i][j-1],maxcost[fa][j-1]);
+    }
+  }
+  int RMQ(int u,int v)
+  {
+    if(dep[u]<dep[v])swap(u,v);
+    int log;
+    for(log=1;ll(log)<=dep[u];++log);--log;
+    int ans=-1;
+    for(int i=log;i>=0;--i)
+      if(dep[u]-ll(i)>=dep[v])
+    {
+      ans=max(ans,maxcost[u][i]);u=anc[u][i];
+    }
+    if(u==v)return ans;
+    for(int i=log;i>=0;--i)
+      if(anc[u][i]!=-1&&anc[u][i]!=anc[v][i])
+    {
+      ans=max(maxcost[u][i],ans);u=anc[u][i];
+      ans=max(maxcost[v][i],ans);v=anc[v][i];
+    }
+    ans=max(ans,dis[u]);
+    ans=max(ans,dis[v]);
+    return ans;
+  }
+  int LCA(int u,int v)
+  {
+    int dis1=-1,dis2=-1;
+    if(dep[u]<dep[v])swap(u,v);
+    while(dep[u]!=dep[v])
+    {
+      dis1=max(dis1,dis[u]);
+      u=pre[u];
+    }
+    while(u^v)
+    {
+      dis1=max(dis1,dis[u]);
+      dis2=max(dis[v],dis2);
+      u=pre[u];v=pre[v];
+    }
+    return max(dis1,dis2);
+  }
+}sp;
+/**********************************
+5.Two-sat
+***********************************/
+/***************************
+无路径输出版
+***************************/
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=2010;
+class Edge
+{
+  public:int v,next;
+};
+class TWO_SAT
+{
+public:
+  int dfn[mm],e_to[mm],stack[mm];
+  Edge e[mm*mm*2];
+  int edge,head[mm],top,dfs_clock,bcc;
+  void clear()
+  {
+    edge=0;clr(head,-1);
+  }
+  void add(int u,int v)
+  {
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  void add_my(int x,int xval,int y,int yval)
+  {
+    x=x+x+xval;y=y+y+yval;
+    add(x,y);
+  }
+  void add_clause(int x,int xval,int y,int yval)
+  {///x or y
+    x=x+x+xval;
+    y=y+y+yval;
+    add(x^1,y);add(y^1,x);
+  }
+  void add_con(int x,int xval)
+  {
+    x=x+x+xval;
+    add(x^1,x);
+  }
+  int tarjan(int u)
+  {
+    int lowu,lowv;
+    lowu=dfn[u]=++dfs_clock;
+    int v; stack[top++]=u;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(!dfn[v])
+      {
+        lowv=tarjan(v);
+        lowu=min(lowv,lowu);
+      }
+      else if(e_to[v]==-1)//in stack
+        lowu=min(lowu,dfn[v]);
+    }
+    if(dfn[u]==lowu)
+    {
+      ++bcc;
+      do{
+        v=stack[--top];
+        e_to[v]=bcc;
+      }while(v!=u);
+    }
+    return lowu;
+  }
+  bool find_bcc(int n)
+  { clr(e_to,-1);
+    clr(dfn,0);
+    bcc=dfs_clock=top=0;
+    FOR(i,0,2*n-1)
+    if(!dfn[i])
+      tarjan(i);
+    for(int i=0;i<2*n;i+=2)
+      if(e_to[i]==e_to[i^1])return 0;
+    return 1;
+  }
+}two;
+int n,m;
+int main()
+{ int a,b,c,d;
+  while(~scanf("%d%d",&n,&m))
+  {
+    two.clear();
+    FOR(i,1,m)
+    {
+      scanf("%d%d%d%d",&a,&b,&c,&d);
+      two.add_clause(a,c^1,b,d^1);
+    }
+    if(two.find_bcc(n))printf("YES\n");
+    else printf("NO\n");
+  }
+}
+
+/***********************
+任意一种方案输出
+***********************/
+
+#include<cstdio>
+#include<iostream>
+#include<cstring>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mp=2e3+9;
+const int me=2e3+9;
+class couple
+{
+  public:char x[5],y[5];
+}f[mp];
+class Edge
+{
+ public:int u,v,next;
+};
+
+class TWO_SAT
+{
+ public:
+ int e_to[mp],dfn[mp],stack[mp],edge;
+ int head[mp],dfs_clock,bcc,top;
+ int qhead[mp],od[mp],mark[mp],hh,tt,que[mp],cor[mp];
+ Edge e[mp*mp*2];
+ void clear()
+ {
+  clr(head,-1);edge=0;clr(qhead,-1);
+ }
+ void add(int u,int v,int*head)
+ {
+  e[edge].u=u; e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+ }
+ void add_clause(int x,int xval,int y,int yval)///x or y
+ {
+  x=x+x+xval;y=y+y+yval;
+  add(x^1,y,head);add(y^1,x,head);
+ }
+// void add_my(int x,int xval,int y,int yval)
+// {
+//  x=x+x+xval;y=y+y+yval;
+//  add(x,y);
+// }
+// void add_con(int x,int xval)
+// {
+//  x=x+x+xval;
+//  add(x^1,x);
+// }
+ int tarjan(int u)
+ {
+  int lowu,lowv,v;
+  lowu=dfn[u]=++dfs_clock;
+  stack[top++]=u;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(!dfn[v])
+    {
+     lowv=tarjan(v);
+     lowu=min(lowu,lowv);
+    }
+    else if(e_to[v]==-1)
+    lowu=min(dfn[v],lowu);
+  }
+  if(lowu==dfn[u])
+  {
+   ++bcc;
+   do
+   {
+    v=stack[--top];
+    e_to[v]=bcc;
+   }while(v^u);
+  }
+  return lowu;
+ }
+ bool find_bcc(int n)
+ {
+  top=bcc=dfs_clock=0;
+  clr(dfn,0);clr(e_to,-1);clr(od,0);
+  for(int i=0;i<n;++i)
+  if(!dfn[i])tarjan(i);
+  for(int i=0;i<n;i+=2)
+  { mark[ e_to[i] ]=e_to[i^1];
+    mark[ e_to[i^1] ]=e_to[i];
+   if(e_to[i]==e_to[i^1])
+   return 0;
+  }
+  return 1;
+ }
+// bool intersex(int i,int vi,int j,int vj)
+// {
+//  int x,y,xx,yy;
+//  if(!vi)
+//  {
+//   x=A[i];y=A[i]+T[i];
+//  }
+//  else x=B[i],y=B[i]-T[i];
+//  if(!vj)
+//  {
+//   xx=A[j];yy=A[j]+T[j];
+//  }
+//  else xx=B[j],yy=B[j]-T[j];
+//  if(x>y)swap(x,y);
+//  if(xx>yy)swap(xx,yy);
+//  if(max(x,xx)<min(y,yy))return 1;
+//  return 0;
+// }
+ void getID(char*s,int&id,int&man)
+ {
+  id=0;
+  for(int i=0;s[i];++i)
+  if(s[i]>='0'&&s[i]<='9')
+  id=id*10+s[i]-'0';
+  else if(s[i]=='h')man=1;
+  else if(s[i]=='w')man=0;
+ }
+ void build(int n,int m)
+ {int a,b,c,d;
+  clear();
+  add_clause(0,0,1,1); ///new wife is 0
+  for(int i=0;i<n;++i) ///husband can't sit with wife
+  {add_clause(i*2,1,i*2+1,1);
+   add_clause(i*2,0,i*2+1,0);
+  }
+  FOR(i,1,m)
+  {
+   getID(f[i].x,a,b);getID(f[i].y,c,d);///husband is 1 wife 0
+   //add_clause(a*2+b,1,c*2+d,1);
+   add_clause(a*2+b,0,c*2+d,0);
+  }
+  n+=n;
+  if(!find_bcc(n+n))printf("bad luck\n");
+  else
+  {
+   n+=n;
+   int cnt=edge,u,v;
+   FOR(i,0,cnt-1)
+   { u=e[i].u;v=e[i].v;
+     if(e_to[u]!=e_to[v])
+     {
+      add(e_to[v],e_to[u],qhead);
+      ++od[ e_to[u] ];
+     }
+   }
+   ///topsort
+   hh=0,tt=0;
+   FOR(i,1,bcc)
+   if(od[i]==0)
+   {
+    que[tt++]=i;
+   }
+   clr(cor,-1);
+   while(hh<tt)
+   {
+     u=que[hh++];
+     if(cor[u]==-1)
+     {
+      cor[u]=1;cor[ mark[u] ]=0;
+     }
+     for(int i=qhead[u];~i;i=e[i].next)
+     {
+      v=e[i].v;
+      if(--od[v]==0)
+      que[tt++]=v;
+     }
+   }
+   ///ans output
+   if(cor[ e_to[4] ])
+   {
+     printf("1w");
+   }
+   else if(cor[ e_to[6] ])
+   printf("1h");
+
+   for(int j=8,i;j<n;j+=2)
+   {  i=j/2;
+      if(cor[ e_to[j] ])///如果标记 选择前面
+      { if(i%2==0)
+        printf(" %dw",i/2);
+        else printf(" %dh",i/2);
+      }
+   }
+   printf("\n");
+  }
+ }
+}two;
+int n,m;
+int main()
+{
+  //freopen("data.in","r",stdin);
+  while(~scanf("%d%d",&n,&m))
+  { if(n==0&&m==0)break;
+    FOR(i,1,m)
+    {
+     scanf("%s%s",f[i].x,f[i].y);
+    }
+    two.build(n,m);
+  }
+  return 0;
+}
+/***************************************
+6.斯坦纳树，最短路
+
+***************************************/
+思路：斯坦纳树，先做全源最短路，然后用DP[包含的点集][根节点]。
+            dp[mak][u]=MIN(dp[k][u]+dp[mask^k][u],dp[mask][j]+dis[j][u]);
+///斯坦纳树
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define ll(x) (1<<x)
+using namespace std;
+const int msize=1009;
+const int oo=0x3f3f3f3f;
+class Edge
+{
+  public:int v,w,next;
+};
+class Short_Path
+{
+public:
+  int dis[msize][msize];
+  bool vis[msize];
+  int n,m,edge,head[msize];
+  Edge e[msize*msize];
+  void clear()
+  {
+    FOR(i,0,n+m)FOR(j,0,n+m)dis[i][j]=oo;
+    edge=0;clr(head,-1);
+  }
+  void add(int u,int v,int w)
+  {
+    e[edge].v=v;e[edge].w=w;e[edge].next=head[u];head[u]=edge++;
+  }
+  void SPFA()
+  {
+    int kn=n+m,u,v;
+    clr(vis,0);
+    FOR(t,0,kn)
+    {
+      dis[t][t]=0;
+      queue<int>Q;
+      Q.push(t);
+      while(!Q.empty())
+      {
+        u=Q.front();Q.pop();vis[u]=0;
+        for(int i=head[u];~i;i=e[i].next)
+        {
+          v=e[i].v;
+          if(dis[t][v]>dis[t][u]+e[i].w)
+          {
+            dis[t][v]=dis[t][u]+e[i].w;
+            if(!vis[v])
+            {
+              Q.push(v);vis[v]=1;
+            }
+          }
+        }
+      }
+    }
+  }
+  int dp[ll(7)][msize];///set contain , root
+  void DP()
+  { int kn=m+n;
+    FOR(i,0,m+n)
+    FOR(j,0,n)
+    dp[ll(j)][i]=dis[i][j];///i->j
+//    FOR(i,0,kn)FOR(j,0,kn)
+//    printf("e=%d %d %d\n",i,j,dis[i][j]);
+    int mask=ll(n+1)-1;
+    FOR(i,1,mask)
+    if(i&(i-1))///有子集
+    {
+      FOR(j,0,kn)
+      {
+        dp[i][j]=oo;
+        for(int k=i;k>0;k=(k-1)&i)
+          dp[i][j]=min(dp[i][j],dp[k][j]+dp[i^k][j]);
+
+      }
+      FOR(j,0,kn)
+      for(int k=0;k<=kn;++k)
+        dp[i][j]=min(dp[i][j],dp[i][k]+dis[k][j]);
+    }
+    printf("%d\n",dp[mask][0]);
+  }
+}sp;
+int main()
+{ int a,b,c,p;
+  while(~scanf("%d%d%d",&sp.n,&sp.m,&p))
+  {
+    sp.clear();
+    FOR(i,1,sp.n+sp.m)
+    {
+      scanf("%d",&a);
+      sp.add(0,i,a);sp.add(i,0,a);
+    }
+    FOR(i,1,p)
+    {
+      scanf("%d%d%d",&a,&b,&c);
+      sp.add(a,b,c);sp.add(b,a,c);
+    }
+    sp.SPFA();
+    sp.DP();
+  }
+}
+
+/*********************************************
+7.dijstra+堆
+*********************************************/
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define LL long long
+using namespace std;
+const int mm=1e6+9;
+const LL oo=1e16;
+class Edge
+{
+ public:int v,next;LL w;
+};
+class Dot
+{
+  public:LL dis;int v;
+  Dot(){}
+  Dot(int _v,LL _d)
+  {
+    v=_v;dis=_d;
+  }
+  bool operator<(const Dot&x)const
+  {
+    return dis>x.dis;
+  }
+};
+class ShortPath
+{
+ public:
+ int head[mm],edge;Edge e[mm*4];
+ void clear()
+ {
+   clr(head,-1);edge=0;
+ }
+ void add(int u,int v,LL w)
+ {
+  e[edge].v=v;e[edge].w=w;e[edge].next=head[u];head[u]=edge++;
+ }
+ bool vis[mm];int id[mm];LL dis[mm];
+ priority_queue<Dot>Q;
+ LL dijstra(int s,int t,int n)
+ {
+   int u,v;Dot uu;
+   FOR(i,0,n)dis[i]=oo,vis[i]=0;
+   Q.push(Dot(s,0));dis[s]=0;
+   while(!Q.empty())
+   {
+    uu=Q.top();Q.pop();u=uu.v;
+    if(vis[u])continue;vis[u]=1;
+    for(int i=head[u];~i;i=e[i].next)
+    { v=e[i].v;
+      if(!vis[v]&&dis[v]>dis[u]+e[i].w)
+      {
+        dis[v]=dis[u]+e[i].w;
+        Q.push(Dot(v,dis[v]));
+      }
+    }
+   }
+   return dis[t];
+ }
+}sf;
+
+
+/**************************************************
+8.网络流-dinic
+
+**************************************************/
+#include<cstdio>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+const int oo=1e9;//无穷大
+const int mm=603;
+/**mm 表示边的最大数量，记住要是原图的两倍，在加边的时候都是双向的*/
+const int mn=303;
+/**mn 表示点的最大数量*/
+int src,dest,node,edge;
+/**node 表示节点数，src 表示源点，dest 表示汇点，edge 统计边数*/
+int ver[mm],flow[mm],next[mm];
+/**ver 边指向的节点，flow 边的容量，next 链表的下一条边*/
+int head[mn],work[mn],dist[mn],q[mn];
+/**head 节点的链表头，work 用于算法中的临时链表头，dis 计算距离*/
+/**初始化链表及图的信息*/
+void prepare(int _node,int _src,int _dest)
+{
+  node=_node;src=_src;dest=_dest;
+  for(int i=0;i<node;i++)head[i]=-1;edge=0;
+}
+/**增加一条u 到v 容量为c 的边*/
+void addedge(int u,int v,int c)
+{
+  ver[edge]=v;flow[edge]=c;next[edge]=head[u];head[u]=edge++;
+  ver[edge]=u;flow[edge]=0;next[edge]=head[v];head[v]=edge++;
+}
+/**广搜计算出每个点与源点的最短距离，如果不能到达汇点说明算法结束*/
+bool bfs()
+{
+  int l=0,r=0;
+  for(int i=1;i<=node;i++)dist[i]=-1;
+  int i,u,v;
+  dist[q[r++]=src]=0;
+   for(l=0;l<r;l++)
+    for(i=head[u=q[l]];i>=0;i=next[i])
+    {
+      if(flow[i]&&dist[v=ver[i]]==-1)
+      {
+        dist[q[r++]=v]=dist[u]+1;
+        if(v==dest)return 1;
+      }
+    }
+  return 0;
+}
+/**寻找可行流的增广路算法，按节点的距离来找，加快速度*/
+int dinic_dfs(int u,int exp)
+{
+  if(u==dest)return exp;
+  int v,tmp;
+  /**work 是临时链表头，这里用i 引用它，这样寻找过的边不再寻找*/
+  for(int&i=work[u];i>=0;i=next[i])//&i=work[u];删链优化
+  if(flow[i]&&dist[v=ver[i]]==dist[u]+1&&(tmp=dinic_dfs(v,min(exp,flow[i])))>0)
+  {
+    flow[i]-=tmp;
+    flow[i^1]+=tmp;
+    /**正反向边容量改变*/
+    return tmp;
+  }
+  return 0;
+}
+/**求最大流，直到没有可行流*/
+int dinic_flow()
+{
+  int sum=0,data;
+  while(bfs())
+  {
+    for(int i=0;i<node;i++)work[i]=head[i];
+    while(data=dinic_dfs(src,oo))sum+=data;
+
+  }
+  return sum;
+}
+int main()
+{
+  int m,n;
+  int a,b,c;
+  while(scanf("%d%d",&m,&n)!=EOF)
+  {
+    prepare(n,1,n);
+    for(int i=0;i<m;i++)
+    {
+      scanf("%d%d%d",&a,&b,&c);
+      addedge(a,b,c);
+    }
+    printf("%d\n",dinic_flow());
+  }
+}
+/***************************************
+9.双连通分量-边
+***************************************/
+#pragma comment(linker, "/STACK:1024000000,1024000000")
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<vector>
+#include<algorithm>
+#define FOR(i,n) for(int i=0;i<n;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=2e5+9;
+const int nn=2e6+9;
+int head[mm];
+class node
+{
+  public:int v,next;bool vis,again;
+}e[nn];
+class dot
+{
+  public:int u,v;
+  bool operator<(const dot&x)const
+  {
+    if(u^x.u)return u<x.u;
+    return v<x.v;
+  }
+}f[nn];
+int dfn[mm],stak[mm],top,edge;
+int n,m,bcc_no,e_to[mm],brige,dfs_clock;
+void data()
+{
+  clr(head,-1);edge=0;
+}
+void add(int u,int v,bool z)
+{ e[edge].vis=0;e[edge].again=z;
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+int tarjan(int u,int fa,bool yes)
+{
+  int v,lowv,lowu;
+  lowu=dfn[u]=++dfs_clock;
+  stak[top++]=u;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(v==fa&&!yes)continue;
+    if(!dfn[v])
+    {
+      lowv=tarjan(v,u,e[i].again);
+      if(lowv>dfn[u])
+      {e[i].vis=e[i^1].vis=1;
+        ++brige;
+      }
+      lowu=min(lowv,lowu);
+    }
+    else if(!e_to[v]&&dfn[v]<lowu)
+      lowu=dfn[v];
+  }
+  if(lowu==dfn[u])
+  {
+    ++bcc_no;
+        do
+        { v=stak[--top];
+          e_to[v]=bcc_no;
+
+        }while(v!=u);
+  }
+  return lowu;
+}
+vector<int>g[mm];
+int dep[mm];
+void dfs(int u)
+{ int v;
+  FOR(i,g[u].size())
+  {
+    v=g[u][i];
+    if(dep[v]!=-1)continue;
+    dep[v]=dep[u]+1;
+    dfs(v);
+  }
+}
+void find_bcc()
+{
+  clr(dfn,0);dfs_clock=0;
+  clr(e_to,0);bcc_no=0;top=0;brige=0;
+  //for(int i=1;i<=n;++i)
+   // if(!dfn[i])
+    tarjan(1,-1,0);
+  FOR(i,n+1)g[i].clear();
+  for(int i=1;i<=n;++i)
+  for(int j=head[i];~j;j=e[j].next)
+  if(e[j].vis)
+  {
+    g[e_to[i]].push_back(e_to[e[j].v]);
+  }
+  clr(dep,-1);
+  dep[1]=0;
+  dfs(1);int z=1;
+  for(int i=1;i<=bcc_no;++i)
+    if(dep[i]>dep[z])z=i;
+  clr(dep,-1);dep[z]=0;dfs(z);
+  int ans=0;
+  for(int i=1;i<=bcc_no;++i)
+    ans=max(ans,dep[i]);
+  //puts("+++");
+ // for(int i=1;i<=n;++i)
+   // printf("%d %d\n",i,e_to[i]);
+ // printf("bcc=%d dep=%d\n",bcc_no,ans);
+  printf("%d\n",bcc_no-ans-1);
+}
+int main()
+{ int a,b;
+  while(~scanf("%d%d",&n,&m))
+  { if(n==0&&m==0)break;
+    data();
+    FOR(i,m)
+    {
+      scanf("%d%d",&a,&b);
+      if(a>b)a^=b,b^=a,a^=b;
+      f[i].u=a;f[i].v=b;
+      ///add(a,b);add(b,a);
+    }
+    sort(f,f+m);
+    FOR(i,m)///去重边
+    if(i==0||f[i].u!=f[i-1].u||f[i].v!=f[i-1].v)
+    {
+      if(i<m-1&&(f[i].u==f[i+1].u&&f[i].v==f[i+1].v))
+        add(f[i].u,f[i].v,1),add(f[i].v,f[i].u,1);
+      else
+      {
+        add(f[i].u,f[i].v,0);add(f[i].v,f[i].u,0);
+      }
+    }
+    find_bcc();
+  }
+  return 0;
+}
+/************************************************
+点双连通
+************************************************/
+class Graph_Cut
+{
+public:
+  int dfn[mp],stak[mp*2],vis[mp];
+  int dfs_clock,top;
+  bool mark[mp],can[mp];
+  Edge e[mp*mp*2];
+  int head[mp],edge;
+  int corlor[mp];
+  int n,m;
+  void clear()
+  {
+    clr(head,-1);edge=0;
+  }
+  void add(int u,int v)
+  { e[edge].u=u;e[edge].vis=0;
+    e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+  }
+  bool two_graph(int u)
+  { int v;
+    bool ret=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(!mark[v])continue;
+      if(corlor[v]!=-1)
+      {
+        if(corlor[v]==corlor[u])return 0;
+      }
+      else {corlor[v]=3-corlor[u];ret=two_graph(v);if(!ret)return 0;}
+    }
+    return ret;
+  }
+  void get_cor(int u)
+  { clr(mark,0);
+    int z;
+    do{
+      z=stak[--top];
+      mark[ e[z].u ]=mark[ e[z].v ]=1;
+    }while(u^e[z].u);
+    clr(corlor,-1);
+    corlor[u]=1;
+    if(!two_graph(u))
+    {
+      FOR(i,1,n)
+      if(mark[i])
+      can[i]=1;
+    }
+  }
+  int tarjan(int u)
+  {
+    int v,lowv,lowu;
+    lowu=dfn[u]=++dfs_clock;
+    vis[u]=1;
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(e[i].vis)continue;
+      e[i].vis=e[i^1].vis=1;
+      //if(v==fa)continue;
+      stak[top++]=i;///add edge
+      if(!dfn[v])
+      {
+        lowv=tarjan(v);
+        lowu=min(lowu,lowv);
+        if(lowv>=dfn[u])
+        {
+          get_cor(u);
+        }
+      }
+      else if(vis[u]==1)
+        lowu=min(lowu,dfn[v]);
+    }
+    vis[u]=2;
+    return lowu;
+  }
+  void find_bcc()
+  {
+    clr(dfn,0);clr(vis,0);clr(can,0);
+    dfs_clock=top=0;
+    FOR(i,1,n)
+    if(!dfn[i])
+      tarjan(i);
+    int ans=n;
+    FOR(i,1,n)
+    if(can[i])--ans;
+    printf("%d\n",ans);
+  }
+}sp;
+/*************************************************
+10.KM最大匹配
+
+************************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=550;
+class Edge
+{
+  public:int v,next;
+}e[mm*mm*2];
+int head[mm],edge;
+void init()
+{
+  clr(head,-1);edge=0;
+}
+void add(int u,int v)
+{
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+int K,M,N;
+bool S[mm],T[mm];
+int X[mm],Y[mm];
+bool dfs(int u)
+{
+  S[u]=1;
+  for(int i=head[u];~i;i=e[i].next)
+  { int v=e[i].v;
+    if(T[v])continue;
+    T[v]=1;
+    if(X[v]==-1||dfs(X[v]))
+    {
+      X[v]=u;
+      return 1;
+    }
+  }
+  return 0;
+}
+void getans()
+{ int ret=0;
+  clr(S,0);clr(X,-1);
+  FOR(i,1,M)
+  { clr(T,0);
+    if(!S[i]&&dfs(i))
+      ++ret;
+  }
+  printf("%d\n",ret);
+}
+int main()
+{ int a,b;
+  while(~scanf("%d",&K))
+  { if(K==0)break;
+    init();
+    scanf("%d%d",&M,&N);
+    FOR(i,1,K)
+    {
+      scanf("%d%d",&a,&b);
+      add(a,b);//add(b,a);
+    }
+    getans();
+  }
+}
+
+/********************************************
+KM最佳匹配+方案输出
+*******************************************/
+
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=550;
+const int oo=1e9;
+class Edge
+{
+  public:int v,next,w;
+}e[mm*mm*2];
+int head[mm],edge;
+void init()
+{
+  clr(head,-1);edge=0;
+}
+void add(int u,int v,int w)
+{ e[edge].w=w;
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+int N;
+bool S[mm],T[mm];
+int X[mm],Y[mm];
+int lx[mm],ly[mm],slack[mm];
+bool dfs(int u)
+{
+  S[u]=1;
+  int tmp;
+  for(int i=head[u];~i;i=e[i].next)
+  { int v=e[i].v;
+    tmp=lx[u]+ly[v]-e[i].w;
+    if(!T[v])
+    {
+      if(tmp==0)
+      {
+        T[v]=1;
+        if(X[v]==-1||dfs(X[v]))
+        {
+          X[v]=u;
+          return 1;
+        }
+      }else slack[v]=min(slack[v],tmp);
+    }
+  }
+  return 0;
+}
+void update()
+{
+  int ret=oo;
+  FOR(i,1,N)
+  if(!T[i])
+    ret=min(slack[i],ret);
+  FOR(i,1,N)
+  if(S[i])  ///所有已匹配的X 减少ret ,包含了当前要匹配点
+  lx[i]-=ret;
+  FOR(i,1,N)
+  if(T[i])
+  ly[i]+=ret;
+}
+void getans()
+{
+  FOR(i,1,N)
+  {
+    lx[i]=ly[i]=0;
+    for(int j=head[i];~j;j=e[j].next)
+    {
+      lx[i]=max(lx[i],e[j].w);
+    }
+  }
+  FOR(i,1,N)X[i]=Y[i]=-1;
+  FOR(i,1,N)
+  {
+    FOR(j,1,N)slack[j]=oo;///当前要匹配X点与其他未匹配的Y点的权差
+    while(1)
+    {
+      FOR(j,1,N)
+      S[j]=T[j]=0;
+      if(dfs(i))break;
+      else update();
+    }
+  }
+  int ans=0;
+  FOR(i,1,N)ans+=lx[i]+ly[i];
+  FOR(i,1,N)printf("%d%c",lx[i],i==N?'\n':' ');
+  FOR(i,1,N)printf("%d%c",ly[i],i==N?'\n':' ');
+  printf("%d\n",ans);
+}
+int main()
+{ int a,b;
+  while(~scanf("%d",&N))
+  {
+    init();
+    FOR(i,1,N)FOR(j,1,N)
+    {
+      scanf("%d",&a);
+      add(i,j,a);//add(b,a);
+    }
+    getans();
+  }
+}
+
+/************************************
+KM多路增广算法sqrt(n)*m
+**********************************/
+#include<cstdio>
+#include<cstring>
+#include<cmath>
+#include<iostream>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int mm=3009;
+class Edge
+{
+  public:int v,next;
+}e[mm*mm*2];
+class _point
+{
+  public:int x,y,dis;
+  int fabs(int x)
+  {
+    if(x<0)return -x;
+    return x;
+  }
+  bool ok(_point t)
+  {
+    int d=fabs(x-t.x)+fabs(y-t.y);
+    if(d<=dis)
+      return 1;
+    return 0;
+  }
+}p[mm];
+int head[mm],edge=0;
+int X[mm],Y[mm];bool T[mm];
+void init()
+{
+  clr(head,-1);edge=0;
+}
+void add(int u,int v)
+{
+  e[edge].v=v;e[edge].next=head[u];head[u]=edge++;
+}
+//queue<int>Q;
+int Q[mm],front,rear;
+int n,m;
+int dx[mm],dy[mm];
+bool bfs()///多路增广
+{ front=rear=0;
+  FOR(i,1,n)
+  if(Y[i]==-1)
+  {  Q[rear++]=i;
+    //Q.push(i);
+  }
+  FOR(i,0,n)dx[i]=0;
+  FOR(i,0,m)dy[i]=0;
+  bool flag=0;
+  int u,v;
+  while(front<rear)
+  {
+    u=Q[front++];//Q.front();Q.pop();
+    for(int i=head[u];~i;i=e[i].next)
+    {
+      v=e[i].v;
+      if(dy[v]==0)
+      {
+        dy[v]=dx[u]+1;
+        if(X[v]==-1)
+        {
+          flag=1;
+        }
+        else
+        {
+          dx[ X[v] ]=dy[v]+1;
+          Q[rear++]=X[v];
+          //Q.push(X[v]);
+        }
+      }
+    }
+  }
+  return flag;
+}
+bool dfs(int u)
+{
+  int v;
+  for(int i=head[u];~i;i=e[i].next)
+  {
+    v=e[i].v;
+    if(dx[u]+1!=dy[v])continue;///run and clear dy[v]
+    dy[v]=0;
+    if(X[v]==-1||dfs(X[v]))
+    {
+      X[v]=u;
+      Y[u]=v;
+      return 1;
+    }
+  }
+  return 0;
+}
+void getans()
+{
+  //clr(X,-1);clr(Y,-1);
+  FOR(i,0,n)Y[i]=-1;
+  FOR(i,0,m)X[i]=-1;
+  int ret=0;
+  while(bfs())
+  { //puts("++++");
+    FOR(i,1,n)
+    {
+      //clr(T,0);
+      if(Y[i]==-1&&dfs(i))
+        ++ret;
+    }
+  }
+  printf("%d\n\n",ret);
+}
+int main()
+{
+  int cas,t;
+  while(~scanf("%d",&cas))
+  {
+    FOR(ca,1,cas)
+    { init();
+      scanf("%d%d",&t,&n);
+      FOR(i,1,n)
+      {
+        scanf("%d%d%d",&p[i].x,&p[i].y,&p[i].dis);
+        p[i].dis*=t;
+      }
+      scanf("%d",&m);
+      _point zt;
+      FOR(i,1,m)
+      {
+        scanf("%d%d",&zt.x,&zt.y);
+        FOR(j,1,n)
+        if(p[j].ok(zt))
+        {
+          add(j,i);
+        }
+      }
+      printf("Scenario #%d:\n",ca);
+      getans();
+    }
+  }
+}
+
+
+（二）字符串
+
+/******************************************************
+ 1.AC自动机
+******************************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int max_node=11000;
+const int sig_size=26;
+class AC_Machine
+{
+public:
+  int ch[max_node][sig_size];
+  int val[max_node],f[max_node],last[max_node];
+  int sz;
+  AC_Machine(){sz=1;clr(ch[0],0);}
+  int idx(char x){return x-'a';}
+  void insert(char*s,int v)
+  { int len=strlen(s);
+    int u=0;
+    FOR(i,0,len-1){
+      int c=idx(s[i]);
+      if(!ch[u][c]){
+       clr(ch[sz],0);
+       val[sz]=0;ch[u][c]=sz++;
+      }
+      u=ch[u][c];
+    }
+    val[u]=v;
+  }
+  void find(char*s)
+  {
+    int len=strlen(s);
+    int u=0;
+    FOR(i,0,len-1)
+    {
+      int c=idx(s[i]);
+      while(u&&!ch[u][c])u=f[u];
+      u=ch[u][c];
+      if(val[u])print(i,u);
+      else if(last[u])print(i,last[u]);
+    }
+  }
+  void print(int x,int u)
+  {
+    if(u){
+      printf("%d: %d\n",u,val[u]);
+      print(x,last[u]);
+    }
+  }
+  int getFail()
+  {
+    queue<int >Q;
+    f[0]=0;//fail pointer
+    FOR(c,0,sig_size-1)
+    {
+      int u=ch[0][c];
+      if(u){f[u]=0;Q.push(u);last[u]=0; }
+    }
+    while(!Q.empty())
+    {
+      int r=Q.front();Q.pop();
+      FOR(c,0,sig_size-1)
+      {
+        int u=ch[r][c];
+        if(!u)continue;//no such node
+        Q.push(u);
+        int v=f[r];//fa node fail pointer
+        while(v&&!ch[v][c])v=f[v];//find first exit fail node c
+        f[u]=ch[v][c];
+        last[u]=val[f[u]]?f[u]:last[f[u]];
+      }
+    }
+  }
+};
+AC_Machine ac;
+char s[max_node];
+int main()
+{
+  int cas;
+  while(~scanf("%d",&cas))
+  {
+    while(cas--)
+    {
+      scanf("%s",s);
+      ac.insert(s,1);
+    }
+    ac.getFail();
+    int n;
+    scanf("%d",&n);
+    while(n--)
+    {
+      scanf("%s",s);
+      ac.find(s);
+    }
+  }
+  return 0;
+}
+/**********************************************************
+2.AC自动机+DP+矩阵+高精度
+***********************************************************/
+Description
+The alphabet of Freeland consists of exactly N letters. Each sentence of Freeland language (also known as Freish) consists of exactly M letters without word breaks. So, there exist exactly N^M different Freish sentences.
+
+But after recent election of Mr. Grass Jr. as Freeland president some words offending him were declared unprintable and all sentences containing at least one of them were forbidden. The sentence S contains a word W if W is a substring of S i.e. exists such k >= 1 that S[k] = W[1], S[k+1] = W[2], ...,S[k+len(W)-1] = W[len(W)], where k+len(W)-1 <= M and len(W) denotes length of W. Everyone who uses a forbidden sentence is to be put to jail for 10 years.
+
+Find out how many different sentences can be used now by freelanders without risk to be put to jail for using it.
+Input
+The first line of the input file contains three integer numbers: N -- the number of letters in Freish alphabet, M -- the length of all Freish sentences and P -- the number of forbidden words (1 <= N <= 50, 1 <= M <= 50, 0 <= P <= 10). 
+
+The second line contains exactly N different characters -- the letters of the Freish alphabet (all with ASCII code greater than 32).
+
+The following P lines contain forbidden words, each not longer than min(M, 10) characters, all containing only letters of Freish alphabet.
+Output
+Output the only integer number -- the number of different sentences freelanders can safely use.
+Sample Input
+2 3 1
+ab
+bb
+Sample Output
+5
+思路：正常转成AC自动机失败函数，构造状态转移矩阵。然后简单DP，当然需要高精度。
+失误：巨坑，char -127-128 用数组HASH RE啊，用MAP吧
+#include<cstdio>
+#include<cstring>
+#include<iostream>
+#include<queue>
+#include<map>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+using namespace std;
+const int msize=109;
+const int sig=251;
+map<char,int>has;
+//int has[257];
+class Matrix
+{ public:
+  int f[msize][msize],n;
+  Matrix(){}
+  Matrix(int x)
+  { n=x;
+    FOR(i,0,n-1)FOR(j,0,n-1)
+    f[i][j]=0;
+  }
+  void out()
+  {
+    FOR(i,0,n-1)FOR(j,0,n-1)
+    printf("%d%c",f[i][j],j==n-1?'\n':' ');
+  }
+};
+class AC_Machine
+{
+  public:int f[msize],ch[msize][sig],sz,val[msize],pos;
+  void clear()
+  { has.clear();
+    pos=0;
+    clr(ch[0],0);sz=1;val[0]=0;
+  }
+  int idx(char z)
+  {
+   // if(has[z]!=-1)return has[z];
+   // has[z]=pos++;
+    return has[z];
+  }
+  void insert(char*s,int v)
+  {
+    int u=0,c;
+    for(int i=0;s[i];++i)
+    {
+      c=idx(s[i]);
+      if(!ch[u][c])
+      {
+        clr(ch[sz],0);val[sz]=0;
+        ch[u][c]=sz++;
+      }
+      u=ch[u][c];
+    }
+    val[u]=v;
+  }
+  void getFail()
+  {
+    int u,v,r;
+    queue<int>Q;
+    FOR(i,0,pos-1)
+    { u=ch[0][i];
+      if(u)
+      {
+        Q.push(u);f[u]=0;
+      }
+    }
+    while(!Q.empty())
+    {
+      r=Q.front();Q.pop();
+      val[r]|=val[ f[r] ];
+      FOR(c,0,pos-1)
+      {
+        u=ch[r][c];
+        if(!u)
+        {
+          ch[r][c]=ch[ f[r] ][c];continue;
+        }
+        Q.push(u);
+        v=f[r];
+        while(v&&!ch[v][c])v=f[v];
+        f[u]=ch[v][c];
+      }
+    }
+  }
+  Matrix getMatrix()
+  {
+    Matrix ret=Matrix(sz);
+    FOR(i,0,sz-1)
+    FOR(j,0,pos-1)
+    if(!val[ ch[i][j] ])//合法
+    ret.f[i][ ch[i][j] ]++;
+    return ret;
+  }
+};
+class BigInt
+{
+ public:
+ const static int mod=10000,Dlen=4;
+  int f[601],len;
+  BigInt()
+  {
+    clr(f,0);len=1;
+  }
+  BigInt(int x)
+  {
+    clr(f,0);
+    len=0;
+    do
+    {
+      f[len++]=x%mod;x/=mod;
+    }while(x);
+  }
+  BigInt operator+(const BigInt&b)const
+  {
+    BigInt c;
+    c.len=max(b.len,len);
+    FOR(i,0,c.len)c.f[i]=0;
+    FOR(i,0,c.len-1)
+    {
+      c.f[i]+=(i<len?f[i]:0)+(i<b.len?b.f[i]:0);
+      c.f[i+1]+=c.f[i]/mod;
+      c.f[i]%=mod;
+    }
+    if(c.f[c.len]>0)c.len++;
+    //c.out();
+    return c;
+  }
+  BigInt operator*(const BigInt&b)const
+  {
+    BigInt c;
+    FOR(i,0,len-1)
+    {
+      int up=0;//进位
+      FOR(j,0,b.len-1)
+      {
+        int tmp=f[i]*b.f[j]+c.f[i+j]+up;//+up;
+        c.f[i+j]=tmp%mod;
+        up=tmp/mod;
+      }
+      if(up)
+      {
+        c.f[i+b.len]=up;
+      }
+    }
+    c.len=len+b.len;
+    while(c.f[ c.len-1 ]==0&&c.len>1)c.len--;
+    return c;
+  }
+  void check()
+  {
+    if(f[len-1]==0&&len>1)puts("yes");
+  }
+  void out()
+  { printf("%d",f[len-1]);
+    for(int i=len-2;i>=0;--i)
+      printf("%04d",f[i]);
+    printf("\n");
+  }
+};
+void getdata(char*s)
+{ int pos=0;
+  while(1)
+  {
+    char z=getchar();
+    if(z=='\n'){s[pos]='\0';return;}
+    s[pos++]=z;
+  }
+}
+AC_Machine ac;
+char s[99];
+BigInt dp[2][110];
+int main()
+{
+  int n,m,p;
+  while(~scanf("%d%d%d",&n,&m,&p))
+  {
+    ac.clear();
+    getdata(s);
+    getdata(s);
+    //scanf("%s",s); 有空格啊亲
+    for(int i=0;s[i];++i)
+      has[s[i]]=i;
+      ac.pos=strlen(s);
+      //ac.idx(s[i]);
+    FOR(i,1,p)
+    {
+      getdata(s);
+      ac.insert(s,1);
+    }
+    ac.getFail();
+    Matrix ret=ac.getMatrix();
+   // ret.out();
+    int now=0,then;
+    dp[now][0]=1;
+    FOR(i,1,ret.n-1)
+    dp[now][i]=0;
+    FOR(i,0,m-1)
+    {
+      then=now^1;
+      FOR(j,0,ret.n-1)
+      dp[then][j]=0;
+      FOR(j,0,ret.n-1)
+      FOR(k,0,ret.n-1)
+      if(ret.f[j][k]>0)
+        dp[then][k]=dp[then][k]+dp[now][j]*ret.f[j][k];
+     now=then;
+    }
+    BigInt ans=0;
+    FOR(i,0,ret.n-1)
+    ans=ans+dp[then][i];
+    ans.out();
+  }
+  return 0;
+}
+
+/******************************************************
+3.AC自动机+矩阵幂
+.加速
+******************************************************/
+Description
+背单词，始终是复习英语的重要环节。在荒废了3年大学生涯后，Lele也终于要开始背单词了。
+一天，Lele在某本单词书上看到了一个根据词根来背单词的方法。比如"ab",放在单词前一般表示"相反，变坏，离去"等。
+
+于是Lele想，如果背了N个词根，那这些词根到底会不会在单词里出现呢。更确切的描述是：长度不超过L，只由小写字母组成的，至少包含一个词根的单词，一共可能有多少个呢？这里就不考虑单词是否有实际意义。
+
+比如一共有2个词根 aa 和 ab ，则可能存在104个长度不超过3的单词，分别为
+(2个) aa,ab,
+(26个)aaa,aab,aac...aaz,
+(26个)aba,abb,abc...abz,
+(25个)baa,caa,daa...zaa,
+(25个)bab,cab,dab...zab。
+
+这个只是很小的情况。而对于其他复杂点的情况，Lele实在是数不出来了，现在就请你帮帮他。
+ 
+Input
+本题目包含多组数据，请处理到文件结束。
+每组数据占两行。
+第一行有两个正整数N和L。(0<N<6,0<L<2^31)
+第二行有N个词根，每个词根仅由小写字母组成，长度不超过5。两个词根中间用一个空格分隔开。
+ 
+Output
+对于每组数据，请在一行里输出一共可能的单词数目。
+由于结果可能非常巨大，你只需要输出单词总数模2^64的值。
+ 
+Sample Input
+2 3
+aa ab
+1 2
+a
+ 
+Sample Output
+104
+52
+
+思路：先用AC自动机找出状态，然后用矩阵快速幂求出不包含词根的单词个数。再求出所有的单词数，相减就可以了。
+
+失误点：L 用int 输入不能+1 否则就冒了。
+
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<queue>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define LL unsigned long long
+using namespace std;
+const int msize=90;
+const int sig=26;
+class Matrix
+{
+public:
+  LL f[37][37];
+  int n;
+  Matrix(){};
+  Matrix(int x)
+  { n=x;
+    FOR(i,0,x-1)FOR(j,0,x-1)
+    f[i][j]=0;
+  }
+  Matrix operator*(const Matrix&b)const
+  {
+    Matrix c=Matrix(n);
+    FOR(i,0,n-1)FOR(j,0,n-1)FOR(k,0,n-1)
+    c.f[i][j]+=f[i][k]*b.f[k][j];
+    return c;
+  }
+  void out()
+  {
+    FOR(i,0,n-1)FOR(j,0,n-1)
+    printf("%llu%c",f[i][j],j==n-1?'\n':' ');
+  }
+};
+class AC_Machine
+{
+public:
+  int f[msize],val[msize],ch[msize][sig],sz;
+  void clear()
+  { sz=1;
+    clr(ch[0],0);val[0]=0;
+  }
+  int idx(char x)
+  {
+    return x-'a';
+  }
+  void insert(char*s,int v)
+  {
+    int u=0,c;
+    for(int i=0;s[i];++i)
+    {
+      c=idx(s[i]);
+      if(!ch[u][c])
+      {
+        clr(ch[sz],0);val[sz]=0;
+        ch[u][c]=sz++;
+      }
+      u=ch[u][c];
+    }
+    val[u]=v;
+  }
+  void getFail()
+  {
+    int u,v,r;
+    queue<int>Q;
+    FOR(c,0,sig-1)
+    {
+      u=ch[0][c];
+      if(u)
+      {
+        Q.push(u);f[u]=0;
+      }
+    }
+    while(!Q.empty())
+    {
+      r=Q.front();Q.pop();
+      val[r]|=val[ f[r] ];
+      FOR(c,0,sig-1)
+      {
+        u=ch[r][c];
+        if(!u)
+        {
+          ch[r][c]=ch[ f[r] ][c];continue;
+        }
+        Q.push(u);
+        v=f[r];
+        while(v&&!ch[v][c])v=f[v];
+        f[u]=ch[v][c];
+      }
+    }
+  }
+  Matrix getMatrix()
+  {
+    Matrix ret=Matrix(sz+1);//one more for sum
+    FOR(i,0,sz-1)FOR(j,0,sig-1)
+    if(!val[ ch[i][j] ])
+      ret.f[i][ ch[i][j] ]++;
+    FOR(i,0,sz)ret.f[i][sz]=1;
+    return ret;
+  }
+};
+Matrix M_pow(Matrix a,int m)
+{
+  Matrix ret=Matrix(a.n);
+  FOR(i,0,a.n-1)
+  ret.f[i][i]=1;
+  while(m)
+  {
+    if(m&1)ret=ret*a;
+    a=a*a;m>>=1;
+  }
+  return ret;
+}
+char s[77];
+AC_Machine ac;
+int main()
+{
+  int n,m;
+  while(~scanf("%d%d",&n,&m))
+  { ac.clear();
+    FOR(i,1,n)
+    {
+      scanf("%s",s);
+      ac.insert(s,1);
+    }
+    ac.getFail();
+    Matrix ret=ac.getMatrix();
+    //ret.out();
+    ret=M_pow(ret,m);
+
+    LL ans=0;
+    FOR(i,0,ret.n-1)
+    ans+=ret.f[0][i];
+    ret=Matrix(2);
+    --ans; //初始是多加了一个
+    ret.f[0][0]=1;ret.f[0][1]=1;
+    ret.f[1][0]=0;ret.f[1][1]=26;
+    //ret.out();
+    ret=M_pow(ret,m);
+    LL tans=0;
+    tans=ret.f[0][1]+ret.f[1][1];//再推一位
+    --tans;
+    ans=tans-ans;
+    cout<<ans<<endl;
+    //printf("%llu\n",ans);
+  }
+  return 0;
+}
+
+
+
+/*********************************************************
+4.后缀数组
+***************************************************************/
+#include<cstring>
+#include<cstdio>
+#include<iostream>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define ll(x) (1<<x)
+using namespace std;
+const int msize=1e5+9;
+const int sig=257;
+class SUFFIX_ARRAY
+{
+public:
+  int ran[msize],t1[msize],c[msize],sa[msize];
+  int n;
+  int idx(char x)
+  {
+    if(x=='\0')return 0;
+    return x-'a'+1;
+  }
+  bool cmp(int*r,int i,int k)
+  {
+    return r[ sa[i] ]==r[ sa[i-1] ]&&r[ sa[i]+k ]==r[ sa[i-1]+k ];
+  }
+  void build_SA(char*s,int m)
+  { int*wx=t1,*wy=ran;
+    n=strlen(s)+1;
+    FOR(i,0,m-1)c[i]=0;
+    FOR(i,0,n-1)c[ wx[i]=idx(s[i]) ]++;
+    FOR(i,1,m-1)c[i]+=c[i-1];
+    for(int i=n-1;i>=0;--i)sa[ --c[ wx[i] ] ]=i;
+    for(int k=1;k<=n;k<<=1)
+    {
+      int p=0;
+      FOR(i,n-k,n-1)wy[p++]=i;//二关键字排序
+      FOR(i,0,n-1)if(sa[i]>=k)wy[p++]=sa[i]-k;
+      FOR(i,0,m-1)c[i]=0;
+      FOR(i,0,n-1)++c[ wx[ wy[i] ] ];
+      FOR(i,1,m-1)c[i]+=c[i-1];
+      for(int i=n-1;i>=0;--i)sa[ --c[ wx[ wy[i] ] ] ]=wy[i];
+      swap(wx,wy);
+      wx[ sa[0] ]=0;
+      p=1;
+      FOR(i,1,n-1)wx[ sa[i] ]=cmp(wy,i,k)?p-1:p++;
+      if(p>=n)break;
+      m=p;
+    }
+    --n;
+  }
+  int h[msize];
+  void get_H(char*s)
+  { int k=0;
+    FOR(i,0,n)ran[ sa[i] ]=i;
+    FOR(i,0,n-1)
+    {
+      if(k)--k;
+      int j=sa[ ran[i]-1 ];
+      while( s[i+k]==s[j+k] )++k;
+      h[ ran[i] ]=k;
+    }
+  }
+  void debug()
+  { printf("sa=");
+    FOR(i,0,n)printf("%d ",sa[i]);puts("");
+    printf("rank=");
+    FOR(i,0,n)printf("%d ",ran[i]);puts("");
+    printf("h=");
+    FOR(i,0,n)printf("%d ",h[i]);puts("");
+  }
+  int rmq[msize][32],bit[msize];
+  void initRMQ()
+  {
+    bit[0]=-1;
+    FOR(i,1,n)bit[i]=(i&(i-1))==0?bit[i-1]+1:bit[i-1];
+    FOR(i,1,n)rmq[i][0]=h[i];
+    FOR(i,1,bit[n])
+    for(int j=1;j+ll(i)-1<=n;++j)
+      rmq[j][i]=min(rmq[j][i-1],rmq[j+ll(i-1)][i-1]);
+  }
+  int LCP(int l,int r)
+  {
+    l=ran[l];r=ran[r];
+    if(l>r)swap(l,r);
+    ++l;//之前一个已经求过了。
+    int t=bit[r-l+1];
+    r-=ll(t)-1;
+    return min(rmq[l][t],rmq[r][t]);
+  }
+};
+SUFFIX_ARRAY ty;
+char s[msize];
+int main()
+{
+  while(~scanf("%s",s))
+  {
+    ty.build_SA(s,257);
+    ty.get_H(s);
+    ty.initRMQ();
+    int hh=1e8;
+    int ans=0;
+     for(int i=1;s[i];++i)
+     {
+       ans+=ty.LCP(0,i);
+       ans%=256;
+     }
+     ans+=strlen(s);
+     ans%=256;
+    printf("%d\n",ans);
+  }
+}
+
+/******************************************
+5.最长回文长度Manacher算法
+******************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+using namespace std;
+const int mm=4e6+9;
+char s[mm],ss[mm];
+int p[mm];
+void creat(char*s,char*ss)
+{
+  int len=strlen(ss);
+  s[0]='$';s[1]='#';
+  for(int i=0;i<len;++i)
+    s[i+i+2]=ss[i],s[i+i+3]='#';
+  s[len+len+2]='\0';
+  //cout<<s<<endl;
+}
+void getp()
+{ ///memset(p,0,sizeof(p));
+  int len=strlen(s);
+  int mx=0,id;
+  for(int i=1;i<len;++i)
+  {
+    if(mx>i)
+      p[i]=min(p[id+id-i],mx-i);
+    else p[i]=1;
+    while(s[i+p[i]]==s[i-p[i]]){++p[i];}
+    if(i+p[i]>mx)mx=i+p[i],id=i;
+  }
+}
+int main()
+{
+  while(scanf("%s",ss)!=EOF)
+  {
+    creat(s,ss);
+    getp();
+    int len=strlen(s),ans=0;
+    for(int i=1;i<len;++i)
+      if(p[i]>ans)ans=p[i];
+    printf("%d\n",ans-1);
+  }
+}
+（三）数据结构
+/**************************************
+1.二维RMQ
+***************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#define FOR(i,a,b) for(int i=a;i<=b;++i)
+#define clr(f,z) memset(f,z,sizeof(f))
+#define ll(x) (1<<x)
+using namespace std;
+const int mm=305;
+int rmq[mm][mm][9][9];
+int f[mm][mm],bit[mm];
+int n,m;
+void initRMQ()
+{ bit[0]=-1;
+  FOR(i,1,mm-1)bit[i]=(i&(i-1))==0?bit[i-1]+1:bit[i-1];
+  FOR(i,1,n)FOR(j,1,m)
+  rmq[i][j][0][0]=f[i][j];
+  FOR(r,0,bit[n])FOR(c,0,bit[m])
+  if(r+c)
+  for(int i=1;i+ll(r)-1<=n;++i)
+    for(int j=1;j+ll(c)-1<=m;++j)
+    if(r!=0)
+    rmq[i][j][r][c]=max(rmq[i][j][r-1][c],rmq[i+ll(r-1)][j][r-1][c]);
+    else rmq[i][j][r][c]=max(rmq[i][j][r][c-1] ,rmq[i][j+ll(c-1)][r][c-1] );
+}
+int RMQ(int r1,int c1,int r2,int c2)
+{
+  int t1,t2;
+  t1=bit[r2-r1+1];
+  t2=bit[c2-c1+1];
+  int a=max(rmq[r1][c1][t1][t2],rmq[r2-ll(t1)+1][c1][t1][t2]);
+  int b=max(rmq[r1][c2-ll(t2)+1][t1][t2],rmq[r2-ll(t1)+1][c2-ll(t2)+1][t1][t2]);
+  return max(a,b);
+}
+void in(int &a)
+{
+    char c;
+    while((c=getchar())<'0'||c>'9');
+    for(a=0;c>='0'&&c<='9';c=getchar())a=a*10+c-'0';
+}
+void out(int x)
+{
+    if(x>9)out(x/10);
+    putchar(x%10+48);
+}
+int main()
+{
+  while(~scanf("%d%d",&n,&m))
+  {
+    FOR(i,1,n)FOR(j,1,m)
+    in(f[i][j]);
+    //scanf("%d",&f[i][j]);
+    initRMQ();
+    int Q;
+    in(Q);
+    //scanf("%d",&Q);
+    while(Q--)
+    {
+      int r1,c1,r2,c2;
+      //scanf("%d%d%d%d",&r1,&c1,&r2,&c2);
+      in(r1);in(c1);in(r2);in(c2);
+      int ans=RMQ(r1,c1,r2,c2);out(ans);
+      if(f[r1][c1]==ans||f[r1][c2]==ans||f[r2][c1]==ans||f[r2][c2]==ans)
+        printf(" yes\n");
+      else printf(" no\n");
+    }
+  }
+  return 0;
+}
+
+/*****************************************
+2.线段树
+******************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+#define lson t<<1
+#define rson t<<1|1
+#define midl (l+r)/2
+#define midr (l+r)/2+1
+using namespace std;
+const int mm=2e5+9;
+class node
+{
+  public:int l,r,fen;
+}rt[mm*4];
+int f[mm],n,m;
+char s;
+void build(int t,int l,int r)
+{ rt[t].l=l;rt[t].r=r;
+  if(l==r)rt[t].fen=f[l];
+  else {build(lson,l,midl),build(rson,midr,r);
+   rt[t].fen=max(rt[lson].fen,rt[rson].fen);
+  }
+}
+void update(int t,int id,int fen)
+{
+  if(rt[t].l==rt[t].r&&id==rt[t].l){rt[t].fen=fen;return;}
+  if(rt[lson].r>=id)update(lson,id,fen);
+  else update(rson,id,fen);
+  rt[t].fen=max(rt[lson].fen,rt[rson].fen);
+}
+int query(int t,int l,int r)
+{
+  if(rt[t].l==l&&rt[t].r==r)return rt[t].fen;
+  if(rt[lson].r>=r)return query(lson,l,r);
+  else if(rt[rson].l<=l)return query(rson,l,r);
+  else return max(query(lson,l,rt[lson].r),query(rson,rt[rson].l,r));
+}
+int main()
+{
+  while(scanf("%d%d",&n,&m)!=EOF)
+  {
+    for(int i=1;i<=n;++i)scanf("%d",&f[i]);
+    build(1,1,n);
+    for(int i=0;i<m;++i)
+    {
+      int a,b;cin>>s;
+      scanf("%d%d",&a,&b);
+      if(s=='Q')
+        printf("%d\n",query(1,a,b));
+      else update(1,a,b);
+    }
+  }
+}
+
+/***************************************
+3.扩展KMP
+*****************************************/
+#include<iostream>
+#include<cstring>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+const int mm=3e5+9;
+char s[mm],t[mm];
+int next[mm],ex[mm];
+void getnext(const char*t)
+{ int len=strlen(t);
+ next[0]=len;
+ int a=0;
+ while(a<len-1&&t[a]==t[a+1])++a;
+ next[1]=a;
+ int l,le;a=1;
+ for(int i=2;i<len;++i)
+ {
+   le=a+next[a]-1;///a影响断范围                                                                     
+   l=next[i-a];///已经确定断匹配
+   if(le<=i-1+l)
+   { int j=le-i+1>0?le-i+1:0;
+     while(i+j<len&&t[i+j]==t[j])++j;
+     next[i]=j;a=i;
+   }else next[i]=l;
+ }
+}
+void ekmp(const char*s,const char*t)
+{ getnext(t);
+ int a=0,ls,lt;ls=strlen(s);lt=strlen(t);
+ while(a<ls&&a<lt&&s[a]==t[a])++a;
+ ex[0]=a;a=0;
+ int l,le;
+ for(int i=1;i<ls;++i)
+ {
+   le=ex[a]+a-1;l=next[i-a];///已经确定的匹配
+   if(le<=l+i-1)
+   {
+     int j=le-i+1>0?le-i+1:0;
+     while(i+j<ls&&j<lt&&s[i+j]==t[j])++j;
+     ex[i]=j;a=i;
+   }
+   else ex[i]=l;
+ }
+}
+int main()
+{
+  while(~scanf("%s%s",s,t))
+  {
+    ekmp(s,t);
+    for(int i=0;s[i];++i)
+    cout<<ex[i]<<" ";
+    puts("");
+    for(int i=0;t[i];++i)
+    cout<<next[i]<<" ";
+    puts("");
+  }
+}
